@@ -20,13 +20,19 @@ type gcc_jit_int_option =
   | GCC_JIT_INT_OPTION_OPTIMIZATION_LEVEL
 
 type gcc_jit_bool_option =
-   | GCC_JIT_BOOL_OPTION_DEBUGINFO
-   | GCC_JIT_BOOL_OPTION_DUMP_INITIAL_TREE
-   | GCC_JIT_BOOL_OPTION_DUMP_INITIAL_GIMPLE
-   | GCC_JIT_BOOL_OPTION_DUMP_GENERATED_CODE
-   | GCC_JIT_BOOL_OPTION_DUMP_SUMMARY
-   | GCC_JIT_BOOL_OPTION_DUMP_EVERYTHING
-   | GCC_JIT_BOOL_OPTION_KEEP_INTERMEDIARIES
+  | GCC_JIT_BOOL_OPTION_DEBUGINFO
+  | GCC_JIT_BOOL_OPTION_DUMP_INITIAL_TREE
+  | GCC_JIT_BOOL_OPTION_DUMP_INITIAL_GIMPLE
+  | GCC_JIT_BOOL_OPTION_DUMP_GENERATED_CODE
+  | GCC_JIT_BOOL_OPTION_DUMP_SUMMARY
+  | GCC_JIT_BOOL_OPTION_DUMP_EVERYTHING
+  | GCC_JIT_BOOL_OPTION_KEEP_INTERMEDIATES
+
+type gcc_jit_output_kind =
+  | GCC_JIT_OUTPUT_KIND_ASSEMBLER
+  | GCC_JIT_OUTPUT_KIND_OBJECT_FILE
+  | GCC_JIT_OUTPUT_KIND_DYNAMIC_LIBRARY
+  | GCC_JIT_OUTPUT_KIND_EXECUTABLE
 
 type gcc_jit_types =
   | GCC_JIT_TYPE_VOID
@@ -125,7 +131,7 @@ module Enums (T : Cstubs_structs.TYPE) = struct
   let gcc_jit_bool_option_dump_summary = T.constant "GCC_JIT_BOOL_OPTION_DUMP_SUMMARY" T.int64_t
   let gcc_jit_bool_option_dump_everything = T.constant "GCC_JIT_BOOL_OPTION_DUMP_EVERYTHING" T.int64_t
   let gcc_jit_bool_option_selfcheck_gc = T.constant "GCC_JIT_BOOL_OPTION_SELFCHECK_GC" T.int64_t
-  let gcc_jit_bool_option_keep_intermediaries = T.constant "GCC_JIT_BOOL_OPTION_KEEP_INTERMEDIERIES" T.int64_t
+  let gcc_jit_bool_option_keep_intermediates = T.constant "GCC_JIT_BOOL_OPTION_KEEP_INTERMEDIATES" T.int64_t
 
   let gcc_jit_bool_option =
     T.enum "gcc_jit_bool_option"
@@ -135,7 +141,19 @@ module Enums (T : Cstubs_structs.TYPE) = struct
         GCC_JIT_BOOL_OPTION_DUMP_GENERATED_CODE, gcc_jit_bool_option_dump_generated_code;
         GCC_JIT_BOOL_OPTION_DUMP_SUMMARY, gcc_jit_bool_option_dump_summary;
         GCC_JIT_BOOL_OPTION_DUMP_EVERYTHING, gcc_jit_bool_option_dump_everything;
-        GCC_JIT_BOOL_OPTION_KEEP_INTERMEDIARIES, gcc_jit_bool_option_keep_intermediaries ]
+        GCC_JIT_BOOL_OPTION_KEEP_INTERMEDIATES, gcc_jit_bool_option_keep_intermediates ]
+
+  let gcc_jit_output_kind_assembler = T.constant "GCC_JIT_OUTPUT_KIND_ASSEMBLER" T.int64_t
+  let gcc_jit_output_kind_object_file = T.constant "GCC_JIT_OUTPUT_KIND_OBJECT_FILE" T.int64_t
+  let gcc_jit_output_kind_dynamic_library = T.constant "GCC_JIT_OUTPUT_KIND_DYNAMIC_LIBRARY" T.int64_t
+  let gcc_jit_output_kind_executable = T.constant "GCC_JIT_OUTPUT_KIND_EXECUTABLE" T.int64_t
+
+  let gcc_jit_output_kind =
+    T.enum "gcc_jit_output_kind"
+      [ GCC_JIT_OUTPUT_KIND_ASSEMBLER, gcc_jit_output_kind_assembler;
+        GCC_JIT_OUTPUT_KIND_OBJECT_FILE, gcc_jit_output_kind_object_file;
+        GCC_JIT_OUTPUT_KIND_DYNAMIC_LIBRARY, gcc_jit_output_kind_dynamic_library;
+        GCC_JIT_OUTPUT_KIND_EXECUTABLE, gcc_jit_output_kind_executable ]
 
   let gcc_jit_type_void = T.constant "GCC_JIT_TYPE_VOID" T.int64_t
   let gcc_jit_type_void_ptr = T.constant "GCC_JIT_TYPE_VOID_PTR" T.int64_t
@@ -294,7 +312,7 @@ module Bindings (T : Cstubs_structs.TYPE with type 'a typ = 'a typ) (F : Cstubs.
 
   let gcc_jit_context_compile_to_file =
     F.foreign "gcc_jit_context_compile_to_file"
-      (gcc_jit_context @-> int @-> string @-> returning void)
+      (gcc_jit_context @-> E.gcc_jit_output_kind @-> string @-> returning void)
 
   let gcc_jit_context_dump_to_file =
     F.foreign "gcc_jit_context_dump_to_file"
@@ -310,8 +328,8 @@ module Bindings (T : Cstubs_structs.TYPE with type 'a typ = 'a typ) (F : Cstubs.
   let gcc_jit_context_get_last_error =
     F.foreign "gcc_jit_context_get_last_error" (gcc_jit_context @-> returning string_opt)
 
-  let gcc_jit_get_code =
-    F.foreign "gcc_jit_get_code" (gcc_jit_result @-> string @-> returning (ptr void))
+  let gcc_jit_result_get_code =
+    F.foreign "gcc_jit_result_get_code" (gcc_jit_result @-> string @-> returning (ptr void))
 
   let gcc_jit_get_global =
     F.foreign "gcc_jit_get_global" (gcc_jit_result @-> string @-> returning (ptr void))

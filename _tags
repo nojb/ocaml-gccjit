@@ -3,3 +3,4 @@ true: package(ctypes.stubs)
 true: package(ctypes.foreign)
 true: debug
 true: bin_annot
+<lib>: include
