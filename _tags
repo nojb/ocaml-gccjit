@@ -3,4 +3,10 @@ true: package(ctypes.stubs)
 true: package(ctypes.foreign)
 true: debug
 true: bin_annot
+<stubgen/gccjit_types_generator.c>: use_ctypes_c_headers, use_ocaml_c_headers
+# <lib/libgccjit_stubs_generated_c.so>: use_ctypes_c_headers
+# <lib/gccjit_stubs_generated_c.c>: use_ctypes_c_headers
+<lib/gccjit.cm{,x}a>: use_gccjit
+# , use_libgccjit
 <lib>: include
+<lib/gccjit_stubs.c>: use_ctypes_c_headers

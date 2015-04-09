@@ -1,0 +1,9 @@
+lib: [
+  "META"
+  "_build/lib/gccjit.mli" {"gccjit.mli"}
+  "_build/lib/gccjit.cmi" {"gccjit.cmi"}
+  "_build/lib/gccjit.cma" {"gccjit.cma"}
+]
+stublibs: [
+  "_build/dllgccjit_stubs.so" {"dllgccjit_stubs.so"}
+]

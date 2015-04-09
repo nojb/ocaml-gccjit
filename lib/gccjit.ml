@@ -1,8 +1,8 @@
 exception Error of string * string
 
-module B = Gccjit_stubs.Bindings (Gccjit_enums_gen) (Gccjit_generated)
+module B = Gccjit_bindings.Bindings (Gccjit_types_generated) (Gccjit_stubs_generated)
 
-open Gccjit_stubs
+open Gccjit_bindings
 open B
 
 type context = gcc_jit_context Ctypes.structure Ctypes.ptr
@@ -104,6 +104,12 @@ let wrap6 name ctx f x1 x2 x3 x4 x5 x6 =
   | None -> y
   | Some err -> raise (Error (name, err))
 
+let wrap8 name ctx f x1 x2 x3 x4 x5 x6 x7 x8 =
+  let y = f x1 x2 x3 x4 x5 x6 x7 x8 in
+  match gcc_jit_context_get_first_error ctx with
+  | None -> y
+  | Some err -> raise (Error (name, err))
+
 let acquire =
   gcc_jit_context_acquire
 
@@ -152,7 +158,11 @@ let function_kind = function
   | Imported -> GCC_JIT_FUNCTION_IMPORTED
   | Always_inline -> GCC_JIT_FUNCTION_ALWAYS_INLINE
 
-(* val new_function : ?loc:loc -> context -> ?variadic:bool -> function_kind -> string -> param list -> typ -> fn *)
+let new_function ?(loc = null_loc) ctx ?(variadic = false) kind name args ret =
+  let a = Ctypes.CArray.of_list gcc_jit_param args in
+  wrap8 "new_function" ctx gcc_jit_context_new_function
+    ctx loc (function_kind kind) ret name (List.length args) (Ctypes.CArray.start a)
+    (if variadic then 1 else 0)
 
 let get_builtin_function ctx name =
   wrap2 "new_builtin_function" ctx gcc_jit_context_get_builtin_function ctx name
@@ -163,9 +173,15 @@ let zero ctx typ =
 let one ctx typ =
   wrap2 "one" ctx gcc_jit_context_one ctx typ
 
-(* val new_rvalue_from_double : context -> typ -> float -> rvalue *)
-(* val new_rvalue_from_int : context -> typ -> int -> rvalue *)
-(* val new_rvalue_from_ptr : context -> typ -> int -> rvalue *)
+let new_rvalue_from_double ctx typ f =
+  wrap3 "new_rvalue_from_double" ctx gcc_jit_context_new_rvalue_from_double ctx typ f
+
+let new_rvalue_from_int ctx typ n =
+  wrap3 "new_rvalue_from_int" ctx gcc_jit_context_new_rvalue_from_int ctx typ n
+
+let new_rvalue_from_ptr ctx typ n =
+  wrap3 "new_rvalue_from_ptr" ctx gcc_jit_context_new_rvalue_from_ptr ctx typ
+    (Ctypes.ptr_of_raw_address n)
 
 let null ctx typ =
   wrap2 "null" ctx gcc_jit_context_null ctx typ
@@ -218,7 +234,9 @@ let new_call_through_ptr ?(loc = null_loc) ctx rval args =
     (List.length args) (Ctypes.CArray.start a)
 
 (* val get_int_type : context -> ?signed:bool -> int -> typ *)
-(* val dump_reproducer_to_file : context -> string -> unit *)
+
+let dump_reproducer_to_file ctx path =
+  wrap2 "dump_reproducer_to_file" ctx gcc_jit_context_dump_reproducer_to_file ctx path
 
 let set_logfile ctx fd =
   assert false

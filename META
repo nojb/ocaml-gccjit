@@ -1,0 +1,8 @@
+version = "0.1.0"
+description = "Bindings to the GCC5 JIT compiler"
+requires = "ctypes ctypes.foreign ctypes.stubs"
+archive(byte) = "gccjit.cma"
+archive(byte, plugin) = "gccjit.cma"
+archive(native) = "gccjit.cmxa"
+archive(native, plugin) = "gccjit.cmxs"
+exists_if = "gccjit.cma"

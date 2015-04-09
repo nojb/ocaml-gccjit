@@ -67,19 +67,19 @@ val dump_to_file : context -> ?update_locs:bool -> string -> unit
 (* val get_first_error : context -> string option *)
 val new_location : context -> string -> int -> int -> loc
 val new_global : ?loc:loc -> context -> typ -> string -> lvalue
-(* val new_array_type : ?loc:loc -> context -> typ -> int -> typ *)
+val new_array_type : ?loc:loc -> context -> typ -> int -> typ
 val new_field : ?loc:loc -> context -> typ -> string -> field
 val new_struct : ?loc:loc -> context -> string -> field list -> structure
 val new_union : ?loc:loc -> context -> string -> field list -> typ
 val new_function_ptr_type : ?loc:loc -> context -> ?variadic:bool -> typ list -> typ -> typ
 val new_param : ?loc:loc -> context -> string -> typ -> param
-(* val new_function : ?loc:loc -> context -> ?variadic:bool -> function_kind -> string -> param list -> typ -> fn *)
+val new_function : ?loc:loc -> context -> ?variadic:bool -> function_kind -> string -> param list -> typ -> fn
 val get_builtin_function : context -> string -> fn
 val zero : context -> typ -> rvalue
 val one : context -> typ -> rvalue
-(* val new_rvalue_from_double : context -> typ -> float -> rvalue *)
-(* val new_rvalue_from_int : context -> typ -> int -> rvalue *)
-(* val new_rvalue_from_ptr : context -> typ -> int -> rvalue *)
+val new_rvalue_from_double : context -> typ -> float -> rvalue
+val new_rvalue_from_int : context -> typ -> int -> rvalue
+val new_rvalue_from_ptr : context -> typ -> nativeint -> rvalue
 val null : context -> typ -> rvalue
 val new_string_literal : context -> string -> rvalue
 val new_unary_op : ?loc:loc -> context -> unary_op -> typ -> rvalue -> rvalue
