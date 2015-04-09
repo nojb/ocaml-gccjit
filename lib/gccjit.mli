@@ -1,4 +1,4 @@
-exception Error of string
+exception Error of string * string
 
 type context
 type result
@@ -53,7 +53,7 @@ type _ option =
   | Dump_summary : bool option
   | Dump_everything : bool option
   | Selfcheck_gc : bool option
-  | Keep_intermediaries : bool option
+  | Keep_intermediates : bool option
 
 type output_kind =
   | Assembler
@@ -64,35 +64,35 @@ type output_kind =
 val acquire : unit -> context
 val release : context -> unit
 val dump_to_file : context -> ?update_locs:bool -> string -> unit
-val get_first_error : context -> string option
+(* val get_first_error : context -> string option *)
 val new_location : context -> string -> int -> int -> loc
 val new_global : ?loc:loc -> context -> typ -> string -> lvalue
-val new_array_type : ?loc:loc -> context -> typ -> int -> typ
-val new_field : ?loc:loc -> context -> typ -> field
-val new_struct : ?loc:loc -> context -> field list -> structure
-val new_union : ?loc:loc -> context -> field list -> typ
+(* val new_array_type : ?loc:loc -> context -> typ -> int -> typ *)
+val new_field : ?loc:loc -> context -> typ -> string -> field
+val new_struct : ?loc:loc -> context -> string -> field list -> structure
+val new_union : ?loc:loc -> context -> string -> field list -> typ
 val new_function_ptr_type : ?loc:loc -> context -> ?variadic:bool -> typ list -> typ -> typ
 val new_param : ?loc:loc -> context -> string -> typ -> param
-val new_function : ?loc:loc -> context -> ?variadic:bool -> function_kind -> string -> param list -> typ -> fn
+(* val new_function : ?loc:loc -> context -> ?variadic:bool -> function_kind -> string -> param list -> typ -> fn *)
 val get_builtin_function : context -> string -> fn
 val zero : context -> typ -> rvalue
 val one : context -> typ -> rvalue
-val new_rvalue_from_double : context -> typ -> float -> rvalue
-val new_rvalue_from_int : context -> typ -> int -> rvalue
-val new_rvalue_from_ptr : context -> typ -> int -> rvalue
+(* val new_rvalue_from_double : context -> typ -> float -> rvalue *)
+(* val new_rvalue_from_int : context -> typ -> int -> rvalue *)
+(* val new_rvalue_from_ptr : context -> typ -> int -> rvalue *)
 val null : context -> typ -> rvalue
 val new_string_literal : context -> string -> rvalue
 val new_unary_op : ?loc:loc -> context -> unary_op -> typ -> rvalue -> rvalue
 val new_binary_op : ?loc:loc -> context -> binary_op -> typ -> rvalue -> rvalue -> rvalue
-val new_comparison : ?loc:loc -> context -> comparison -> rvalue -> rvalue -> rvalue
+(* val new_comparison : ?loc:loc -> context -> comparison -> rvalue -> rvalue -> rvalue *)
 val new_child_context : context -> context
 val new_cast : ?loc:loc -> context -> rvalue -> typ -> rvalue
 val new_array_access : ?loc:loc -> rvalue -> rvalue -> lvalue
 val new_call : ?loc:loc -> context -> fn -> rvalue list -> rvalue
 val new_call_through_ptr : ?loc:loc -> context -> rvalue -> rvalue list -> rvalue
-val get_int_type : context -> ?signed:bool -> int -> typ
-val dump_reproducer_to_file : context -> string -> unit
-val set_logfile : context -> out_channel -> unit
+(* val get_int_type : context -> ?signed:bool -> int -> typ *)
+(* val dump_reproducer_to_file : context -> string -> unit *)
+val set_logfile : context -> Unix.file_descr -> unit
 val set_option : context -> 'a option -> 'a -> unit
 val compile_to_file : context -> output_kind -> string -> unit
 val compile : context -> result
@@ -105,8 +105,8 @@ val pointer : typ -> typ
 val const : typ -> typ
 val volatile : typ -> typ
 
-val dereference_field : ?loc:loc -> rvalue -> field -> rvalue
-val dereference : ?loc:loc -> rvalue -> rvalue
+val dereference_field : ?loc:loc -> rvalue -> field -> lvalue
+val dereference : ?loc:loc -> rvalue -> lvalue
 val get_type : rvalue -> typ
 
 val get_address : ?loc:loc -> lvalue -> rvalue
