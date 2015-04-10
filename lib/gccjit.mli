@@ -48,7 +48,29 @@ type loc = [ `Location of loc' ]
     associate locations in your languages with statements in the JIT-compiled
     code, alowing the debugger to single-step through your language.
 
-    Note that to do so, you need to enable [Debuginfo] on the {!context}. *)
+    You can construct them using {!new_location}.
+
+    You need to enable {!Debuginfo} on the {!context} for these locations to
+    actually be usable by the debugger:
+
+    {[
+      set_option ctx Debuginfo true
+    ]}
+
+    {e Faking it}
+
+    If you don’t have source code for your internal representation, but need to
+    debug, you can generate a C-like representation of the functions in your context
+    using {!dump_to_file}:
+
+    {[
+      dump_to_file ctx ~update_locs:true "/tmp/something.c"
+    ]}
+
+    This will dump C-like code to the given path. If the [~update_locs] argument
+    is [true], this will also set up location information throughout the
+    context, pointing at the dump file as if it were a source file, giving you
+    something you can step through in the debugger. *)
 
 type param'
 
@@ -402,6 +424,7 @@ val get_address : ?loc:loc -> [< lvalue] -> rvalue
 (** Taking the address of an {!lvalue}; analogous to [&(EXPR)] in C. *)
 
 val new_local : ?loc:loc -> fn -> [< typ] -> string -> lvalue
+(** Add a new local variable to the function. *)
 
 val new_block : fn -> ?name:string -> unit -> block
 (** Create a block.  You can give it a meaningful name, which may show up in
@@ -416,7 +439,8 @@ val dump_to_dot : fn -> string -> unit
 val add_eval : ?loc:loc -> block -> [< rvalue] -> unit
 (** Add evaluation of an {!rvalue}, discarding the result (e.g. a function call
     that {e returns} void).  This is equivalent to this C code:
-{[(void)expression;]} *)
+
+    {[ (void)expression; ]} *)
 
 val add_assignment : ?loc:loc -> block -> [< lvalue] -> rvalue -> unit
 (** Add evaluation of an {!rvalue}, assigning the result to the given {!lvalue}.
@@ -426,12 +450,13 @@ val add_assignment : ?loc:loc -> block -> [< lvalue] -> rvalue -> unit
 val add_assignment_op : ?loc:loc -> block -> [< lvalue] -> binary_op -> rvalue -> unit
 (** Add evaluation of an rvalue, using the result to modify an lvalue.  This
     is analogous to ["+="] and friends:
-{[
-lvalue += rvalue;
-lvalue *= rvalue;
-lvalue /= rvalue;
-etc
-]}
+
+    {[
+      lvalue += rvalue;
+      lvalue *= rvalue;
+      lvalue /= rvalue;
+      etc
+    ]}
 *)
 
 val add_comment : ?loc:loc -> block -> string -> unit
@@ -439,34 +464,32 @@ val add_comment : ?loc:loc -> block -> string -> unit
     It will be optimized away, but will be visible in the dumps seen via
     {!Dump_initial_tree} and {!Dump_initial_gimple} and thus may be of use when
     debugging how your project's internal representation gets converted to the
-    libgccjit IR.  *)
+    [libgccjit] IR.  *)
 
 val end_with_conditional : ?loc:loc -> block -> [< rvalue] -> block -> block -> unit
 (** Terminate a block by adding evaluation of an rvalue, branching on the
     result to the appropriate successor block.  This is roughly equivalent to
     this C code:
-{[
-if (boolval)
-  goto on_true;
-else
-  goto on_false;
-]}
-*)
+
+    {[ if (boolval) goto on_true; else goto on_false; ]} *)
 
 val end_with_jump : ?loc:loc -> block -> block -> unit
 (** Terminate a block by adding a jump to the given target block.  This is
     roughly equivalent to this C code:
-{[goto target;]} *)
+
+    {[ goto target; ]} *)
 
 val end_with_return : ?loc:loc -> block -> [< rvalue] -> unit
 (** Terminate a block by adding evaluation of an {!rvalue}, returning the
     value.  This is roughly equivalent to this C code:
-{[return expression;]} *)
+
+    {[ return expression; ]} *)
 
 val end_with_void_return : ?loc:loc -> block -> unit
 (** Terminate a block by adding a valueless return, for use within a function
     with [void] return type.  This is equivalent to this C code:
-{[return;]} *)
+
+    {[ return; ]} *)
 
 val get_function : block -> fn
 (** Which function is this block within? *)
