@@ -42,19 +42,64 @@ type result
 (** A [result] encapsulates the result of an in-memory compilation. *)
 
 type loc
+(** A [loc] encapsulates a source code location, so that you can (optionally)
+    associate locations in your languages with statements in the JIT-compiled
+    code, alowing the debugger to single-step through your language.
+
+    Note that to do so, you need to enable [Debuginfo] on the {!context}. *)
+
 type param'
+
 type lvalue'
+
 type rvalue'
+
 type lvalue = [ `Lvalue of lvalue' | `Param of param' ]
+(** A [lvalue] is a storage location within your code (e.g. a variable, a
+    parameter, etc).  It is also a [rvalue]. *)
+
 type rvalue = [ `Lvalue of lvalue' | `Rvalue of rvalue' | `Param of param' ]
+(** A [rvalue] is an expression within your code, with some type. *)
+
 type field
+(** A [field] encapsulates a field within a struct; it is used when creating a
+    struct type (using {!new_struct_type}).  Fields cannot be shared between
+    structs. *)
+
 type structure'
+
 type typ'
+
 type typ = [ `Struct of structure' | `Type of typ' ]
+(** A [typ] encapsulates a type e.g. [int] or a [struct foo*]. *)
+
 type structure = [ `Struct of structure' ]
+(** A [structure] encapsulates a struct type, either one that we have the layout
+    for, or an opaque type. *)
+
 type param = [ `Param of param' ]
+
 type fn
+(** A [fn] encapsulates a function: either one that you're creating yourself, or
+    a reference to one that you're dynamically linking to within the ret of the
+    process. *)
+
 type block
+(** A [block] encapsulates a {e basic block} of statements within a function
+    (i.e. with one entry point and one exit point).
+
+    Every block within a function must be terminated with a conditional, a
+    branch, or a return.
+
+    The blocks within a function form a directed graph.
+
+    The entrypoint to the function is the first block created within it.
+
+    All of the blocks in a function must be reachable via some path from the
+    first block.
+
+    It's OK to have more than one {e return} from a function (i.e., multiple
+    blocks that terminate by returning. *)
 
 type unary_op =
   | Negate
@@ -87,17 +132,59 @@ type function_kind =
   | Imported
   | Always_inline
 
+(** Context options.  Set with {!set_option}. *)
 type _ option =
   | Progname : string option
+  (** The name of the program, for used as a prefix when printing error messages
+      to stderr.  If not set, ["libgccjit.so"] is used. *)
+
   | Optimization_level : int option
+  (** How much to optimize the code.  Valid values are [0-3], corresponding to
+      GCC's command-line options -O0 through -O3.
+
+      The default value is 0 (unoptimized). *)
+
   | Debuginfo : bool option
+  (** If [true], {!compile} will attempt to do the right thing so that if you
+      attach a debugger to the process, it will be able to inspect variables and
+      step through your code.  Note that you can't step through code unless you
+      set up source location information for the code (by creating and passing
+      in {!loc} instances).  *)
+
   | Dump_initial_tree : bool option
+  (** If [true], {!compile} will dump its initial "tree" representation of
+      your code to [stderr] (before any optimizations).  *)
+
   | Dump_initial_gimple : bool option
+  (** If [true], {!compile} will dump the "gimple" representation of your
+      code to stderr, before any optimizations are performed.  The dump resembles
+      C code.  *)
+
   | Dump_generated_code : bool option
+  (** If [true], {!compile} will dump the final generated code to stderr,
+      in the form of assembly language.  *)
+
   | Dump_summary : bool option
+  (** If [true], {!compile} will print information to stderr on the
+      actions it is performing, followed by a profile showing the time taken and
+      memory usage of each phase. *)
+
   | Dump_everything : bool option
+  (** If [true], {!compile} will dump copious amount of information on
+      what it's doing to various files within a temporary directory.  Use
+      {!Keep_intermediates} (see below) to see the results.  The files are
+      intended to be human-readable, but the exact files and their formats are
+      subject to change. *)
+
   | Selfcheck_gc : bool option
+  (** If [true], [libgccjit] will aggressively run its garbage collector,
+      to shake out bugs (greatly slowing down the compile).  This is likely to
+      only be of interest to developers *of* the library.  It is used when
+      running the selftest suite.  *)
+
   | Keep_intermediates : bool option
+  (** If [true], {!release} will not clean up intermediate files written to the
+       filesystem, and will display their location on stderr.  *)
 
 type output_kind =
   | Assembler
