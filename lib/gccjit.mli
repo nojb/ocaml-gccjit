@@ -25,12 +25,15 @@ exception Error of string * string
 type context
 type result
 type loc
-type lvalue
-type rvalue
+type param'
+type lvalue'
+type rvalue'
+type lvalue = [ `Lvalue of lvalue' | `Param of param' ]
+type rvalue = [ `Rvalue of rvalue' | `Param of param' ]
 type field
 type typ
 type structure
-type param
+type param = [ `Param of param' ]
 type fn
 type block
 
@@ -129,7 +132,7 @@ val new_rvalue_from_ptr : context -> typ -> nativeint -> rvalue
 val null : context -> typ -> rvalue
 val new_string_literal : context -> string -> rvalue
 val new_unary_op : ?loc:loc -> context -> unary_op -> typ -> rvalue -> rvalue
-val new_binary_op : ?loc:loc -> context -> binary_op -> typ -> rvalue -> rvalue -> rvalue
+val new_binary_op : ?loc:loc -> context -> binary_op -> typ -> [< rvalue] -> [< rvalue] -> rvalue
 val new_comparison : ?loc:loc -> context -> comparison -> rvalue -> rvalue -> rvalue
 val new_child_context : context -> context
 val new_cast : ?loc:loc -> context -> rvalue -> typ -> rvalue
@@ -150,6 +153,7 @@ val get_code : result -> string -> ('a -> 'b) Ctypes.fn -> 'a -> 'b
 val get_pointer : typ -> typ
 val get_const : typ -> typ
 val get_volatile : typ -> typ
+val get_type : context -> type_kind -> typ
 
 val dereference_field : ?loc:loc -> rvalue -> field -> lvalue
 val dereference : ?loc:loc -> rvalue -> lvalue
@@ -166,4 +170,8 @@ val add_eval : ?loc:loc -> block -> rvalue -> unit
 val add_assignment : ?loc:loc -> block -> lvalue -> rvalue -> unit
 val add_assignment_op : ?loc:loc -> block -> lvalue -> binary_op -> rvalue -> unit
 val add_comment : ?loc:loc -> block -> string -> unit
+val end_with_conditional : ?loc:loc -> block -> rvalue -> block -> block -> unit
+val end_with_jmp : ?loc:loc -> block -> block -> unit
+val end_with_return : ?loc:loc -> block -> rvalue -> unit
+val end_with_void_return : ?loc:loc -> block -> unit
 val get_function : block -> fn
