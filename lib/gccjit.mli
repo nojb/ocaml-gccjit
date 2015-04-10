@@ -41,7 +41,9 @@ type context
 type result
 (** A [result] encapsulates the result of an in-memory compilation. *)
 
-type loc
+type loc'
+
+type loc = [ `Location of loc' ]
 (** A [loc] encapsulates a source code location, so that you can (optionally)
     associate locations in your languages with statements in the JIT-compiled
     code, alowing the debugger to single-step through your language.
@@ -61,7 +63,9 @@ type lvalue = [ `Lvalue of lvalue' | `Param of param' ]
 type rvalue = [ `Lvalue of lvalue' | `Rvalue of rvalue' | `Param of param' ]
 (** A [rvalue] is an expression within your code, with some type. *)
 
-type field
+type field'
+
+type field = [ `Field of field' ]
 (** A [field] encapsulates a field within a struct; it is used when creating a
     struct type (using {!new_struct_type}).  Fields cannot be shared between
     structs. *)
@@ -79,12 +83,16 @@ type structure = [ `Struct of structure' ]
 
 type param = [ `Param of param' ]
 
-type fn
+type fn'
+
+type fn = [ `Function of fn' ]
 (** A [fn] encapsulates a function: either one that you're creating yourself, or
     a reference to one that you're dynamically linking to within the ret of the
     process. *)
 
-type block
+type block'
+
+type block = [ `Block of block' ]
 (** A [block] encapsulates a {e basic block} of statements within a function
     (i.e. with one entry point and one exit point).
 
@@ -100,6 +108,17 @@ type block
 
     It's OK to have more than one {e return} from a function (i.e., multiple
     blocks that terminate by returning. *)
+
+type obj =
+  [ `Location of loc'
+  | `Type of typ'
+  | `Struct of structure'
+  | `Field of field'
+  | `Function of fn'
+  | `Block of block'
+  | `Rvalue of rvalue'
+  | `Lvalue of lvalue'
+  | `Param of param' ]
 
 type unary_op =
   | Negate
@@ -288,6 +307,9 @@ val get_global : result -> string -> 'a Ctypes.typ -> 'a Ctypes.ptr
 (** Locate a given global within the built machine code.  It must have been
     created using {!Exported}.  This is a ptr to the global, so e.g. for an
     [int] this is an [int *]. *)
+
+val get_debug_string : obj -> string
+(** Get a human-readable description of this object. *)
 
 val get_pointer : [< typ] -> typ
 val get_const : [< typ] -> typ
