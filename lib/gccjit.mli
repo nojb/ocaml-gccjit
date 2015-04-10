@@ -23,16 +23,35 @@
 exception Error of string * string
 
 type context
+(** A [context] encapsulates the state of a compilation.  You can set up options
+    on it (see {!set_option}), and add types (see {!types}), functions (see
+    {!functions}) and code, using the API below.
+
+    Invoking {!compile} on it gives you a {!result}, representing in-memory
+    machine-code.
+
+    You can call {!compile} repeatedly on one context, giving multiple
+    independent results.
+
+    Similarly, you can call {!compile_to_file} on a context to compile to disk.
+
+    Eventually you can call {!release} to clean up the context; any in-memory
+    results created from it are still usable. *)
+
 type result
+(** A [result] encapsulates the result of an in-memory compilation. *)
+
 type loc
 type param'
 type lvalue'
 type rvalue'
 type lvalue = [ `Lvalue of lvalue' | `Param of param' ]
-type rvalue = [ `Rvalue of rvalue' | `Param of param' ]
+type rvalue = [ `Lvalue of lvalue' | `Rvalue of rvalue' | `Param of param' ]
 type field
-type typ
-type structure
+type structure'
+type typ'
+type typ = [ `Struct of structure' | `Type of typ' ]
+type structure = [ `Struct of structure' ]
 type param = [ `Param of param' ]
 type fn
 type block
@@ -115,14 +134,14 @@ val acquire : unit -> context
 val release : context -> unit
 val dump_to_file : context -> ?update_locs:bool -> string -> unit
 val new_location : context -> string -> int -> int -> loc
-val new_global : ?loc:loc -> context -> typ -> string -> lvalue
-val new_array_type : ?loc:loc -> context -> typ -> int -> typ
-val new_field : ?loc:loc -> context -> typ -> string -> field
+val new_global : ?loc:loc -> context -> [< typ] -> string -> lvalue
+val new_array_type : ?loc:loc -> context -> [< typ] -> int -> typ
+val new_field : ?loc:loc -> context -> [< typ] -> string -> field
 val new_struct : ?loc:loc -> context -> string -> field list -> structure
 val new_union : ?loc:loc -> context -> string -> field list -> typ
 val new_function_ptr_type : ?loc:loc -> context -> ?variadic:bool -> typ list -> typ -> typ
-val new_param : ?loc:loc -> context -> string -> typ -> param
-val new_function : ?loc:loc -> context -> ?variadic:bool -> function_kind -> string -> param list -> typ -> fn
+val new_param : ?loc:loc -> context -> string -> [< typ] -> param
+val new_function : ?loc:loc -> context -> ?variadic:bool -> function_kind -> string -> param list -> [< typ] -> fn
 val get_builtin_function : context -> string -> fn
 val zero : context -> typ -> rvalue
 val one : context -> typ -> rvalue
@@ -131,14 +150,14 @@ val new_rvalue_from_int : context -> typ -> int -> rvalue
 val new_rvalue_from_ptr : context -> typ -> nativeint -> rvalue
 val null : context -> typ -> rvalue
 val new_string_literal : context -> string -> rvalue
-val new_unary_op : ?loc:loc -> context -> unary_op -> typ -> rvalue -> rvalue
+val new_unary_op : ?loc:loc -> context -> unary_op -> typ -> [< rvalue] -> rvalue
 val new_binary_op : ?loc:loc -> context -> binary_op -> typ -> [< rvalue] -> [< rvalue] -> rvalue
-val new_comparison : ?loc:loc -> context -> comparison -> rvalue -> rvalue -> rvalue
+val new_comparison : ?loc:loc -> context -> comparison -> [< rvalue] -> [< rvalue] -> rvalue
 val new_child_context : context -> context
 val new_cast : ?loc:loc -> context -> rvalue -> typ -> rvalue
-val new_array_access : ?loc:loc -> rvalue -> rvalue -> lvalue
-val new_call : ?loc:loc -> context -> fn -> rvalue list -> rvalue
-val new_call_through_ptr : ?loc:loc -> context -> rvalue -> rvalue list -> rvalue
+val new_array_access : ?loc:loc -> [< rvalue] -> [< rvalue] -> lvalue
+val new_call : ?loc:loc -> context -> fn -> [< rvalue] list -> rvalue
+val new_call_through_ptr : ?loc:loc -> context -> [< rvalue] -> [< rvalue] list -> rvalue
 val get_int_type : context -> ?signed:bool -> int -> typ
 val dump_reproducer_to_file : context -> string -> unit
 val set_logfile : context -> ?append:bool -> Unix.file_descr -> unit
@@ -150,28 +169,28 @@ val set_fields : ?loc:loc -> structure -> field list -> unit
 
 val get_code : result -> string -> ('a -> 'b) Ctypes.fn -> 'a -> 'b
 
-val get_pointer : typ -> typ
-val get_const : typ -> typ
-val get_volatile : typ -> typ
+val get_pointer : [< typ] -> typ
+val get_const : [< typ] -> typ
+val get_volatile : [< typ] -> typ
 val get_type : context -> type_kind -> typ
 
-val dereference_field : ?loc:loc -> rvalue -> field -> lvalue
-val dereference : ?loc:loc -> rvalue -> lvalue
+val dereference_field : ?loc:loc -> [< rvalue] -> field -> lvalue
+val dereference : ?loc:loc -> [< rvalue] -> lvalue
 val type_of : rvalue -> typ
 
-val get_address : ?loc:loc -> lvalue -> rvalue
+val get_address : ?loc:loc -> [< lvalue] -> rvalue
 
-val new_local : ?loc:loc -> fn -> typ -> string -> lvalue
+val new_local : ?loc:loc -> fn -> [< typ] -> string -> lvalue
 val new_block : fn -> string -> block
 val get_param : fn -> int -> param
 val dump_to_dot : fn -> string -> unit
 
-val add_eval : ?loc:loc -> block -> rvalue -> unit
-val add_assignment : ?loc:loc -> block -> lvalue -> rvalue -> unit
-val add_assignment_op : ?loc:loc -> block -> lvalue -> binary_op -> rvalue -> unit
+val add_eval : ?loc:loc -> block -> [< rvalue] -> unit
+val add_assignment : ?loc:loc -> block -> [< lvalue] -> rvalue -> unit
+val add_assignment_op : ?loc:loc -> block -> [< lvalue] -> binary_op -> rvalue -> unit
 val add_comment : ?loc:loc -> block -> string -> unit
-val end_with_conditional : ?loc:loc -> block -> rvalue -> block -> block -> unit
+val end_with_conditional : ?loc:loc -> block -> [< rvalue] -> block -> block -> unit
 val end_with_jmp : ?loc:loc -> block -> block -> unit
-val end_with_return : ?loc:loc -> block -> rvalue -> unit
+val end_with_return : ?loc:loc -> block -> [< rvalue] -> unit
 val end_with_void_return : ?loc:loc -> block -> unit
 val get_function : block -> fn
