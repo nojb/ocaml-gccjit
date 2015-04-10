@@ -308,7 +308,7 @@ val get_global : result -> string -> 'a Ctypes.typ -> 'a Ctypes.ptr
     created using {!Exported}.  This is a ptr to the global, so e.g. for an
     [int] this is an [int *]. *)
 
-val get_debug_string : obj -> string
+val get_debug_string : [< obj] -> string
 (** Get a human-readable description of this object. *)
 
 val get_pointer : [< typ] -> typ
