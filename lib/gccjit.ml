@@ -270,10 +270,10 @@ let new_rvalue_from_double ctx typ f =
 let new_rvalue_from_int ctx typ n =
   `Rvalue (wrap3 "new_rvalue_from_int" ctx gcc_jit_context_new_rvalue_from_int ctx (typ' typ) n)
 
-let new_rvalue_from_ptr ctx typ n =
+let new_rvalue_from_ptr ctx typ ptr =
   `Rvalue
     (wrap3 "new_rvalue_from_ptr" ctx gcc_jit_context_new_rvalue_from_ptr ctx (typ' typ)
-       (Ctypes.ptr_of_raw_address n))
+       (Ctypes.to_voidp ptr))
 
 let null ctx typ =
   `Rvalue (wrap2 "null" ctx gcc_jit_context_null ctx (typ' typ))
@@ -490,7 +490,7 @@ let new_local ?(loc = null_loc) (`Function fn) typ name =
   let ctx = gcc_jit_object_get_context (gcc_jit_function_as_object fn) in
   `Lvalue (wrap4 "new_local" ctx gcc_jit_function_new_local fn (loc' loc) (typ' typ) name)
 
-let new_block (`Function fn) name =
+let new_block (`Function fn) ?name () =
   let ctx = gcc_jit_object_get_context (gcc_jit_function_as_object fn) in
   `Block (wrap2 "new_block" ctx gcc_jit_function_new_block fn name)
 
@@ -524,7 +524,7 @@ let end_with_conditional ?(loc = null_loc) (`Block blk) rval (`Block blk1) (`Blo
   wrap5 "end_with_conditional" ctx gcc_jit_block_end_with_conditional blk (loc' loc)
     (rvalue' rval) blk1 blk2
 
-let end_with_jmp ?(loc = null_loc) (`Block blk) (`Block blk1) =
+let end_with_jump ?(loc = null_loc) (`Block blk) (`Block blk1) =
   let ctx = gcc_jit_object_get_context (gcc_jit_block_as_object blk) in
   wrap3 "end_with_jump" ctx gcc_jit_block_end_with_jump blk (loc' loc) blk1
 

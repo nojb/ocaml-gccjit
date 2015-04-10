@@ -139,17 +139,43 @@ type binary_op =
 
 type comparison =
   | Eq
-  | Ne
-  | Lt
-  | Le
-  | Gt
-  | Ge
+  (** [(EXPR_A) == (EXPR_B).] *)
 
+  | Ne
+  (** [(EXPR_A) != (EXPR_B).] *)
+
+  | Lt
+  (** [(EXPR_A) < (EXPR_B).] *)
+
+  | Le
+  (** [(EXPR_A) <=(EXPR_B).] *)
+
+  | Gt
+  (** [(EXPR_A) > (EXPR_B).] *)
+
+  | Ge
+  (** [(EXPR_A) >= (EXPR_B).] *)
+
+(** Kinds of function.  *)
 type function_kind =
   | Exported
+  (** Function is defined by the client code and visible by name outside of the
+      JIT. *)
+
   | Internal
+  (** Function is defined by the client code, but is invisible outside of the
+      JIT.  Analogous to a ["static"] function. *)
+
   | Imported
+  (** Function is not defined by the client code; we're merely referring to it.
+       Analogous to using an ["extern"] function from a header file. *)
+
   | Always_inline
+  (** Function is only ever inlined into other functions, and is invisible
+      outside of the JIT.  Analogous to prefixing with ["inline"] and adding
+      [__attribute__((always_inline))].  Inlining will only occur when the
+      optimization level is above 0; when optimization is off, this is
+      essentially the same as {!Internal}. *)
 
 (** Context options.  Set with {!set_option}. *)
 type _ option =
@@ -270,24 +296,53 @@ val new_union : ?loc:loc -> context -> string -> field list -> typ
 (** Unions work similarly to structs. *)
 
 val new_function_ptr_type : ?loc:loc -> context -> ?variadic:bool -> typ list -> typ -> typ
+
 val new_param : ?loc:loc -> context -> string -> [< typ] -> param
+(** Create a function param. *)
+
 val new_function : ?loc:loc -> context -> ?variadic:bool -> function_kind -> string -> param list -> [< typ] -> fn
+(** Create a function. *)
+
 val get_builtin_function : context -> string -> fn
+(** Create a reference to a builtin function (sometimes called intrinsic
+    functions). *)
+
 val zero : context -> typ -> rvalue
+
 val one : context -> typ -> rvalue
+
 val new_rvalue_from_double : context -> typ -> float -> rvalue
+
 val new_rvalue_from_int : context -> typ -> int -> rvalue
-val new_rvalue_from_ptr : context -> typ -> nativeint -> rvalue
+
+val new_rvalue_from_ptr : context -> typ -> 'a Ctypes.ptr -> rvalue
+(** Pointers. *)
+
 val null : context -> typ -> rvalue
+
 val new_string_literal : context -> string -> rvalue
+(** String literals. *)
+
 val new_unary_op : ?loc:loc -> context -> unary_op -> typ -> [< rvalue] -> rvalue
+
 val new_binary_op : ?loc:loc -> context -> binary_op -> typ -> [< rvalue] -> [< rvalue] -> rvalue
+
 val new_comparison : ?loc:loc -> context -> comparison -> [< rvalue] -> [< rvalue] -> rvalue
+
 val new_child_context : context -> context
+
 val new_cast : ?loc:loc -> context -> rvalue -> typ -> rvalue
+(** Type-coercion.  Currently only a limited set of conversions are possible:
+    - int <-> float
+    - int <-> bool *)
+
 val new_array_access : ?loc:loc -> [< rvalue] -> [< rvalue] -> lvalue
+
 val new_call : ?loc:loc -> context -> fn -> [< rvalue] list -> rvalue
+(** Call of a specific function. *)
+
 val new_call_through_ptr : ?loc:loc -> context -> [< rvalue] -> [< rvalue] list -> rvalue
+(** Call through a function pointer. *)
 
 val get_int_type : context -> ?signed:bool -> int -> typ
 (** Get the integer type of the given size and signedness. *)
@@ -344,12 +399,19 @@ val dereference : ?loc:loc -> [< rvalue] -> lvalue
 val type_of : rvalue -> typ
 
 val get_address : ?loc:loc -> [< lvalue] -> rvalue
-(** Taking the address of an lvalue; analogous to [&(EXPR)] in C. *)
+(** Taking the address of an {!lvalue}; analogous to [&(EXPR)] in C. *)
 
 val new_local : ?loc:loc -> fn -> [< typ] -> string -> lvalue
-val new_block : fn -> string -> block
+
+val new_block : fn -> ?name:string -> unit -> block
+(** Create a block.  You can give it a meaningful name, which may show up in
+    dumps of the internal representation, and in error messages. *)
+
 val get_param : fn -> int -> param
+(** Get a specific param of a function by index. *)
+
 val dump_to_dot : fn -> string -> unit
+(** Emit the function in graphviz format. *)
 
 val add_eval : ?loc:loc -> block -> [< rvalue] -> unit
 (** Add evaluation of an {!rvalue}, discarding the result (e.g. a function call
@@ -364,13 +426,13 @@ val add_assignment : ?loc:loc -> block -> [< lvalue] -> rvalue -> unit
 val add_assignment_op : ?loc:loc -> block -> [< lvalue] -> binary_op -> rvalue -> unit
 (** Add evaluation of an rvalue, using the result to modify an lvalue.  This
     is analogous to ["+="] and friends:
-
 {[
 lvalue += rvalue;
 lvalue *= rvalue;
 lvalue /= rvalue;
 etc
-]} *)
+]}
+*)
 
 val add_comment : ?loc:loc -> block -> string -> unit
 (** Add a no-op textual comment to the internal representation of the code.
@@ -388,9 +450,23 @@ if (boolval)
   goto on_true;
 else
   goto on_false;
-]} *)
+]}
+*)
 
-val end_with_jmp : ?loc:loc -> block -> block -> unit
+val end_with_jump : ?loc:loc -> block -> block -> unit
+(** Terminate a block by adding a jump to the given target block.  This is
+    roughly equivalent to this C code:
+{[goto target;]} *)
+
 val end_with_return : ?loc:loc -> block -> [< rvalue] -> unit
+(** Terminate a block by adding evaluation of an {!rvalue}, returning the
+    value.  This is roughly equivalent to this C code:
+{[return expression;]} *)
+
 val end_with_void_return : ?loc:loc -> block -> unit
+(** Terminate a block by adding a valueless return, for use within a function
+    with [void] return type.  This is equivalent to this C code:
+{[return;]} *)
+
 val get_function : block -> fn
+(** Which function is this block within? *)

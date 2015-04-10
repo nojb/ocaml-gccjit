@@ -4,7 +4,7 @@ let main () =
   let int_type = get_type ctx Int in
   let param_i = new_param ctx "i" int_type in
   let fn = new_function ctx Exported "square" [param_i] int_type in
-  let block = new_block fn "entry" in
+  let block = new_block fn ~name:"entry" () in
   let expr = new_binary_op ctx Mult int_type param_i param_i in
   end_with_return block expr;
   let jit_result = compile ctx in

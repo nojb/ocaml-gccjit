@@ -460,7 +460,7 @@ module Bindings (T : Cstubs_structs.TYPE with type 'a typ = 'a typ) (F : Cstubs.
     F.foreign "gcc_jit_function_dump_to_dot" (gcc_jit_function @-> string @-> returning void)
 
   let gcc_jit_function_new_block =
-    F.foreign "gcc_jit_function_new_block" (gcc_jit_function @-> string @-> returning gcc_jit_block)
+    F.foreign "gcc_jit_function_new_block" (gcc_jit_function @-> string_opt @-> returning gcc_jit_block)
 
   let gcc_jit_block_as_object =
     F.foreign "gcc_jit_block_as_object" (gcc_jit_block @-> returning gcc_jit_object)
