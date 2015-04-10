@@ -256,10 +256,19 @@ val dump_to_file : context -> ?update_locs:bool -> string -> unit
 
 val new_location : context -> string -> int -> int -> loc
 val new_global : ?loc:loc -> context -> [< typ] -> string -> lvalue
+
 val new_array_type : ?loc:loc -> context -> [< typ] -> int -> typ
+(** Given type [T], get type [T[N]] (for a constant [N]). *)
+
 val new_field : ?loc:loc -> context -> [< typ] -> string -> field
+(** Create a field, for use within a struct or union. *)
+
 val new_struct : ?loc:loc -> context -> string -> field list -> structure
+(** Create a struct type from an list of fields. *)
+
 val new_union : ?loc:loc -> context -> string -> field list -> typ
+(** Unions work similarly to structs. *)
+
 val new_function_ptr_type : ?loc:loc -> context -> ?variadic:bool -> typ list -> typ -> typ
 val new_param : ?loc:loc -> context -> string -> [< typ] -> param
 val new_function : ?loc:loc -> context -> ?variadic:bool -> function_kind -> string -> param list -> [< typ] -> fn
@@ -279,7 +288,10 @@ val new_cast : ?loc:loc -> context -> rvalue -> typ -> rvalue
 val new_array_access : ?loc:loc -> [< rvalue] -> [< rvalue] -> lvalue
 val new_call : ?loc:loc -> context -> fn -> [< rvalue] list -> rvalue
 val new_call_through_ptr : ?loc:loc -> context -> [< rvalue] -> [< rvalue] list -> rvalue
+
 val get_int_type : context -> ?signed:bool -> int -> typ
+(** Get the integer type of the given size and signedness. *)
+
 val dump_reproducer_to_file : context -> string -> unit
 
 val set_logfile : context -> Unix.file_descr -> unit
@@ -312,15 +324,27 @@ val get_debug_string : [< obj] -> string
 (** Get a human-readable description of this object. *)
 
 val get_pointer : [< typ] -> typ
+(** Given type [T], get type [T*] *)
+
 val get_const : [< typ] -> typ
+(** Given type [T], get type [const T]. *)
+
 val get_volatile : [< typ] -> typ
+(** Given type [T], get type [volatile T]. *)
+
 val get_type : context -> type_kind -> typ
 
 val dereference_field : ?loc:loc -> [< rvalue] -> field -> lvalue
+(** Accessing a field of an [rvalue] of pointer type, analogous [(EXPR)->field]
+    in C, itself equivalent to [(\*EXPR).FIELD] *)
+
 val dereference : ?loc:loc -> [< rvalue] -> lvalue
+(** Dereferencing a pointer; analogous to [*(EXPR)] in C. *)
+
 val type_of : rvalue -> typ
 
 val get_address : ?loc:loc -> [< lvalue] -> rvalue
+(** Taking the address of an lvalue; analogous to [&(EXPR)] in C. *)
 
 val new_local : ?loc:loc -> fn -> [< typ] -> string -> lvalue
 val new_block : fn -> string -> block
@@ -328,10 +352,44 @@ val get_param : fn -> int -> param
 val dump_to_dot : fn -> string -> unit
 
 val add_eval : ?loc:loc -> block -> [< rvalue] -> unit
+(** Add evaluation of an {!rvalue}, discarding the result (e.g. a function call
+    that {e returns} void).  This is equivalent to this C code:
+{[(void)expression;]} *)
+
 val add_assignment : ?loc:loc -> block -> [< lvalue] -> rvalue -> unit
+(** Add evaluation of an {!rvalue}, assigning the result to the given {!lvalue}.
+    This is roughly equivalent to this C code:
+{[lvalue = rvalue;]} *)
+
 val add_assignment_op : ?loc:loc -> block -> [< lvalue] -> binary_op -> rvalue -> unit
+(** Add evaluation of an rvalue, using the result to modify an lvalue.  This
+    is analogous to ["+="] and friends:
+
+{[
+lvalue += rvalue;
+lvalue *= rvalue;
+lvalue /= rvalue;
+etc
+]} *)
+
 val add_comment : ?loc:loc -> block -> string -> unit
+(** Add a no-op textual comment to the internal representation of the code.
+    It will be optimized away, but will be visible in the dumps seen via
+    {!Dump_initial_tree} and {!Dump_initial_gimple} and thus may be of use when
+    debugging how your project's internal representation gets converted to the
+    libgccjit IR.  *)
+
 val end_with_conditional : ?loc:loc -> block -> [< rvalue] -> block -> block -> unit
+(** Terminate a block by adding evaluation of an rvalue, branching on the
+    result to the appropriate successor block.  This is roughly equivalent to
+    this C code:
+{[
+if (boolval)
+  goto on_true;
+else
+  goto on_false;
+]} *)
+
 val end_with_jmp : ?loc:loc -> block -> block -> unit
 val end_with_return : ?loc:loc -> block -> [< rvalue] -> unit
 val end_with_void_return : ?loc:loc -> block -> unit
