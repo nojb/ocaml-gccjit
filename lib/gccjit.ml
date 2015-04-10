@@ -333,9 +333,8 @@ let dump_reproducer_to_file ctx path =
 
 external int_of_file_descr : Unix.file_descr -> int = "%identity"
 
-let set_logfile ctx ?(append = false) fd =
-  let mode = if append then "a" else "w" in
-  let f = match fdopen (int_of_file_descr fd) mode with
+let set_logfile ctx fd =
+  let f = match fdopen (int_of_file_descr fd) "a" with
     | None -> raise (Error ("set_logfile", "fdopen"))
     | Some f -> f
   in
@@ -375,7 +374,7 @@ let compile_to_file ctx kind path =
 
 let compile ctx =
   let res = wrap1 "compile" ctx gcc_jit_context_compile ctx in
-  Gc.finalise gcc_jit_result_release res;
+  (* Gc.finalise gcc_jit_result_release res; *)
   res
 
 let set_fields ?(loc = null_loc) (`Struct struc) fields =
@@ -390,7 +389,12 @@ let get_code res name fn =
   let p = gcc_jit_result_get_code res name in
   (* we keep a reference to [res] in the returned function to keep it from begin
      GC'ed prematurely. *)
-  fun x -> let save = res in Ctypes.(coerce (ptr void) (Foreign.funptr ~name fn) p) x
+  (* fun x -> let save = res in Ctypes.(coerce (ptr void) (Foreign.funptr ~name fn) p) x *)
+  Ctypes.(coerce (ptr void) (Foreign.funptr ~name fn) p)
+
+let get_global res name typ =
+  let p = gcc_jit_result_get_global res name in
+  Ctypes.(coerce (ptr void) (ptr typ)) p
 
 let get_pointer typ =
   let ctx = gcc_jit_object_get_context (gcc_jit_type_as_object (typ' typ)) in

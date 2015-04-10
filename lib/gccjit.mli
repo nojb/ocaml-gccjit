@@ -186,11 +186,19 @@ type _ option =
   (** If [true], {!release} will not clean up intermediate files written to the
        filesystem, and will display their location on stderr.  *)
 
+(** Kinds of ahead-of-time compilation, for use with {!compile_to_file}.  *)
 type output_kind =
   | Assembler
+  (** Compile the context to an assembler file. *)
+
   | Object_file
+  (** Compile the context to an object file. *)
+
   | Dynamic_library
+  (** Compile the context to a dynamic library. *)
+
   | Executable
+  (** Compile the context to an executable. *)
 
 type type_kind =
   | Void
@@ -219,7 +227,14 @@ type type_kind =
 
 val acquire : unit -> context
 val release : context -> unit
+
 val dump_to_file : context -> ?update_locs:bool -> string -> unit
+(** To help with debugging: dump a C-like representation to the given path,
+    describing what's been set up on the context.  If [~update_locs] true, then
+    also set up {!loc} information throughout the context, pointing at the dump
+    file as if it were a source file.  This may be of use in conjunction with
+    {!Debuginfo} to allow stepping through the code in a debugger. *)
+
 val new_location : context -> string -> int -> int -> loc
 val new_global : ?loc:loc -> context -> [< typ] -> string -> lvalue
 val new_array_type : ?loc:loc -> context -> [< typ] -> int -> typ
@@ -247,14 +262,32 @@ val new_call : ?loc:loc -> context -> fn -> [< rvalue] list -> rvalue
 val new_call_through_ptr : ?loc:loc -> context -> [< rvalue] -> [< rvalue] list -> rvalue
 val get_int_type : context -> ?signed:bool -> int -> typ
 val dump_reproducer_to_file : context -> string -> unit
-val set_logfile : context -> ?append:bool -> Unix.file_descr -> unit
+
+val set_logfile : context -> Unix.file_descr -> unit
+(** To help with debugging; enable ongoing logging of the context's activity to
+    the given file descriptor.  The caller remains responsible for closing the
+    file descriptor. *)
+
 val set_option : context -> 'a option -> 'a -> unit
+
 val compile_to_file : context -> output_kind -> string -> unit
+(** Compile the context to a file of the given kind.  This can be called more
+    that once on a given context, although any errors that occur will block
+    further compilation. *)
+
 val compile : context -> result
 
 val set_fields : ?loc:loc -> structure -> field list -> unit
 
 val get_code : result -> string -> ('a -> 'b) Ctypes.fn -> 'a -> 'b
+(** Locate a given function within the built machine code.  The Ctypes
+    signature is used to cast the code so that it can be called.  Care must be
+    taken to pass a signature compatible with that of function being extracted. *)
+
+val get_global : result -> string -> 'a Ctypes.typ -> 'a Ctypes.ptr
+(** Locate a given global within the built machine code.  It must have been
+    created using {!Exported}.  This is a ptr to the global, so e.g. for an
+    [int] this is an [int *]. *)
 
 val get_pointer : [< typ] -> typ
 val get_const : [< typ] -> typ
