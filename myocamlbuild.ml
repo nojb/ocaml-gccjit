@@ -33,7 +33,9 @@ let () =
         flag [ "compile"; "c"; "use_ocaml_c_headers" ] (S [A "-I"; P (pkg_ctypes.Findlib.location ^ "/../ocaml")]);
 
         dep [ "ocaml"; "link"; "use_gccjit" ] [ "lib/gccjit_stubs.o" ];
-        flag [ "ocaml"; "link"; "use_gccjit"; "native" ] (S [A"-cclib"; P"-lgccjit"])
+        flag [ "ocaml"; "link"; "use_gccjit" ] (S [A"-cclib"; P"-lgccjit"]);
+        flag [ "ocaml"; "link"; "byte"; "use_gccjit" ]  (S[A"-custom"])
+
     | _ ->
         ()
   end

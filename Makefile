@@ -6,6 +6,8 @@ all: lib_test/test.native
 %.native:
 	$(OCAMLBUILD) -lflags -ccopt,-L$(LIBGCCJITDIR) -tag-line "<$@>: use_gccjit" $@
 
+%.byte:
+	$(OCAMLBUILD) -lflags -ccopt,-L$(LIBGCCJITDIR) -tag-line "<$@>: use_gccjit" $@
 
 clean:
 	$(OCAMLBUILD) -clean

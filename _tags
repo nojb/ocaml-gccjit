@@ -6,4 +6,5 @@ true: bin_annot
 <stubgen/gccjit_types_generator.c>: use_ctypes_c_headers, use_ocaml_c_headers
 <lib/gccjit_stubs.c>: use_ctypes_c_headers
 # <lib_test/test.*>: use_gccjit
+<lib_test/utop.*>: thread, package(utop)
 <lib>: include
