@@ -9,7 +9,14 @@ let main () =
   end_with_return block expr;
   let jit_result = compile ctx in
   let callable = get_code jit_result "square" Ctypes.(int @-> returning int) in
-  Printf.printf "%d\n%!" (callable 5)
+  Printf.printf "%d\n%!" (callable 5);
+  set_option ctx Dump_initial_gimple true;
+  let jit_result = compile ctx in
+  set_option ctx Dump_generated_code true;
+  let jit_result = compile ctx in
+  set_option ctx Optimization_level 3;
+  let jit_result = compile ctx in
+  ()
 
 let _ =
   main ()
