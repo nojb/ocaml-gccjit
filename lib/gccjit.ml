@@ -185,8 +185,8 @@ let release ctx =
 let dump_to_file ctx ?(update_locs = false) path =
   wrap3 "dump_to_file" ctx gcc_jit_context_dump_to_file ctx path (if update_locs then 1 else 0)
 
-(* let get_first_error ctx = *)
-(*   gcc_jit_context_get_first_error ctx *)
+let get_first_error ctx =
+  gcc_jit_context_get_first_error ctx
 
 let new_location ctx path line col =
   `Location (wrap4 "new_location" ctx gcc_jit_context_new_location ctx path line col)
