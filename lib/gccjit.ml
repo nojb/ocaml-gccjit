@@ -90,6 +90,31 @@ type output_kind =
   | Dynamic_library
   | Executable
 
+type type_kind =
+  | Void
+  | Void_ptr
+  | Bool
+  | Char
+  | Signed_char
+  | Unsigned_char
+  | Short
+  | Unsigned_short
+  | Int
+  | Unsigned_int
+  | Long
+  | Unsigned_long
+  | Long_long
+  | Unsigned_long_long
+  | Float
+  | Double
+  | Long_double
+  | Const_char_ptr
+  | Size_t
+  | File_ptr
+  | Complex_float
+  | Complex_double
+  | Complex_long_double
+
 let wrap1 name ctx f x1 =
   let y = f x1 in
   match gcc_jit_context_get_first_error ctx with
@@ -132,16 +157,17 @@ let wrap8 name ctx f x1 x2 x3 x4 x5 x6 x7 x8 =
   | None -> y
   | Some err -> raise (Error (name, err))
 
-let acquire =
-  gcc_jit_context_acquire
+let acquire ctx =
+  gcc_jit_context_acquire ctx
 
-let release =
-  gcc_jit_context_release
+let release ctx =
+  gcc_jit_context_release ctx
 
 let dump_to_file ctx ?(update_locs = false) path =
   wrap3 "dump_to_file" ctx gcc_jit_context_dump_to_file ctx path (if update_locs then 1 else 0)
 
-(* val get_first_error : context -> string option *)
+(* let get_first_error ctx = *)
+(*   gcc_jit_context_get_first_error ctx *)
 
 let new_location ctx path line col =
   wrap4 "new_location" ctx gcc_jit_context_new_location ctx path line col
@@ -234,7 +260,16 @@ let binary_op = function
 let new_binary_op ?(loc = null_loc) ctx op typ rval1 rval2 =
   wrap6 "new_binary_op" ctx gcc_jit_context_new_binary_op ctx loc (binary_op op) typ rval1 rval2
 
-(* val new_comparison : ?loc:loc -> context -> comparison -> rvalue -> rvalue -> rvalue *)
+let comparison = function
+  | Eq -> GCC_JIT_COMPARISON_EQ
+  | Ne -> GCC_JIT_COMPARISON_NE
+  | Lt -> GCC_JIT_COMPARISON_LT
+  | Le -> GCC_JIT_COMPARISON_LE
+  | Gt -> GCC_JIT_COMPARISON_GT
+  | Ge -> GCC_JIT_COMPARISON_GE
+
+let new_comparison ?(loc = null_loc) ctx cmp rval1 rval2 =
+  wrap5 "new_comparison" ctx gcc_jit_context_new_comparison ctx loc (comparison cmp) rval1 rval2
 
 let new_child_context ctx =
   wrap1 "new_child_context" ctx gcc_jit_context_new_child_context ctx
@@ -255,13 +290,21 @@ let new_call_through_ptr ?(loc = null_loc) ctx rval args =
   wrap5 "new_call_through_ptr" ctx gcc_jit_context_new_call_through_ptr ctx loc rval
     (List.length args) (Ctypes.CArray.start a)
 
-(* val get_int_type : context -> ?signed:bool -> int -> typ *)
+let get_int_type ctx ?(signed = false) n =
+  wrap3 "get_int_type" ctx gcc_jit_context_get_int_type ctx (if signed then 1 else 0) n
 
 let dump_reproducer_to_file ctx path =
   wrap2 "dump_reproducer_to_file" ctx gcc_jit_context_dump_reproducer_to_file ctx path
 
-let set_logfile ctx fd =
-  assert false
+external int_of_file_descr : Unix.file_descr -> int = "%identity"
+
+let set_logfile ctx ?(append = false) fd =
+  let mode = if append then "a" else "w" in
+  let f = match fdopen (int_of_file_descr fd) mode with
+    | None -> raise (Error ("set_logfile", "fdopen"))
+    | Some f -> f
+  in
+  wrap4 "set_logfile" ctx gcc_jit_context_set_logfile ctx f 0 0
 
 let set_option : type a. context -> a option -> a -> unit = fun ctx opt v ->
   match opt with
@@ -310,17 +353,45 @@ let get_code res name fn =
   let p = gcc_jit_result_get_code res name in
   Ctypes.(coerce (ptr void) (Foreign.funptr ~name fn) p)
 
-let pointer typ =
+let get_pointer typ =
   let ctx = gcc_jit_object_get_context (gcc_jit_type_as_object typ) in
-  wrap1 "pointer" ctx gcc_jit_type_get_pointer typ
+  wrap1 "get_pointer" ctx gcc_jit_type_get_pointer typ
 
-let const typ =
+let get_const typ =
   let ctx = gcc_jit_object_get_context (gcc_jit_type_as_object typ) in
-  wrap1 "const" ctx gcc_jit_type_get_const typ
+  wrap1 "get_const" ctx gcc_jit_type_get_const typ
 
-let volatile typ =
+let get_volatile typ =
   let ctx = gcc_jit_object_get_context (gcc_jit_type_as_object typ) in
-  wrap1 "volatile" ctx gcc_jit_type_get_volatile typ
+  wrap1 "get_volatile" ctx gcc_jit_type_get_volatile typ
+
+let type_kind = function
+  | Void -> GCC_JIT_TYPE_VOID
+  | Void_ptr -> GCC_JIT_TYPE_VOID_PTR
+  | Bool -> GCC_JIT_TYPE_BOOL
+  | Char -> GCC_JIT_TYPE_CHAR
+  | Signed_char -> GCC_JIT_TYPE_SIGNED_CHAR
+  | Unsigned_char -> GCC_JIT_TYPE_UNSIGNED_CHAR
+  | Short -> GCC_JIT_TYPE_SHORT
+  | Unsigned_short -> GCC_JIT_TYPE_UNSIGNED_SHORT
+  | Int -> GCC_JIT_TYPE_INT
+  | Unsigned_int -> GCC_JIT_TYPE_UNSIGNED_INT
+  | Long -> GCC_JIT_TYPE_LONG
+  | Unsigned_long -> GCC_JIT_TYPE_UNSIGNED_LONG
+  | Long_long -> GCC_JIT_TYPE_LONG_LONG
+  | Unsigned_long_long -> GCC_JIT_TYPE_UNSIGNED_LONG_LONG
+  | Float -> GCC_JIT_TYPE_FLOAT
+  | Double -> GCC_JIT_TYPE_DOUBLE
+  | Long_double -> GCC_JIT_TYPE_LONG_DOUBLE
+  | Const_char_ptr -> GCC_JIT_TYPE_CONST_CHAR_PTR
+  | Size_t -> GCC_JIT_TYPE_SIZE_T
+  | File_ptr -> GCC_JIT_TYPE_FILE_PTR
+  | Complex_float -> GCC_JIT_TYPE_COMPLEX_FLOAT
+  | Complex_double -> GCC_JIT_TYPE_COMPLEX_DOUBLE
+  | Complex_long_double -> GCC_JIT_TYPE_COMPLEX_LONG_DOUBLE
+
+let get_type ctx kind =
+  wrap2 "get_type" ctx gcc_jit_context_get_type ctx (type_kind kind)
 
 let dereference_field ?(loc = null_loc) rval fld =
   let ctx = gcc_jit_object_get_context (gcc_jit_rvalue_as_object rval) in
@@ -330,9 +401,9 @@ let dereference ?(loc = null_loc) rval =
   let ctx = gcc_jit_object_get_context (gcc_jit_rvalue_as_object rval) in
   wrap2 "dereference" ctx gcc_jit_rvalue_dereference rval loc
 
-let get_type rval =
+let type_of rval =
   let ctx = gcc_jit_object_get_context (gcc_jit_rvalue_as_object rval) in
-  wrap1 "get_type" ctx gcc_jit_rvalue_get_type rval
+  wrap1 "type_of" ctx gcc_jit_rvalue_get_type rval
 
 let get_address ?(loc = null_loc) lval =
   let ctx = gcc_jit_object_get_context (gcc_jit_lvalue_as_object lval) in

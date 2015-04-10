@@ -83,10 +83,34 @@ type output_kind =
   | Dynamic_library
   | Executable
 
+type type_kind =
+  | Void
+  | Void_ptr
+  | Bool
+  | Char
+  | Signed_char
+  | Unsigned_char
+  | Short
+  | Unsigned_short
+  | Int
+  | Unsigned_int
+  | Long
+  | Unsigned_long
+  | Long_long
+  | Unsigned_long_long
+  | Float
+  | Double
+  | Long_double
+  | Const_char_ptr
+  | Size_t
+  | File_ptr
+  | Complex_float
+  | Complex_double
+  | Complex_long_double
+
 val acquire : unit -> context
 val release : context -> unit
 val dump_to_file : context -> ?update_locs:bool -> string -> unit
-(* val get_first_error : context -> string option *)
 val new_location : context -> string -> int -> int -> loc
 val new_global : ?loc:loc -> context -> typ -> string -> lvalue
 val new_array_type : ?loc:loc -> context -> typ -> int -> typ
@@ -106,15 +130,15 @@ val null : context -> typ -> rvalue
 val new_string_literal : context -> string -> rvalue
 val new_unary_op : ?loc:loc -> context -> unary_op -> typ -> rvalue -> rvalue
 val new_binary_op : ?loc:loc -> context -> binary_op -> typ -> rvalue -> rvalue -> rvalue
-(* val new_comparison : ?loc:loc -> context -> comparison -> rvalue -> rvalue -> rvalue *)
+val new_comparison : ?loc:loc -> context -> comparison -> rvalue -> rvalue -> rvalue
 val new_child_context : context -> context
 val new_cast : ?loc:loc -> context -> rvalue -> typ -> rvalue
 val new_array_access : ?loc:loc -> rvalue -> rvalue -> lvalue
 val new_call : ?loc:loc -> context -> fn -> rvalue list -> rvalue
 val new_call_through_ptr : ?loc:loc -> context -> rvalue -> rvalue list -> rvalue
-(* val get_int_type : context -> ?signed:bool -> int -> typ *)
-(* val dump_reproducer_to_file : context -> string -> unit *)
-val set_logfile : context -> Unix.file_descr -> unit
+val get_int_type : context -> ?signed:bool -> int -> typ
+val dump_reproducer_to_file : context -> string -> unit
+val set_logfile : context -> ?append:bool -> Unix.file_descr -> unit
 val set_option : context -> 'a option -> 'a -> unit
 val compile_to_file : context -> output_kind -> string -> unit
 val compile : context -> result
@@ -123,13 +147,13 @@ val set_fields : ?loc:loc -> structure -> field list -> unit
 
 val get_code : result -> string -> ('a -> 'b) Ctypes.fn -> 'a -> 'b
 
-val pointer : typ -> typ
-val const : typ -> typ
-val volatile : typ -> typ
+val get_pointer : typ -> typ
+val get_const : typ -> typ
+val get_volatile : typ -> typ
 
 val dereference_field : ?loc:loc -> rvalue -> field -> lvalue
 val dereference : ?loc:loc -> rvalue -> lvalue
-val get_type : rvalue -> typ
+val type_of : rvalue -> typ
 
 val get_address : ?loc:loc -> lvalue -> rvalue
 

@@ -609,6 +609,11 @@ module Bindings (T : Cstubs_structs.TYPE with type 'a typ = 'a typ) (F : Cstubs.
   let gcc_jit_context_dump_reproducer_to_file =
     F.foreign "gcc_jit_context_dump_reproducer_to_file" (gcc_jit_context @-> string @-> returning void)
 
+  external int_of_fd : Unix.file_descr -> int = "%identity"
+
+  let fdopen =
+    F.foreign "fdopen" (int @-> string @-> returning (ptr_opt void))
+
   (* let gcc_jit_context_enable_dump = *)
   (*   F.foreign "gcc_jit_context_enable_dump" (gcc_jit_context @-> string @-> ptr char @-> returning void) *)
 end
