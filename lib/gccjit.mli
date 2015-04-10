@@ -21,6 +21,8 @@
    SOFTWARE. *)
 
 exception Error of string * string
+(** This exception is raised if an error occurs.  The first argument is the API
+    function name and the second one has an explanatory string. *)
 
 type context
 (** A [context] encapsulates the state of a compilation.  You can set up options
