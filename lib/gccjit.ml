@@ -258,10 +258,10 @@ let wrap8 name ctx f x1 x2 x3 x4 x5 x6 x7 x8 =
 let get_first_error ctx =
   gcc_jit_context_get_first_error ctx
 
-let acquire ctx =
+let acquire_context ctx =
   gcc_jit_context_acquire ctx
 
-let release ctx =
+let release_context ctx =
   gcc_jit_context_release ctx
 
 let new_child_context ctx =
@@ -528,7 +528,7 @@ let get_global res name typ =
   let p = gcc_jit_result_get_global res name in
   Ctypes.(coerce (ptr void) (ptr typ)) p
 
-let result_release res =
+let release_result res =
   gcc_jit_result_release res
 
 let output_kind = function

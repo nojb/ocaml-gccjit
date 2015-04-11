@@ -260,11 +260,11 @@ type type_kind =
 
 (** {2 Lifetime-management} *)
 
-val acquire : unit -> context
+val acquire_context : unit -> context
 (** This function acquires a new {!context} instance, which is independent of
     any others that may be present within this process. *)
 
-val release : context -> unit
+val release_context : context -> unit
 (** This function releases all resources associated with the given context.
     Both the context itsel and all of its object instances are claed up.  It
     should be called exactly once on a given context.
@@ -300,7 +300,7 @@ val new_child_context : context -> context
 
 (** {2 Thread-safety}
 
-    Instances of {!context} created via {!acquire} are independent from each
+    Instances of {!context} created via {!acquire_context} are independent from each
     other: only one thread may use a given context at once, but multiple threads
     could each have their own contexts without needing locks.
 
@@ -331,7 +331,7 @@ val set_logfile : context -> Unix.file_descr option -> unit
 
     - API calls
     - the various steps involved within compilation
-    - activity on any gcc_jit_result instances created by the context
+    - activity on any {!result} instances created by the context
     - activity within any child contexts
     - An example of a log can be seen here, though the precise format and kinds of
       information logged is subject to change.
@@ -812,7 +812,7 @@ val get_code : result -> string -> ('a -> 'b) Ctypes.fn -> 'a -> 'b
     Care must be taken to pass a signature compatible with that of function
     being extracted.
 
-    Note that the resulting machine code becomes invalid after {!result_release}
+    Note that the resulting machine code becomes invalid after {!release_result}
     is called on the {!result}; attempting to call it after that may lead to a
     segmentation fault. *)
 
@@ -841,11 +841,11 @@ val get_global : result -> string -> 'a Ctypes.typ -> 'a Ctypes.ptr
 
     If such a global is not found, an error will be raised.
 
-    Note that the resulting address becomes invalid after {!result_release}
+    Note that the resulting address becomes invalid after {!release_result}
     is called on the {!result}; attempting to use it after that may lead to a
     segmentation fault.  *)
 
-val result_release : result -> unit
+val release_result : result -> unit
 (** Once we're done with the code, this unloads the built [.so] file. This
     cleans up the result; after calling this, it’s no longer valid to use the
     result, or any code or globals that were obtained by calling {!get_code} or
