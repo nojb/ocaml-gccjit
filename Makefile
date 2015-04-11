@@ -1,13 +1,10 @@
 OCAMLBUILD = ocamlbuild -classic-display
-LIBGCCJITDIR = /usr/local/lib/gcc/5
 
-square: lib_test/square.native
+all:
+	$(OCAMLBUILD) lib/gccjit.cma lib/dllgccjit_stubs.so
 
-%.native:
-	$(OCAMLBUILD) -lflags -ccopt,-L$(LIBGCCJITDIR) -tag-line "<$@>: use_gccjit" $@
-
-%.byte:
-	$(OCAMLBUILD) -lflags -ccopt,-L$(LIBGCCJITDIR) -tag-line "<$@>: use_gccjit" $@
+square:
+	$(OCAMLBUILD) lib_test/square.byte
 
 clean:
 	$(OCAMLBUILD) -clean
@@ -27,4 +24,4 @@ gh-pages: doc
 	git -C .gh-pages push origin gh-pages -f
 	rm -rf .gh-pages
 
-.PHONY: %.native %.byte clean doc
+.PHONY: clean doc
