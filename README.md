@@ -68,6 +68,7 @@ LIBGCCJIT_DIR=<directory where libgccjit lives> opam install gccjit
 ### Links
 
 - [API documentation](https://nojb.github.io/ocaml-gccjit)
+- [Wiki](https://github.com/nojb/ocaml-gccjit/wiki)
 - [The C header file](https://github.com/gcc-mirror/gcc/blob/master/gcc/jit/libgccjit.h)
 - [libgccjit wiki](https://gcc.gnu.org/wiki/JIT)
 - [Experiments in JIT compilation](https://github.com/davidmalcolm/jittest)
