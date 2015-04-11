@@ -310,7 +310,6 @@ val new_child_context : context -> context
     tree" of such contexts at once, and if you're using multiple threads you
     should provide your own locking around entire such context partitions. *)
 
-
 (** {2 Debugging} *)
 
 val dump_to_file : context -> ?update_locs:bool -> string -> unit
@@ -380,8 +379,7 @@ val get_debug_string : [< object_] -> string
 
     {[
       obj: 4.0 * (float)i
-    ]}
-*)
+    ]} *)
 
 (** {2 Options} *)
 
@@ -569,7 +567,7 @@ val new_call : ?loc:location -> context -> function_ -> [< rvalue] list -> rvalu
     function with [void] return type), use [add_eval]:
 
     {[
-      (* Add "(void)printf (arg0, arg1);". *)
+      (* Add "(void)printf (args);". *)
       add_eval block (new_call ctx printf_func args)
     ]} *)
 
@@ -702,8 +700,7 @@ val add_assignment_op : ?loc:location -> block -> [< lvalue] -> binary_op -> rva
     {[
       (* "i++" *)
       add_assignment_op loop_body i Plus (one ctx int_type)
-    ]}
-*)
+    ]} *)
 
 val add_comment : ?loc:location -> block -> string -> unit
 (** Add a no-op textual comment to the internal representation of the code.
@@ -812,8 +809,12 @@ val get_code : result -> string -> ('a -> 'b) Ctypes.fn -> 'a -> 'b
     If such a function is not found, an error will be raised.
 
     If the function is found, the result is cast to the given Ctypes signature.
-    Care must be taken to pass a signature compatible with that of function being
-    extracted. *)
+    Care must be taken to pass a signature compatible with that of function
+    being extracted.
+
+    Note that the resulting machine code becomes invalid after {!result_release}
+    is called on the {!result}; attempting to call it after that may lead to a
+    segmentation fault. *)
 
 val get_global : result -> string -> 'a Ctypes.typ -> 'a Ctypes.ptr
 (** Locate a given global within the built machine code.
@@ -838,7 +839,17 @@ val get_global : result -> string -> 'a Ctypes.typ -> 'a Ctypes.ptr
       let ptr_to_foo = get_global result "foo" Ctypes.int
     ]}
 
-    If such a global is not found, an error will be raised. *)
+    If such a global is not found, an error will be raised.
+
+    Note that the resulting address becomes invalid after {!result_release}
+    is called on the {!result}; attempting to use it after that may lead to a
+    segmentation fault.  *)
+
+val result_release : result -> unit
+(** Once we're done with the code, this unloads the built [.so] file. This
+    cleans up the result; after calling this, it’s no longer valid to use the
+    result, or any code or globals that were obtained by calling {!get_code} or
+    {!get_global} on it. *)
 
 (** {2 Ahead-of-time compilation}
 

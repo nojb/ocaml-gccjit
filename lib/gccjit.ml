@@ -520,15 +520,16 @@ let compile ctx =
   Gc.finalise gcc_jit_result_release res;
   res
 
-(* We keep a reference to [res] in the returned function to keep it from begin
-   GC'ed prematurely. *)
 let get_code res name fn =
   let p = gcc_jit_result_get_code res name in
-  fun x -> let save = res in Ctypes.(coerce (ptr void) (Foreign.funptr ~name fn) p) x
+  Ctypes.(coerce (ptr void) (Foreign.funptr ~name fn) p)
 
-let get_global res name =
+let get_global res name typ =
   let p = gcc_jit_result_get_global res name in
-  fun typ -> let save = res in Ctypes.(coerce (ptr void) (ptr typ)) p
+  Ctypes.(coerce (ptr void) (ptr typ)) p
+
+let result_release res =
+  gcc_jit_result_release res
 
 let output_kind = function
   | Assembler -> GCC_JIT_OUTPUT_KIND_ASSEMBLER
