@@ -8,7 +8,6 @@ bug-reports: "https://www.github.com/nojb/ocaml-gccjit/issues"
 license: "MIT"
 build: [make]
 build-doc: [make "doc"]
-remove: ["ocamlfind" "remove" "gccjit"]
 depends: [
   "ctypes" {>= "0.4"}
   "ocamlfind" {build}
