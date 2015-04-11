@@ -3,6 +3,9 @@ lib: [
   "_build/lib/gccjit.mli" {"gccjit.mli"}
   "_build/lib/gccjit.cmi" {"gccjit.cmi"}
   "_build/lib/gccjit.cma" {"gccjit.cma"}
+  "_build/lib/gccjit.a" {"gccjit.a"}
+  "_build/lib/gccjit.cmxa" {"gccjit.cmxa"}
+  "_build/lib/libgccjit_stubs.a" {"libgccjit_stubs.a"}
 ]
 stublibs: [
   "_build/lib/dllgccjit_stubs.so" {"dllgccjit_stubs.so"}

@@ -10,6 +10,9 @@ let c_headers tag dir =
 let libgccjit_dir =
   try S [A "-L"; P (Sys.getenv "LIBGCCJIT_DIR")] with Not_found -> N
 
+let ldopt =
+  try S [A "-ccopt"; A "-L"; A"-ccopt"; P (Sys.getenv "LIBGCCJIT_DIR")] with Not_found -> N
+
 let () =
   dispatch begin function
     | Before_options ->
@@ -39,14 +42,12 @@ let () =
         c_headers "use_ctypes" ctypes_lib;
         c_headers "use_ocaml" ocaml_stdlib;
 
-        (* flag [ "c"; "ocamlmklib"; "use_gccjit" ] (S [A "-L/usr/local/lib/gcc/5"]); *)
         flag [ "c"; "ocamlmklib"; "use_gccjit" ] (S [libgccjit_dir; A "-lgccjit"]);
 
         flag [ "ocaml"; "link"; "use_gccjit"; "byte" ] (S [A"-dllib"; A"-lgccjit_stubs"]);
 
-        (* TODO figure out what to do so that ocamlopt can link to the stubs shared (or static) lib,
-           dllgccjit_stubs.so or libgccjit_stubs.a *)
-        (* flag [ "ocaml"; "link"; "use_gccjit"; "library"; "native" ] (S [A"-cclib"; A"-lgccjit_stubs"]); *)
+        flag [ "ocaml"; "link"; "use_gccjit"; "library"; "native" ]
+          (S [ A "-cclib"; A "-lgccjit_stubs"; ldopt; A "-cclib"; A"-lgccjit"]);
 
     | _ ->
         ()

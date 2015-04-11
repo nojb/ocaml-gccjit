@@ -1,7 +1,7 @@
 OCAMLBUILD = ocamlbuild -classic-display
 
 all:
-	$(OCAMLBUILD) lib/gccjit.cma lib/dllgccjit_stubs.so
+	$(OCAMLBUILD) lib/gccjit.cma lib/gccjit.cmxa lib/gccjit.a lib/libgccjit_stubs.a lib/dllgccjit_stubs.so
 
 square:
 	$(OCAMLBUILD) lib_test/square.byte
