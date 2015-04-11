@@ -8,6 +8,4 @@ true: bin_annot
 <lib/libgccjit_stubs.a>: use_gccjit
 <lib/gccjit.*>: use_gccjit
 <lib_test/*>: use_gccjit
-# <lib_test/test.*>: use_gccjit
-# <lib_test/utop.*>: thread, package(utop)
 <lib>: include
