@@ -1,7 +1,7 @@
 OCAMLBUILD = ocamlbuild -classic-display
 LIBGCCJITDIR = /usr/local/lib/gcc/5
 
-all: lib_test/test.native
+square: lib_test/square.native
 
 %.native:
 	$(OCAMLBUILD) -lflags -ccopt,-L$(LIBGCCJITDIR) -tag-line "<$@>: use_gccjit" $@
@@ -27,4 +27,4 @@ gh-pages: doc
 	git -C .gh-pages push origin gh-pages -f
 	rm -rf .gh-pages
 
-.PHONY: all clean doc
+.PHONY: %.native %.byte clean doc

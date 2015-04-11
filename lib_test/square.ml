@@ -1,6 +1,6 @@
-let main () =
-  let open Gccjit in
+open Gccjit
 
+let main () =
   (* Create a compilation context *)
   let ctx = acquire () in
 
@@ -35,7 +35,7 @@ let main () =
   let callable = get_code jit_result "square" Ctypes.(int @-> returning int) in
 
   (* Now try running the code *)
-  Printf.printf "%d\n%!" (callable 5)
+  assert (25 = callable 5)
 
 let _ =
   main ()
