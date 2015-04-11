@@ -12,13 +12,13 @@ let main () =
   (* Adjust this to control optimization level of the generated code *)
   (* set_option ctx Optimization_level 3; *)
 
-  let int_type = get_type ctx Int in
+  let int_type = get_standard_type ctx Int in
 
   (* Create parameter "i" *)
-  let param_i = new_param ctx "i" int_type in
+  let param_i = new_param ctx int_type "i" in
 
   (* Create the function *)
-  let fn = new_function ctx Exported "square" [param_i] int_type in
+  let fn = new_function ctx Exported int_type "square" [ param_i ] in
 
   (* Create a basic block within the function *)
   let block = new_block fn ~name:"entry" () in

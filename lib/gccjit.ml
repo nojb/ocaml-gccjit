@@ -227,7 +227,7 @@ let new_function_ptr_type ?(loc = null_loc) ctx ?(variadic = false) args ret =
        gcc_jit_context_new_function_ptr_type ctx (loc' loc) (typ' ret) (List.length args) (Ctypes.CArray.start a)
        (if variadic then 1 else 0))
 
-let new_param ?(loc = null_loc) ctx name typ =
+let new_param ?(loc = null_loc) ctx typ name =
   `Param (wrap4 "new_param" ctx gcc_jit_context_new_param ctx (loc' loc) (typ' typ) name)
 
 let function_kind = function
@@ -248,7 +248,7 @@ let rvalue' = function
   | `Param param ->
       gcc_jit_param_as_rvalue param
 
-let new_function ?(loc = null_loc) ctx ?(variadic = false) kind name args ret =
+let new_function ?(loc = null_loc) ctx ?(variadic = false) kind ret name args =
   let a = Ctypes.CArray.of_list gcc_jit_param (List.map (function `Param p -> p) args) in
   `Function
     (wrap8 "new_function" ctx gcc_jit_context_new_function
@@ -394,7 +394,7 @@ let compile_to_file ctx kind path =
 
 let compile ctx =
   let res = wrap1 "compile" ctx gcc_jit_context_compile ctx in
-  (* Gc.finalise gcc_jit_result_release res; *)
+  Gc.finalise gcc_jit_result_release res;
   res
 
 let set_fields ?(loc = null_loc) (`Struct struc) fields =
@@ -405,16 +405,15 @@ let set_fields ?(loc = null_loc) (`Struct struc) fields =
   wrap3 "set_fields" ctx gcc_jit_struct_set_fields struc (loc' loc)
     (List.length fields) (Ctypes.CArray.start a)
 
+(* We keep a reference to [res] in the returned function to keep it from begin
+   GC'ed prematurely. *)
 let get_code res name fn =
   let p = gcc_jit_result_get_code res name in
-  (* we keep a reference to [res] in the returned function to keep it from begin
-     GC'ed prematurely. *)
-  (* fun x -> let save = res in Ctypes.(coerce (ptr void) (Foreign.funptr ~name fn) p) x *)
-  Ctypes.(coerce (ptr void) (Foreign.funptr ~name fn) p)
+  fun x -> let save = res in Ctypes.(coerce (ptr void) (Foreign.funptr ~name fn) p) x
 
-let get_global res name typ =
+let get_global res name =
   let p = gcc_jit_result_get_global res name in
-  Ctypes.(coerce (ptr void) (ptr typ)) p
+  fun typ -> let save = res in Ctypes.(coerce (ptr void) (ptr typ)) p
 
 let object' = function
   | `Location loc -> gcc_jit_location_as_object loc
@@ -467,7 +466,7 @@ let type_kind = function
   | Complex_double -> GCC_JIT_TYPE_COMPLEX_DOUBLE
   | Complex_long_double -> GCC_JIT_TYPE_COMPLEX_LONG_DOUBLE
 
-let get_type ctx kind =
+let get_standard_type ctx kind =
   `Type (wrap2 "get_type" ctx gcc_jit_context_get_type ctx (type_kind kind))
 
 let dereference_field ?(loc = null_loc) rval (`Field fld) =
@@ -478,9 +477,9 @@ let dereference ?(loc = null_loc) rval =
   let ctx = gcc_jit_object_get_context (gcc_jit_rvalue_as_object (rvalue' rval)) in
   `Lvalue (wrap2 "dereference" ctx gcc_jit_rvalue_dereference (rvalue' rval) (loc' loc))
 
-let type_of rval =
+let get_type rval =
   let ctx = gcc_jit_object_get_context (gcc_jit_rvalue_as_object (rvalue' rval)) in
-  `Type (wrap1 "type_of" ctx gcc_jit_rvalue_get_type (rvalue' rval)) (* CHECK *)
+  `Type (wrap1 "get_type" ctx gcc_jit_rvalue_get_type (rvalue' rval)) (* CHECK *)
 
 let get_address ?(loc = null_loc) lval =
   let ctx = gcc_jit_object_get_context (gcc_jit_lvalue_as_object (lvalue' lval)) in

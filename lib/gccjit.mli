@@ -295,6 +295,7 @@ type type_kind =
   | Complex_long_double
 
 val acquire : unit -> context
+
 val release : context -> unit
 
 val dump_to_file : context -> ?update_locs:bool -> string -> unit
@@ -321,10 +322,10 @@ val new_union : ?loc:loc -> context -> string -> field list -> typ
 
 val new_function_ptr_type : ?loc:loc -> context -> ?variadic:bool -> typ list -> typ -> typ
 
-val new_param : ?loc:loc -> context -> string -> [< typ] -> param
+val new_param : ?loc:loc -> context -> [< typ] -> string -> param
 (** Create a function param. *)
 
-val new_function : ?loc:loc -> context -> ?variadic:bool -> function_kind -> string -> param list -> [< typ] -> fn
+val new_function : ?loc:loc -> context -> ?variadic:bool -> function_kind -> [< typ] -> string -> param list -> fn
 (** Create a function. *)
 
 val get_builtin_function : context -> string -> fn
@@ -411,7 +412,7 @@ val get_const : [< typ] -> typ
 val get_volatile : [< typ] -> typ
 (** Given type [T], get type [volatile T]. *)
 
-val get_type : context -> type_kind -> typ
+val get_standard_type : context -> type_kind -> typ
 
 val dereference_field : ?loc:loc -> [< rvalue] -> field -> lvalue
 (** Accessing a field of an [rvalue] of pointer type, analogous [(EXPR)->field]
@@ -420,7 +421,7 @@ val dereference_field : ?loc:loc -> [< rvalue] -> field -> lvalue
 val dereference : ?loc:loc -> [< rvalue] -> lvalue
 (** Dereferencing a pointer; analogous to [*(EXPR)] in C. *)
 
-val type_of : rvalue -> typ
+val get_type : rvalue -> typ
 
 val get_address : ?loc:loc -> [< lvalue] -> rvalue
 (** Taking the address of an {!lvalue}; analogous to [&(EXPR)] in C. *)
