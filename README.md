@@ -19,7 +19,7 @@ open Gccjit
 
 let square =
   (* Create a compilation context *)
-  let ctx = acquire () in
+  let ctx = acquire_context () in
 
   let int_type = get_standard_type ctx Int in
 
@@ -52,7 +52,7 @@ We can now call the function by doing simply
 
 ### Installation
 
-```bash
+```
 opam install gccjit
 ```
 
@@ -61,7 +61,7 @@ found by the C compiler using the `-lgccjit` flag.  If the `libgccjit` library
 in your system is a non-standard location, please set the `LIBGCCJIT_DIR`
 environment variable before installing this package, like this:
 
-```bash
+```
 LIBGCCJIT_DIR=<directory where libgccjit lives> opam install gccjit
 ```
 
