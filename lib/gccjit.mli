@@ -41,8 +41,8 @@ type context
 
     Similarly, you can call {!compile_to_file} on a context to compile to disk.
 
-    Eventually you can call {!release} to clean up the context; any in-memory
-    results created from it are still usable. *)
+    Eventually you can call {!release_context} to clean up the context; any
+    in-memory results created from it are still usable. *)
 
 type result
 (** A {!result} encapsulates the result of an in-memory compilation. *)
@@ -214,8 +214,8 @@ type _ context_option =
       running the selftest suite.  *)
 
   | Keep_intermediates : bool context_option
-  (** If [true], {!release} will not clean up intermediate files written to the
-       filesystem, and will display their location on stderr.  *)
+  (** If [true], {!release_context} will not clean up intermediate files written
+       to the filesystem, and will display their location on stderr.  *)
 
 (** Kinds of ahead-of-time compilation, for use with {!compile_to_file}.  *)
 type output_kind =
