@@ -289,14 +289,14 @@ val new_child_context : context -> context
 
 (** {3 Thread-safety}
 
-    Instances of gcc_jit_context * created via gcc_jit_context_acquire() are
-    independent from each other: only one thread may use a given context at once,
-    but multiple threads could each have their own contexts without needing locks.
+    Instances of {!context} created via {!acquire} are independent from each
+    other: only one thread may use a given context at once, but multiple threads
+    could each have their own contexts without needing locks.
 
-    Contexts created via gcc_jit_context_new_child_context() are related to their
-    parent context. They can be partitioned by their ultimate ancestor into
-    independent “family trees”. Only one thread within a process may use a given
-    “family tree” of such contexts at once, and if you’re using multiple threads you
+    Contexts created via {!new_child_context} are related to their parent
+    context. They can be partitioned by their ultimate ancestor into independent
+    "family trees". Only one thread within a process may use a given "family
+    tree" of such contexts at once, and if you’re using multiple threads you
     should provide your own locking around entire such context partitions. *)
 
 
