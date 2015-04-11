@@ -20,14 +20,18 @@
    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
    SOFTWARE. *)
 
+(** Ocaml bindings for [libgccjit].
+
+    See {{:https://gcc.gnu.org/wiki/JIT}GCC wiki page} for more information. *)
+
 exception Error of string * string
 (** This exception is raised if an error occurs.  The first argument is the API
-    function name and the second one has an explanatory string. *)
+    function name and the second one is an explanatory string. *)
 
 type context
-(** A [context] encapsulates the state of a compilation.  You can set up options
-    on it (see {!set_option}), and add types (see {!types}), functions (see
-    {!functions}) and code, using the API below.
+(** A {!context} encapsulates the state of a compilation.  You can set up
+    options on it (see {!set_option}), and add {{!types}types},
+    {{!functions}functions} and {{!code}code}, using the API below.
 
     Invoking {!compile} on it gives you a {!result}, representing in-memory
     machine-code.
@@ -41,14 +45,15 @@ type context
     results created from it are still usable. *)
 
 type result
-(** A [result] encapsulates the result of an in-memory compilation. *)
+(** A {!result} encapsulates the result of an in-memory compilation. *)
 
 type location = [ `Location of Gccjit_bindings.gcc_jit_location ]
-(** A [loc] encapsulates a source code location, so that you can (optionally)
-    associate locations in your languages with statements in the JIT-compiled
-    code, alowing the debugger to single-step through your language.
+(** A {!location} encapsulates a source code location, so that you can
+    (optionally) associate locations in your languages with statements in the
+    JIT-compiled code, alowing the debugger to single-step through your
+    language.
 
-    See {{#locations}} *)
+    See {{!locations}Source locations}. *)
 
 type param = [ `Param of Gccjit_bindings.gcc_jit_param ]
 
@@ -119,12 +124,18 @@ type binary_op =
   | Logical_or
 
 type comparison =
-  | Eq  (** [(EXPR_A) == (EXPR_B).] *)
-  | Ne  (** [(EXPR_A) != (EXPR_B).] *)
-  | Lt  (** [(EXPR_A) < (EXPR_B).] *)
-  | Le  (** [(EXPR_A) <= (EXPR_B).] *)
-  | Gt  (** [(EXPR_A) > (EXPR_B).] *)
-  | Ge  (** [(EXPR_A) >= (EXPR_B).] *)
+  | Eq
+  (** [(EXPR_A) == (EXPR_B).] *)
+  | Ne
+  (** [(EXPR_A) != (EXPR_B).] *)
+  | Lt
+  (** [(EXPR_A) < (EXPR_B).] *)
+  | Le
+  (** [(EXPR_A) <= (EXPR_B).] *)
+  | Gt
+  (** [(EXPR_A) > (EXPR_B).] *)
+  | Ge
+  (** [(EXPR_A) >= (EXPR_B).] *)
 
 (** Kinds of function.  *)
 type function_kind =
@@ -169,7 +180,7 @@ type _ context_option =
       attach a debugger to the process, it will be able to inspect variables and
       step through your code.  Note that you can't step through code unless you
       set up source location information for the code (by creating and passing
-      in {!loc} instances).  *)
+      in {!location} instances).  *)
 
   | Dump_initial_tree : bool context_option
   (** If [true], {!compile} will dump its initial "tree" representation of
@@ -245,9 +256,9 @@ type type_kind =
   | Complex_double
   | Complex_long_double
 
-(** {2 Compilation contexts} *)
+(** {1 Compilation contexts} *)
 
-(** {3 Lifetime-management} *)
+(** {2 Lifetime-management} *)
 
 val acquire : unit -> context
 (** This function acquires a new {!context} instance, which is independent of
@@ -273,8 +284,8 @@ val new_child_context : context -> context
 
     If you use a function from a parent context within a child context, you have
     to compile the parent context before you can compile the child context, and
-    the gcc_jit_result of the parent context must outlive the gcc_jit_result of
-    the child context.
+    the {!result} of the parent context must outlive the {!result} of the
+    child context.
 
     This allows caching of shared initializations. For example, you could create
     types and declarations of global functions in a parent context once within a
@@ -284,10 +295,10 @@ val new_child_context : context -> context
     parent context.
 
     Contexts can be arbitrarily nested, provided the above rules are followed,
-    but it’s probably not worth going above 2 or 3 levels, and there will likely
+    but it's probably not worth going above 2 or 3 levels, and there will likely
     be a performance hit for such nesting. *)
 
-(** {3 Thread-safety}
+(** {2 Thread-safety}
 
     Instances of {!context} created via {!acquire} are independent from each
     other: only one thread may use a given context at once, but multiple threads
@@ -296,24 +307,26 @@ val new_child_context : context -> context
     Contexts created via {!new_child_context} are related to their parent
     context. They can be partitioned by their ultimate ancestor into independent
     "family trees". Only one thread within a process may use a given "family
-    tree" of such contexts at once, and if you’re using multiple threads you
+    tree" of such contexts at once, and if you're using multiple threads you
     should provide your own locking around entire such context partitions. *)
 
 
-(** {3 Debugging} *)
+(** {2 Debugging} *)
 
 val dump_to_file : context -> ?update_locs:bool -> string -> unit
 (** To help with debugging: dump a C-like representation to the given path,
     describing what's been set up on the context.  If [~update_locs] true, then
-    also set up {!loc} information throughout the context, pointing at the dump
-    file as if it were a source file.  This may be of use in conjunction with
-    {!Debuginfo} to allow stepping through the code in a debugger. *)
+    also set up {!location} information throughout the context, pointing at the
+    dump file as if it were a source file.  This may be of use in conjunction
+    with {!Debuginfo} to allow stepping through the code in a debugger. *)
 
 val set_logfile : context -> Unix.file_descr option -> unit
 (** To help with debugging; enable ongoing logging of the context's activity to
     the given file descriptor.
 
-    {[ set_logfile ctx logfile ]}
+    {[
+      set_logfile ctx logfile
+    ]}
 
     Examples of information logged include:
 
@@ -359,21 +372,25 @@ val get_debug_string : [< object_] -> string
 
     For example,
 
-    {[ Printf.printf "obj: %s\n" (get_debug_string obj) ]}
+    {[
+      Printf.printf "obj: %s\n" (get_debug_string obj)
+    ]}
 
     might give this text on [stdout]:
 
-    {[ obj: 4.0 * (float)i ]}
+    {[
+      obj: 4.0 * (float)i
+    ]}
 *)
 
-(** {3 Options} *)
+(** {2 Options} *)
 
 val set_option : context -> 'a context_option -> 'a -> unit
 (** Set an option of the {!context}. *)
 
-(** {2 Types} *)
+(** {1:types Types} *)
 
-(** {3 Standard types} *)
+(** {2 Standard types} *)
 
 val get_standard_type : context -> type_kind -> type_
 (** Access a specific type.  See {!type_kind}. *)
@@ -381,7 +398,7 @@ val get_standard_type : context -> type_kind -> type_
 val get_int_type : context -> ?signed:bool -> int -> type_
 (** Get the integer type of the given size and signedness. *)
 
-(** {3 Pointers, const, and volatile} *)
+(** {2 Pointers, const, and volatile} *)
 
 val get_pointer : [< type_] -> type_
 (** Given type [T], get type [T*] *)
@@ -397,14 +414,16 @@ val new_array_type : ?loc:location -> context -> [< type_] -> int -> type_
 
 val new_function_ptr_type : ?loc:location -> context -> ?variadic:bool -> type_ list -> type_ -> type_
 
-(** {3 Structures and unions}
+(** {2 Structures and unions}
 
     You can model C struct types by creating [struct_] and [field] instances, in
     either order:
 
     - by creating the fields, then the structure. For example, to model:
 
-      {[ struct coord {double x; double y; }; ]}
+      {[
+        struct coord {double x; double y; };
+      ]}
 
       you could call:
 
@@ -417,7 +436,9 @@ val new_function_ptr_type : ?loc:location -> context -> ?variadic:bool -> type_ 
     - by creating the structure, then populating it with fields, typically to
       allow modelling self-referential structs such as:
 
-      {[ struct node { int m_hash; struct node *m_next; }; ]}
+      {[
+        struct node { int m_hash; struct node *m_next; };
+      ]}
 
       like this:
 
@@ -427,8 +448,7 @@ val new_function_ptr_type : ?loc:location -> context -> ?variadic:bool -> type_ 
         let field_hash = new_field ctx int_type "m_hash" in
         let field_next = new_field ctx node_ptr "m_next" in
         set_fields node [ field_hash; field_next ]
-      ]}
-*)
+      ]} *)
 
 val new_field : ?loc:location -> context -> [< type_] -> string -> field
 (** Create a field, with the given type and name. *)
@@ -449,32 +469,33 @@ val set_fields : ?loc:location -> struct_ -> field list -> unit
 val new_union : ?loc:location -> context -> string -> field list -> type_
 (** Unions work similarly to structs. *)
 
-(** {2 Expressions} *)
+(** {1 Expressions} *)
 
-(** {3 Rvalues}
+(** {2:rvalues Rvalues}
 
     A {!rvalue} is an expression that can be computed.
 
     It can be simple, e.g.:
 
-    - an integer value e.g. 0 or 42
-    - a string literal e.g. “Hello world”
-    - a variable e.g. i. These are also lvalues (see below).
+    - an integer value e.g. [0] or [42]
+    - a string literal e.g. ["Hello world"]
+    - a variable e.g. i. These are also {{!lvalues}lvalues} (see below).
 
     or compound e.g.:
 
-    - a unary expression e.g. !cond
-    - a binary expression e.g. (a + b)
-    - a function call e.g. get_distance (&player_ship, &target)
+    - a unary expression e.g. [!cond]
+    - a binary expression e.g. [(a + b)]
+    - a function call e.g. [get_distance (&player_ship, &target)]
     - etc.
 
-    Every rvalue has an associated type, and the API will check to ensure that
-    types match up correctly (otherwise the context will emit an error). *)
+    Every {!rvalue} has an associated {{!type_}type}, and the API will check to
+    ensure that types match up correctly (otherwise the context will emit an
+    error). *)
 
 val get_type : rvalue -> type_
 (** Get the type of this {!rvalue}. *)
 
-(** {3 Simple expressions} *)
+(** {2 Simple expressions} *)
 
 val new_rvalue_from_int : context -> type_ -> int -> rvalue
 (** Given a numeric type (integer or floating point), build an {!rvalue} for the
@@ -484,13 +505,17 @@ val zero : context -> type_ -> rvalue
 (** Given a numeric type (integer or floating point), get the {!rvalue} for
     zero. Essentially this is just a shortcut for:
 
-    {[ new_rvalue_from_int ctx numeric_type 0 }] *)
+    {[
+      new_rvalue_from_int ctx numeric_type 0
+    ]} *)
 
 val one : context -> type_ -> rvalue
 (** Given a numeric type (integer or floating point), get the {!rvalue} for
     one. Essentially this is just a shortcut for:
 
-    {[ new_rvalue_from_int ctx numeric_type 1 ]} *)
+    {[
+      new_rvalue_from_int ctx numeric_type 1
+    ]} *)
 
 val new_rvalue_from_double : context -> type_ -> float -> rvalue
 (** Given a numeric type (integer or floating point), build an {!rvalue} for the
@@ -503,36 +528,38 @@ val null : context -> type_ -> rvalue
 (** Given a pointer type, build an {!rvalue} for [NULL]. Essentially this is
     just a shortcut for:
 
-    {[ new_rvalue_from_ptr ctx pointer_type Ctypes.null }] *)
+    {[
+      new_rvalue_from_ptr ctx pointer_type Ctypes.null
+    ]} *)
 
 val new_string_literal : context -> string -> rvalue
 (** Generate an {!rvalue} for the given [NIL]-terminated string, of type
     [Const_char_ptr]. *)
 
-(** {3 Unary operations} *)
+(** {2 Unary operations} *)
 
 val new_unary_op : ?loc:location -> context -> unary_op -> type_ -> [< rvalue] -> rvalue
 (** Build a unary operation out of an input {!rvalue}.  See {!unary_op}. *)
 
-(** {3 Binary operations} *)
+(** {2 Binary operations} *)
 
 val new_binary_op : ?loc:location -> context -> binary_op -> type_ -> [< rvalue] -> [< rvalue] -> rvalue
 (** Build a binary operation out of two constituent {{!rvalue}rvalues}. See
     {!binary_op}. *)
 
-(** {3 Comparisons} *)
+(** {2 Comparisons} *)
 
 val new_comparison : ?loc:location -> context -> comparison -> [< rvalue] -> [< rvalue] -> rvalue
 (** Build a boolean {!rvalue} out of the comparison of two other
     {{!rvalue}rvalues}. *)
 
-(** {3 Function calls} *)
+(** {2 Function calls} *)
 
 val new_call : ?loc:location -> context -> function_ -> [< rvalue] list -> rvalue
 (** Given a function and the given table of argument rvalues, construct a call
     to the function, with the result as an {!rvalue}.
 
-    {e Note}
+    {3 Note}
 
     [new_call] merely builds a [rvalue] i.e. an expression that can be
     evaluated, perhaps as part of a more complicated expression.  The call won't
@@ -544,33 +571,32 @@ val new_call : ?loc:location -> context -> function_ -> [< rvalue] list -> rvalu
     {[
       (* Add "(void)printf (arg0, arg1);". *)
       add_eval block (new_call ctx printf_func args)
-    ]}
-*)
+    ]} *)
 
 val new_call_through_ptr : ?loc:location -> context -> [< rvalue] -> [< rvalue] list -> rvalue
 (** Call through a function pointer. *)
 
-(** {3 Type-coercion} *)
+(** {2 Type-coercion} *)
 
 val new_cast : ?loc:location -> context -> rvalue -> type_ -> rvalue
 (** Given an {!rvalue} of [T], construct another {!rvalue} of another type.
 
     Currently only a limited set of conversions are possible:
 
-    - [int] <-> [float]
-    - [int] <-> [bool]
-    - [P*] <-> [Q*], for pointer types [P] and [Q] *)
+    - [int <-> float]
+    - [int <-> bool]
+    - [P* <-> Q*], for pointer types [P] and [Q] *)
 
-(** {3 Lvalues}
+(** {2:lvalues Lvalues}
 
-    An lvalue is something that can of the left-hand side of an assignment: a
+    An {!lvalue} is something that can of the left-hand side of an assignment: a
     storage area (such as a variable). It is also usable as an {!rvalue}, where
     the {!rvalue} is computed by reading from the storage area. *)
 
 val get_address : ?loc:location -> [< lvalue] -> rvalue
 (** Taking the address of an {!lvalue}; analogous to [&(EXPR)] in C. *)
 
-(** {3 Global variables} *)
+(** {2 Global variables} *)
 
 val new_global : ?loc:location -> context -> global_kind -> [< type_] -> string -> lvalue
 (** Add a new global variable of the given type and name to the context.
@@ -578,7 +604,7 @@ val new_global : ?loc:location -> context -> global_kind -> [< type_] -> string 
     The {!global_kind} parameter determines the visibility of the {e global}
     outside of the {!result}. *)
 
-(** {3 Working with pointers, structs, and unions} *)
+(** {2 Working with pointers, structs, and unions} *)
 
 val dereference : ?loc:location -> [< rvalue] -> lvalue
 (** Dereferencing a pointer; analogous to [*(EXPR)] in C. *)
@@ -590,12 +616,12 @@ val dereference_field : ?loc:location -> [< rvalue] -> field -> lvalue
 val new_array_access : ?loc:location -> [< rvalue] -> [< rvalue] -> lvalue
 (** Given an rvalue of pointer type [T *], get at the element [T] at the given
     index, using standard C array indexing rules i.e. each increment of index
-    corresponds to [sizeof(T)] bytes. Analogous to {[ PTR[INDEX] }] in C (or,
+    corresponds to [sizeof(T)] bytes. Analogous to [PTR[INDEX]] in C (or,
     indeed, to [PTR + INDEX]). *)
 
-(** {2 Creating and using functions} *)
+(** {1:functions Creating and using functions} *)
 
-(** {3 Params}
+(** {2 Params}
 
     A {!param} represents a parameter to a function. *)
 
@@ -603,7 +629,7 @@ val new_param : ?loc:location -> context -> [< type_] -> string -> param
 (** In preparation for creating a function, create a new parameter of the given
     type and name. *)
 
-(** {3 Functions} *)
+(** {2 Functions} *)
 
 val new_function :
   ?loc:location -> context -> ?variadic:bool -> function_kind -> [< type_] -> string -> param list -> function_
@@ -623,7 +649,7 @@ val dump_to_dot : function_ -> string -> unit
 val new_local : ?loc:location -> function_ -> [< type_] -> string -> lvalue
 (** Add a new local variable within the function, of the given type and name. *)
 
-(** {3 Blocks}
+(** {2 Blocks}
 
     A {!block} represents a basic block within a function i.e. a sequence of
     statements with a single entry point and a single exit point.
@@ -642,19 +668,23 @@ val new_block : function_ -> ?name:string -> unit -> block
 val get_function : block -> function_
 (** Which function is this block within? *)
 
-(** {3 Statements} *)
+(** {2:code Statements} *)
 
 val add_eval : ?loc:location -> block -> [< rvalue] -> unit
 (** Add evaluation of an {!rvalue}, discarding the result (e.g. a function call
     that {e returns} void).  This is equivalent to this C code:
 
-    {[ (void)expression; ]} *)
+    {[
+      (void)expression;
+    ]} *)
 
 val add_assignment : ?loc:location -> block -> [< lvalue] -> rvalue -> unit
 (** Add evaluation of an {!rvalue}, assigning the result to the given {!lvalue}.
     This is roughly equivalent to this C code:
 
-    {[lvalue = rvalue;]} *)
+    {[
+      lvalue = rvalue;
+    ]} *)
 
 val add_assignment_op : ?loc:location -> block -> [< lvalue] -> binary_op -> rvalue -> unit
 (** Add evaluation of an rvalue, using the result to modify an lvalue.  This
@@ -687,27 +717,38 @@ val end_with_conditional : ?loc:location -> block -> [< rvalue] -> block -> bloc
     result to the appropriate successor block.  This is roughly equivalent to
     this C code:
 
-    {[ if (boolval) goto on_true; else goto on_false; ]} *)
+    {[
+      if (boolval)
+        goto on_true;
+      else
+        goto on_false;
+    ]} *)
 
 val end_with_jump : ?loc:location -> block -> block -> unit
 (** Terminate a block by adding a jump to the given target block.  This is
     roughly equivalent to this C code:
 
-    {[ goto target; ]} *)
+    {[
+      goto target;
+    ]} *)
 
 val end_with_return : ?loc:location -> block -> [< rvalue] -> unit
 (** Terminate a block by adding evaluation of an {!rvalue}, returning the
     value.  This is roughly equivalent to this C code:
 
-    {[ return expression; ]} *)
+    {[
+      return expression;
+    ]} *)
 
 val end_with_void_return : ?loc:location -> block -> unit
 (** Terminate a block by adding a valueless return, for use within a function
     with [void] return type.  This is equivalent to this C code:
 
-    {[ return; ]} *)
+    {[
+      return;
+    ]} *)
 
-(** {2 Source Locations}
+(** {1:locations Source Locations}
 
     A {!location} encapsulates a source code location, so that you can (optionally)
     associate locations in your language with statements in the JIT-compiled code,
@@ -721,27 +762,29 @@ val end_with_void_return : ?loc:location -> block -> unit
     You need to enable [Debuginfo] on the {!context} for these locations to
     actually be usable by the debugger:
 
-    {[ set_option ctx Debuginfo true ]}
+    {[
+      set_option ctx Debuginfo true
+    ]}
 
-    {e Faking it}
+    {3 Faking it}
 
     If you don't have source code for your internal representation, but need to
     debug, you can generate a C-like representation of the functions in your
     context using {!dump_to_file}:
 
-    {[ dump_to_file ctx ~update_locs:true "/tmp/something.c" ]}
+    {[
+      dump_to_file ctx ~update_locs:true "/tmp/something.c"
+    ]}
 
     This will dump C-like code to the given path. If the update_locations
     argument is true, this will also set up {!location} information throughout
     the context, pointing at the dump file as if it were a source file, giving
-    you something you can step through in the debugger.
-*)
+    you something you can step through in the debugger. *)
 
 val new_location : context -> string -> int -> int -> location
-(** Create a gcc_jit_location instance representing the given source
-    location. *)
+(** Create a {!location} instance representing the given source location. *)
 
-(** {2 Compiling a context}
+(** {1 Compiling a context}
 
     Once populated, a {!context} can be compiled to machine code, either
     in-memory via {!compile} or to disk via {!compile_to_file}.
@@ -749,6 +792,8 @@ val new_location : context -> string -> int -> int -> location
     You can compile a context multiple times (using either form of compilation),
     although any errors that occur on the context will prevent any future
     compilation of that context. *)
+
+(** {2 In-memory compilation} *)
 
 val compile : context -> result
 (** This calls into GCC and builds the code, returning a {!result}. *)
@@ -760,7 +805,9 @@ val get_code : result -> string -> ('a -> 'b) Ctypes.fn -> 'a -> 'b
     matching funcname must have been created on result's context (or a parent
     context) via a call to {!new_function} with kind [Exported]:
 
-    {[ new_function ctx Exported any_return_type funcname (* etc. *) ]}
+    {[
+      new_function ctx Exported any_return_type funcname (* etc. *)
+    ]}
 
     If such a function is not found, an error will be raised.
 
@@ -781,16 +828,20 @@ val get_global : result -> string -> 'a Ctypes.typ -> 'a Ctypes.ptr
 
     For example, given an [int foo;] created this way:
 
-    {[ let exported_global = new_global ctx Global_exported int_type "foo" ]}
+    {[
+      let exported_global = new_global ctx Global_exported int_type "foo"
+    ]}
 
     we can access it like this:
 
-    {[ let ptr_to_foo = get_global result "foo" Ctypes.int ]}
+    {[
+      let ptr_to_foo = get_global result "foo" Ctypes.int
+    ]}
 
     If such a global is not found, an error will be raised.
 *)
 
-(** {3 Ahead-of-time compilation}
+(** {2 Ahead-of-time compilation}
 
     Although [libgccjit] is primarily aimed at just-in-time compilation, it can
     also be used for implementing more traditional ahead-of-time compilers, via
