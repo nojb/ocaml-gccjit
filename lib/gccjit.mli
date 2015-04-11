@@ -43,9 +43,7 @@ type context
 type result
 (** A [result] encapsulates the result of an in-memory compilation. *)
 
-type loc'
-
-type loc = [ `Location of loc' ]
+type location = [ `Location of Gccjit_bindings.gcc_jit_location ]
 (** A [loc] encapsulates a source code location, so that you can (optionally)
     associate locations in your languages with statements in the JIT-compiled
     code, alowing the debugger to single-step through your language.
@@ -74,49 +72,33 @@ type loc = [ `Location of loc' ]
     context, pointing at the dump file as if it were a source file, giving you
     something you can step through in the debugger. *)
 
-type param'
+type param = [ `Param of Gccjit_bindings.gcc_jit_param ]
 
-type lvalue'
-
-type rvalue'
-
-type lvalue = [ `Lvalue of lvalue' | `Param of param' ]
+type lvalue = [ `Lvalue of Gccjit_bindings.gcc_jit_lvalue | param ]
 (** A [lvalue] is a storage location within your code (e.g. a variable, a
     parameter, etc).  It is also a [rvalue]. *)
 
-type rvalue = [ `Lvalue of lvalue' | `Rvalue of rvalue' | `Param of param' ]
+type rvalue = [ `Rvalue of Gccjit_bindings.gcc_jit_rvalue | lvalue ]
 (** A [rvalue] is an expression within your code, with some type. *)
 
-type field'
-
-type field = [ `Field of field' ]
+type field = [ `Field of Gccjit_bindings.gcc_jit_field ]
 (** A [field] encapsulates a field within a struct; it is used when creating a
     struct type (using {!new_struct_type}).  Fields cannot be shared between
     structs. *)
 
-type structure'
-
-type typ'
-
-type typ = [ `Struct of structure' | `Type of typ' ]
-(** A [typ] encapsulates a type e.g. [int] or a [struct foo*]. *)
-
-type structure = [ `Struct of structure' ]
+type struct_ = [ `Struct of Gccjit_bindings.gcc_jit_struct ]
 (** A [structure] encapsulates a struct type, either one that we have the layout
     for, or an opaque type. *)
 
-type param = [ `Param of param' ]
+type type_ = [ `Type of Gccjit_bindings.gcc_jit_type | struct_ ]
+(** A [typ] encapsulates a type e.g. [int] or a [struct foo*]. *)
 
-type fn'
-
-type fn = [ `Function of fn' ]
-(** A [fn] encapsulates a function: either one that you're creating yourself, or
+type function_ = [ `Function of Gccjit_bindings.gcc_jit_function ]
+(** A [function_] encapsulates a function: either one that you're creating yourself, or
     a reference to one that you're dynamically linking to within the ret of the
     process. *)
 
-type block'
-
-type block = [ `Block of block' ]
+type block = [ `Block of Gccjit_bindings.gcc_jit_block ]
 (** A [block] encapsulates a {e basic block} of statements within a function
     (i.e. with one entry point and one exit point).
 
@@ -133,16 +115,13 @@ type block = [ `Block of block' ]
     It's OK to have more than one {e return} from a function (i.e., multiple
     blocks that terminate by returning. *)
 
-type obj =
-  [ `Location of loc'
-  | `Type of typ'
-  | `Struct of structure'
-  | `Field of field'
-  | `Function of fn'
-  | `Block of block'
-  | `Rvalue of rvalue'
-  | `Lvalue of lvalue'
-  | `Param of param' ]
+type object_ =
+  [ location
+  | type_
+  | field
+  | function_
+  | block
+  | rvalue ]
 
 type unary_op =
   | Negate
@@ -305,71 +284,73 @@ val dump_to_file : context -> ?update_locs:bool -> string -> unit
     file as if it were a source file.  This may be of use in conjunction with
     {!Debuginfo} to allow stepping through the code in a debugger. *)
 
-val new_location : context -> string -> int -> int -> loc
-val new_global : ?loc:loc -> context -> [< typ] -> string -> lvalue
+val new_location : context -> string -> int -> int -> location
 
-val new_array_type : ?loc:loc -> context -> [< typ] -> int -> typ
+val new_global : ?loc:location -> context -> [< type_] -> string -> lvalue
+
+val new_array_type : ?loc:location -> context -> [< type_] -> int -> type_
 (** Given type [T], get type [T[N]] (for a constant [N]). *)
 
-val new_field : ?loc:loc -> context -> [< typ] -> string -> field
+val new_field : ?loc:location -> context -> [< type_] -> string -> field
 (** Create a field, for use within a struct or union. *)
 
-val new_struct : ?loc:loc -> context -> string -> field list -> structure
+val new_struct : ?loc:location -> context -> string -> field list -> struct_
 (** Create a struct type from an list of fields. *)
 
-val new_union : ?loc:loc -> context -> string -> field list -> typ
+val new_union : ?loc:location -> context -> string -> field list -> type_
 (** Unions work similarly to structs. *)
 
-val new_function_ptr_type : ?loc:loc -> context -> ?variadic:bool -> typ list -> typ -> typ
+val new_function_ptr_type : ?loc:location -> context -> ?variadic:bool -> type_ list -> type_ -> type_
 
-val new_param : ?loc:loc -> context -> [< typ] -> string -> param
+val new_param : ?loc:location -> context -> [< type_] -> string -> param
 (** Create a function param. *)
 
-val new_function : ?loc:loc -> context -> ?variadic:bool -> function_kind -> [< typ] -> string -> param list -> fn
+val new_function :
+  ?loc:location -> context -> ?variadic:bool -> function_kind -> [< type_] -> string -> param list -> function_
 (** Create a function. *)
 
-val get_builtin_function : context -> string -> fn
+val get_builtin_function : context -> string -> function_
 (** Create a reference to a builtin function (sometimes called intrinsic
     functions). *)
 
-val zero : context -> typ -> rvalue
+val zero : context -> type_ -> rvalue
 
-val one : context -> typ -> rvalue
+val one : context -> type_ -> rvalue
 
-val new_rvalue_from_double : context -> typ -> float -> rvalue
+val new_rvalue_from_double : context -> type_ -> float -> rvalue
 
-val new_rvalue_from_int : context -> typ -> int -> rvalue
+val new_rvalue_from_int : context -> type_ -> int -> rvalue
 
-val new_rvalue_from_ptr : context -> typ -> 'a Ctypes.ptr -> rvalue
+val new_rvalue_from_ptr : context -> type_ -> 'a Ctypes.ptr -> rvalue
 (** Pointers. *)
 
-val null : context -> typ -> rvalue
+val null : context -> type_ -> rvalue
 
 val new_string_literal : context -> string -> rvalue
 (** String literals. *)
 
-val new_unary_op : ?loc:loc -> context -> unary_op -> typ -> [< rvalue] -> rvalue
+val new_unary_op : ?loc:location -> context -> unary_op -> type_ -> [< rvalue] -> rvalue
 
-val new_binary_op : ?loc:loc -> context -> binary_op -> typ -> [< rvalue] -> [< rvalue] -> rvalue
+val new_binary_op : ?loc:location -> context -> binary_op -> type_ -> [< rvalue] -> [< rvalue] -> rvalue
 
-val new_comparison : ?loc:loc -> context -> comparison -> [< rvalue] -> [< rvalue] -> rvalue
+val new_comparison : ?loc:location -> context -> comparison -> [< rvalue] -> [< rvalue] -> rvalue
 
 val new_child_context : context -> context
 
-val new_cast : ?loc:loc -> context -> rvalue -> typ -> rvalue
+val new_cast : ?loc:location -> context -> rvalue -> type_ -> rvalue
 (** Type-coercion.  Currently only a limited set of conversions are possible:
     - int <-> float
     - int <-> bool *)
 
-val new_array_access : ?loc:loc -> [< rvalue] -> [< rvalue] -> lvalue
+val new_array_access : ?loc:location -> [< rvalue] -> [< rvalue] -> lvalue
 
-val new_call : ?loc:loc -> context -> fn -> [< rvalue] list -> rvalue
+val new_call : ?loc:location -> context -> function_ -> [< rvalue] list -> rvalue
 (** Call of a specific function. *)
 
-val new_call_through_ptr : ?loc:loc -> context -> [< rvalue] -> [< rvalue] list -> rvalue
+val new_call_through_ptr : ?loc:location -> context -> [< rvalue] -> [< rvalue] list -> rvalue
 (** Call through a function pointer. *)
 
-val get_int_type : context -> ?signed:bool -> int -> typ
+val get_int_type : context -> ?signed:bool -> int -> type_
 (** Get the integer type of the given size and signedness. *)
 
 val dump_reproducer_to_file : context -> string -> unit
@@ -388,7 +369,7 @@ val compile_to_file : context -> output_kind -> string -> unit
 
 val compile : context -> result
 
-val set_fields : ?loc:loc -> structure -> field list -> unit
+val set_fields : ?loc:location -> struct_ -> field list -> unit
 
 val get_code : result -> string -> ('a -> 'b) Ctypes.fn -> 'a -> 'b
 (** Locate a given function within the built machine code.  The Ctypes
@@ -400,57 +381,57 @@ val get_global : result -> string -> 'a Ctypes.typ -> 'a Ctypes.ptr
     created using {!Exported}.  This is a ptr to the global, so e.g. for an
     [int] this is an [int *]. *)
 
-val get_debug_string : [< obj] -> string
+val get_debug_string : [< object_] -> string
 (** Get a human-readable description of this object. *)
 
-val get_pointer : [< typ] -> typ
+val get_pointer : [< type_] -> type_
 (** Given type [T], get type [T*] *)
 
-val get_const : [< typ] -> typ
+val get_const : [< type_] -> type_
 (** Given type [T], get type [const T]. *)
 
-val get_volatile : [< typ] -> typ
+val get_volatile : [< type_] -> type_
 (** Given type [T], get type [volatile T]. *)
 
-val get_standard_type : context -> type_kind -> typ
+val get_standard_type : context -> type_kind -> type_
 
-val dereference_field : ?loc:loc -> [< rvalue] -> field -> lvalue
+val dereference_field : ?loc:location -> [< rvalue] -> field -> lvalue
 (** Accessing a field of an [rvalue] of pointer type, analogous [(EXPR)->field]
     in C, itself equivalent to [(\*EXPR).FIELD] *)
 
-val dereference : ?loc:loc -> [< rvalue] -> lvalue
+val dereference : ?loc:location -> [< rvalue] -> lvalue
 (** Dereferencing a pointer; analogous to [*(EXPR)] in C. *)
 
-val get_type : rvalue -> typ
+val get_type : rvalue -> type_
 
-val get_address : ?loc:loc -> [< lvalue] -> rvalue
+val get_address : ?loc:location -> [< lvalue] -> rvalue
 (** Taking the address of an {!lvalue}; analogous to [&(EXPR)] in C. *)
 
-val new_local : ?loc:loc -> fn -> [< typ] -> string -> lvalue
+val new_local : ?loc:location -> function_ -> [< type_] -> string -> lvalue
 (** Add a new local variable to the function. *)
 
-val new_block : fn -> ?name:string -> unit -> block
+val new_block : function_ -> ?name:string -> unit -> block
 (** Create a block.  You can give it a meaningful name, which may show up in
     dumps of the internal representation, and in error messages. *)
 
-val get_param : fn -> int -> param
+val get_param : function_ -> int -> param
 (** Get a specific param of a function by index. *)
 
-val dump_to_dot : fn -> string -> unit
+val dump_to_dot : function_ -> string -> unit
 (** Emit the function in graphviz format. *)
 
-val add_eval : ?loc:loc -> block -> [< rvalue] -> unit
+val add_eval : ?loc:location -> block -> [< rvalue] -> unit
 (** Add evaluation of an {!rvalue}, discarding the result (e.g. a function call
     that {e returns} void).  This is equivalent to this C code:
 
     {[ (void)expression; ]} *)
 
-val add_assignment : ?loc:loc -> block -> [< lvalue] -> rvalue -> unit
+val add_assignment : ?loc:location -> block -> [< lvalue] -> rvalue -> unit
 (** Add evaluation of an {!rvalue}, assigning the result to the given {!lvalue}.
     This is roughly equivalent to this C code:
 {[lvalue = rvalue;]} *)
 
-val add_assignment_op : ?loc:loc -> block -> [< lvalue] -> binary_op -> rvalue -> unit
+val add_assignment_op : ?loc:location -> block -> [< lvalue] -> binary_op -> rvalue -> unit
 (** Add evaluation of an rvalue, using the result to modify an lvalue.  This
     is analogous to ["+="] and friends:
 
@@ -462,37 +443,37 @@ val add_assignment_op : ?loc:loc -> block -> [< lvalue] -> binary_op -> rvalue -
     ]}
 *)
 
-val add_comment : ?loc:loc -> block -> string -> unit
+val add_comment : ?loc:location -> block -> string -> unit
 (** Add a no-op textual comment to the internal representation of the code.
     It will be optimized away, but will be visible in the dumps seen via
     {!Dump_initial_tree} and {!Dump_initial_gimple} and thus may be of use when
     debugging how your project's internal representation gets converted to the
     [libgccjit] IR.  *)
 
-val end_with_conditional : ?loc:loc -> block -> [< rvalue] -> block -> block -> unit
+val end_with_conditional : ?loc:location -> block -> [< rvalue] -> block -> block -> unit
 (** Terminate a block by adding evaluation of an rvalue, branching on the
     result to the appropriate successor block.  This is roughly equivalent to
     this C code:
 
     {[ if (boolval) goto on_true; else goto on_false; ]} *)
 
-val end_with_jump : ?loc:loc -> block -> block -> unit
+val end_with_jump : ?loc:location -> block -> block -> unit
 (** Terminate a block by adding a jump to the given target block.  This is
     roughly equivalent to this C code:
 
     {[ goto target; ]} *)
 
-val end_with_return : ?loc:loc -> block -> [< rvalue] -> unit
+val end_with_return : ?loc:location -> block -> [< rvalue] -> unit
 (** Terminate a block by adding evaluation of an {!rvalue}, returning the
     value.  This is roughly equivalent to this C code:
 
     {[ return expression; ]} *)
 
-val end_with_void_return : ?loc:loc -> block -> unit
+val end_with_void_return : ?loc:location -> block -> unit
 (** Terminate a block by adding a valueless return, for use within a function
     with [void] return type.  This is equivalent to this C code:
 
     {[ return; ]} *)
 
-val get_function : block -> fn
+val get_function : block -> function_
 (** Which function is this block within? *)

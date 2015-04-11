@@ -27,36 +27,18 @@ module B = Gccjit_bindings.Bindings (Gccjit_types_generated) (Gccjit_stubs_gener
 open Gccjit_bindings
 open B
 
-type context = gcc_jit_context Ctypes.structure Ctypes.ptr
-type result = gcc_jit_result Ctypes.structure Ctypes.ptr
-type loc' = gcc_jit_location Ctypes.structure Ctypes.ptr
-type loc = [ `Location of loc' ]
-type param' = gcc_jit_param Ctypes.structure Ctypes.ptr
-type lvalue' = gcc_jit_lvalue Ctypes.structure Ctypes.ptr
-type rvalue' = gcc_jit_rvalue Ctypes.structure Ctypes.ptr
-type lvalue = [ `Lvalue of lvalue' | `Param of param' ]
-type rvalue = [ `Lvalue of lvalue' | `Rvalue of rvalue' | `Param of param' ]
-type field' = gcc_jit_field Ctypes.structure Ctypes.ptr
-type field = [ `Field of field' ]
-type typ' = gcc_jit_type Ctypes.structure Ctypes.ptr
-type structure' = gcc_jit_struct Ctypes.structure Ctypes.ptr
-type typ = [ `Struct of structure' | `Type of typ' ]
-type structure = [ `Struct of structure' ]
-type param = [ `Param of param' ]
-type fn' = gcc_jit_function Ctypes.structure Ctypes.ptr
-type fn = [ `Function of fn' ]
-type block' = gcc_jit_block Ctypes.structure Ctypes.ptr
-type block = [ `Block of block' ]
-type obj =
-  [ `Location of loc'
-  | `Type of typ'
-  | `Struct of structure'
-  | `Field of field'
-  | `Function of fn'
-  | `Block of block'
-  | `Rvalue of rvalue'
-  | `Lvalue of lvalue'
-  | `Param of param' ]
+type context = gcc_jit_context
+type result = gcc_jit_result
+type location = [ `Location of gcc_jit_location ]
+type param = [ `Param of gcc_jit_param ]
+type lvalue = [ `Lvalue of gcc_jit_lvalue | param ]
+type rvalue = [ `Rvalue of gcc_jit_rvalue | lvalue ]
+type field = [ `Field of gcc_jit_field ]
+type struct_ = [ `Struct of gcc_jit_struct ]
+type type_ = [ `Type of gcc_jit_type | struct_ ]
+type function_ = [ `Function of gcc_jit_function ]
+type block = [ `Block of gcc_jit_block ]
+type object_ = [ location | type_ | field | function_ | block | rvalue ]
 
 let null_loc = `Location (Ctypes.(coerce (ptr void) gcc_jit_location null))
 
@@ -258,7 +240,7 @@ let new_function ?(loc = null_loc) ctx ?(variadic = false) kind ret name args =
 let get_builtin_function ctx name =
   `Function (wrap2 "new_builtin_function" ctx gcc_jit_context_get_builtin_function ctx name)
 
-let zero ctx typ =
+let zero (ctx : context) (typ : type_) : rvalue =
   `Rvalue (wrap2 "zero" ctx gcc_jit_context_zero ctx (typ' typ))
 
 let one ctx typ =

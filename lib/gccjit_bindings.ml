@@ -22,18 +22,18 @@
 
 open Ctypes
 
-type gcc_jit_context
-type gcc_jit_result
-type gcc_jit_object
-type gcc_jit_location
-type gcc_jit_type
-type gcc_jit_field
-type gcc_jit_struct
-type gcc_jit_param
-type gcc_jit_lvalue
-type gcc_jit_rvalue
-type gcc_jit_function
-type gcc_jit_block
+type gcc_jit_context_t
+type gcc_jit_result_t
+type gcc_jit_object_t
+type gcc_jit_location_t
+type gcc_jit_type_t
+type gcc_jit_field_t
+type gcc_jit_struct_t
+type gcc_jit_param_t
+type gcc_jit_lvalue_t
+type gcc_jit_rvalue_t
+type gcc_jit_function_t
+type gcc_jit_block_t
 
 type gcc_jit_str_option =
   | GCC_JIT_STR_OPTION_PROGNAME
@@ -121,18 +121,31 @@ type gcc_jit_comparison =
   | GCC_JIT_COMPARISON_GT
   | GCC_JIT_COMPARISON_GE
 
-let gcc_jit_context : gcc_jit_context structure ptr typ = ptr (structure "gcc_jit_context")
-let gcc_jit_result : gcc_jit_result structure ptr typ = ptr (structure "gcc_jit_result")
-let gcc_jit_object : gcc_jit_object structure ptr typ = ptr (structure "gcc_jit_object")
-let gcc_jit_location : gcc_jit_location structure ptr typ = ptr (structure "gcc_jit_location")
-let gcc_jit_type : gcc_jit_type structure ptr typ = ptr (structure "gcc_jit_type")
-let gcc_jit_field : gcc_jit_field structure ptr typ = ptr (structure "gcc_jit_field")
-let gcc_jit_struct : gcc_jit_struct structure ptr typ = ptr (structure "gcc_jit_struct")
-let gcc_jit_param : gcc_jit_param structure ptr typ = ptr (structure "gcc_jit_param")
-let gcc_jit_lvalue : gcc_jit_lvalue structure ptr typ = ptr (structure "gcc_jit_lvalue")
-let gcc_jit_rvalue : gcc_jit_rvalue structure ptr typ = ptr (structure "gcc_jit_rvalue")
-let gcc_jit_function : gcc_jit_function structure ptr typ = ptr (structure "gcc_jit_function")
-let gcc_jit_block : gcc_jit_block structure ptr typ = ptr (structure "gcc_jit_block")
+type gcc_jit_context = gcc_jit_context_t structure ptr
+type gcc_jit_result = gcc_jit_result_t structure ptr
+type gcc_jit_object = gcc_jit_object_t structure ptr
+type gcc_jit_location = gcc_jit_location_t structure ptr
+type gcc_jit_type = gcc_jit_type_t structure ptr
+type gcc_jit_field = gcc_jit_field_t structure ptr
+type gcc_jit_struct = gcc_jit_struct_t structure ptr
+type gcc_jit_param = gcc_jit_param_t structure ptr
+type gcc_jit_lvalue = gcc_jit_lvalue_t structure ptr
+type gcc_jit_rvalue = gcc_jit_rvalue_t structure ptr
+type gcc_jit_function = gcc_jit_function_t structure ptr
+type gcc_jit_block = gcc_jit_block_t structure ptr
+
+let gcc_jit_context : gcc_jit_context typ = ptr (structure "gcc_jit_context")
+let gcc_jit_result : gcc_jit_result typ = ptr (structure "gcc_jit_result")
+let gcc_jit_object : gcc_jit_object typ = ptr (structure "gcc_jit_object")
+let gcc_jit_location : gcc_jit_location typ = ptr (structure "gcc_jit_location")
+let gcc_jit_type : gcc_jit_type typ = ptr (structure "gcc_jit_type")
+let gcc_jit_field : gcc_jit_field typ = ptr (structure "gcc_jit_field")
+let gcc_jit_struct : gcc_jit_struct typ = ptr (structure "gcc_jit_struct")
+let gcc_jit_param : gcc_jit_param typ = ptr (structure "gcc_jit_param")
+let gcc_jit_lvalue : gcc_jit_lvalue typ = ptr (structure "gcc_jit_lvalue")
+let gcc_jit_rvalue : gcc_jit_rvalue typ = ptr (structure "gcc_jit_rvalue")
+let gcc_jit_function : gcc_jit_function typ = ptr (structure "gcc_jit_function")
+let gcc_jit_block : gcc_jit_block typ = ptr (structure "gcc_jit_block")
 
 module Enums (T : Cstubs_structs.TYPE) = struct
 
