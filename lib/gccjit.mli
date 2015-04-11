@@ -838,8 +838,7 @@ val get_global : result -> string -> 'a Ctypes.typ -> 'a Ctypes.ptr
       let ptr_to_foo = get_global result "foo" Ctypes.int
     ]}
 
-    If such a global is not found, an error will be raised.
-*)
+    If such a global is not found, an error will be raised. *)
 
 (** {2 Ahead-of-time compilation}
 
