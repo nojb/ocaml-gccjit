@@ -1,5 +1,7 @@
 `ocaml-gccjit` is a OCaml library that provides bidings for
-[`libgccjit`](https://gcc.gnu.org/wiki/JIT), the new JIT compiler in GCC5.
+[`libgccjit`](https://gcc.gnu.org/wiki/JIT).  `libgccjit` is an embeddable
+shared library included in GCC 5 for adding compilation to existing programs
+using GCC as the backend.
 
 For example, consider this C function:
 
@@ -45,7 +47,22 @@ let square =
 We can now call the function by doing simply
 ```ocaml
   (* Now try running the code *)
-  Printf.printf "square(5) = %d\n%!" square 5
+  Printf.printf "square(5) = %d\n%!" (square 5)
+```
+
+### Installation
+
+```bash
+opam install gccjit
+```
+
+In order for compilation to be successful the library `libgccjit` needs to be
+found by the C compiler using the `-lgccjit` flag.  If the `libgccjit` library
+in your system is a non-standard location, please set the `LIBGCCJIT_DIR`
+environment variable before installing this package, like this:
+
+```bash
+LIBGCCJIT_DIR=<directory where libgccjit lives> opam install gccjit
 ```
 
 ### Links
