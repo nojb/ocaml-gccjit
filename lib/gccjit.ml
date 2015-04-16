@@ -427,6 +427,9 @@ module RV = struct
 
   let cast ?(loc = null_loc) ctx rval typ =
     `Rvalue (wrap4 "RV.cast" ctx gcc_jit_context_new_cast ctx (loc' loc) (rvalue' rval) (typ' typ))
+
+  let param param =
+    (param :> rvalue)
 end
 
 module LV = struct
@@ -452,6 +455,9 @@ module LV = struct
     `Lvalue
       (wrap3 "LV.array_access" ctx gcc_jit_context_new_array_access ctx (loc' loc)
          (rvalue' rval1) (rvalue' rval2))
+
+  let param param =
+    (param :> lvalue)
 end
 
 let new_param ?(loc = null_loc) ctx typ name =

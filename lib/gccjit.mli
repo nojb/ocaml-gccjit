@@ -590,6 +590,8 @@ module RV : sig
       - [int <-> float]
       - [int <-> bool]
       - [P* <-> Q*], for pointer types [P] and [Q] *)
+
+  val param : param -> rvalue
 end
 
 module LV : sig
@@ -624,6 +626,8 @@ module LV : sig
       index, using standard C array indexing rules i.e. each increment of index
       corresponds to [sizeof(T)] bytes. Analogous to [PTR[INDEX]] in C (or,
       indeed, to [PTR + INDEX]). *)
+
+  val param : param -> lvalue
 end
 
 (** {1:functions Creating and using functions} *)
