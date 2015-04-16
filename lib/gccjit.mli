@@ -99,12 +99,12 @@ type block
     blocks that terminate by returning. *)
 
 type unary_op =
-  | Negate
+    Negate
   | Bitwise_negate
   | Logical_negate
 
 type binary_op =
-  | Plus
+    Plus
   | Minus
   | Mult
   | Divide
@@ -116,7 +116,7 @@ type binary_op =
   | Logical_or
 
 type comparison =
-  | Eq
+    Eq
   (** [(EXPR_A) == (EXPR_B).] *)
   | Ne
   (** [(EXPR_A) != (EXPR_B).] *)
@@ -131,19 +131,19 @@ type comparison =
 
 (** Kinds of function.  *)
 type function_kind =
-  | Exported
+    FUNCTION_Exported
   (** Function is defined by the client code and visible by name outside of the
       JIT. *)
 
-  | Internal
+  | FUNCTION_Internal
   (** Function is defined by the client code, but is invisible outside of the
       JIT.  Analogous to a ["static"] function. *)
 
-  | Imported
+  | FUNCTION_Imported
   (** Function is not defined by the client code; we're merely referring to it.
        Analogous to using an ["extern"] function from a header file. *)
 
-  | Always_inline
+  | FUNCTION_Always_inline
   (** Function is only ever inlined into other functions, and is invisible
       outside of the JIT.  Analogous to prefixing with ["inline"] and adding
       [__attribute__((always_inline))].  Inlining will only occur when the
@@ -151,102 +151,102 @@ type function_kind =
       essentially the same as {!Internal}. *)
 
 type global_kind =
-  | Global_exported
-  | Global_internal
-  | Global_imported
+    GLOBAL_Exported
+  | GLOBAL_Internal
+  | GLOBAL_Imported
 
 (** Context options.  Set with {!set_option}. *)
 type _ context_option =
-  | Progname : string context_option
+    OPTION_Progname : string context_option
   (** The name of the program, for used as a prefix when printing error messages
       to stderr.  If not set, ["libgccjit.so"] is used. *)
 
-  | Optimization_level : int context_option
+  | OPTION_Optimization_level : int context_option
   (** How much to optimize the code.  Valid values are [0-3], corresponding to
       GCC's command-line options -O0 through -O3.
 
       The default value is 0 (unoptimized). *)
 
-  | Debuginfo : bool context_option
+  | OPTION_Debuginfo : bool context_option
   (** If [true], {!compile} will attempt to do the right thing so that if you
       attach a debugger to the process, it will be able to inspect variables and
       step through your code.  Note that you can't step through code unless you
       set up source location information for the code (by creating and passing
       in {!location} instances).  *)
 
-  | Dump_initial_tree : bool context_option
+  | OPTION_Dump_initial_tree : bool context_option
   (** If [true], {!compile} will dump its initial "tree" representation of
       your code to [stderr] (before any optimizations).  *)
 
-  | Dump_initial_gimple : bool context_option
+  | OPTION_Dump_initial_gimple : bool context_option
   (** If [true], {!compile} will dump the "gimple" representation of your
       code to stderr, before any optimizations are performed.  The dump resembles
       C code.  *)
 
-  | Dump_generated_code : bool context_option
+  | OPTION_Dump_generated_code : bool context_option
   (** If [true], {!compile} will dump the final generated code to stderr,
       in the form of assembly language.  *)
 
-  | Dump_summary : bool context_option
+  | OPTION_Dump_summary : bool context_option
   (** If [true], {!compile} will print information to stderr on the
       actions it is performing, followed by a profile showing the time taken and
       memory usage of each phase. *)
 
-  | Dump_everything : bool context_option
+  | OPTION_Dump_everything : bool context_option
   (** If [true], {!compile} will dump copious amount of information on
       what it's doing to various files within a temporary directory.  Use
       {!Keep_intermediates} (see below) to see the results.  The files are
       intended to be human-readable, but the exact files and their formats are
       subject to change. *)
 
-  | Selfcheck_gc : bool context_option
+  | OPTION_Selfcheck_gc : bool context_option
   (** If [true], [libgccjit] will aggressively run its garbage collector,
       to shake out bugs (greatly slowing down the compile).  This is likely to
       only be of interest to developers *of* the library.  It is used when
       running the selftest suite.  *)
 
-  | Keep_intermediates : bool context_option
+  | OPTION_Keep_intermediates : bool context_option
   (** If [true], {!release_context} will not clean up intermediate files written
        to the filesystem, and will display their location on stderr.  *)
 
 (** Kinds of ahead-of-time compilation, for use with {!compile_to_file}.  *)
 type output_kind =
-  | Assembler
+    OUTPUT_Assembler
   (** Compile the context to an assembler file. *)
 
-  | Object_file
+  | OUTPUT_Object_file
   (** Compile the context to an object file. *)
 
-  | Dynamic_library
+  | OUTPUT_Dynamic_library
   (** Compile the context to a dynamic library. *)
 
-  | Executable
+  | OUTPUT_Executable
   (** Compile the context to an executable. *)
 
 type type_kind =
-  | Void
-  | Void_ptr
-  | Bool
-  | Char
-  | Signed_char
-  | Unsigned_char
-  | Short
-  | Unsigned_short
-  | Int
-  | Unsigned_int
-  | Long
-  | Unsigned_long
-  | Long_long
-  | Unsigned_long_long
-  | Float
-  | Double
-  | Long_double
-  | Const_char_ptr
-  | Size_t
-  | File_ptr
-  | Complex_float
-  | Complex_double
-  | Complex_long_double
+    TYPE_Void
+  | TYPE_Void_ptr
+  | TYPE_Bool
+  | TYPE_Char
+  | TYPE_Signed_char
+  | TYPE_Unsigned_char
+  | TYPE_Short
+  | TYPE_Unsigned_short
+  | TYPE_Int
+  | TYPE_Unsigned_int
+  | TYPE_Long
+  | TYPE_Unsigned_long
+  | TYPE_Long_long
+  | TYPE_Unsigned_long_long
+  | TYPE_Float
+  | TYPE_Double
+  | TYPE_Long_double
+  | TYPE_Const_char_ptr
+  | TYPE_Size_t
+  | TYPE_File_ptr
+  | TYPE_Complex_float
+  | TYPE_Complex_double
+  | TYPE_Complex_long_double
 
 module Context : sig
   (** {1 Compilation contexts} *)

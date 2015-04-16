@@ -59,114 +59,92 @@ type binary_op =
   | Logical_and
   | Logical_or
 
-type comparison =
-  | Eq
-  | Ne
-  | Lt
-  | Le
-  | Gt
-  | Ge
+type comparison = Eq | Ne | Lt | Le | Gt | Ge
 
 type function_kind =
-  | Exported
-  | Internal
-  | Imported
-  | Always_inline
+    FUNCTION_Exported
+  | FUNCTION_Internal
+  | FUNCTION_Imported
+  | FUNCTION_Always_inline
 
 type global_kind =
-  | Global_exported
-  | Global_internal
-  | Global_imported
+    GLOBAL_Exported
+  | GLOBAL_Internal
+  | GLOBAL_Imported
 
 type _ context_option =
-  | Progname : string context_option
-  | Optimization_level : int context_option
-  | Debuginfo : bool context_option
-  | Dump_initial_tree : bool context_option
-  | Dump_initial_gimple : bool context_option
-  | Dump_generated_code : bool context_option
-  | Dump_summary : bool context_option
-  | Dump_everything : bool context_option
-  | Selfcheck_gc : bool context_option
-  | Keep_intermediates : bool context_option
+    OPTION_Progname : string context_option
+  | OPTION_Optimization_level : int context_option
+  | OPTION_Debuginfo : bool context_option
+  | OPTION_Dump_initial_tree : bool context_option
+  | OPTION_Dump_initial_gimple : bool context_option
+  | OPTION_Dump_generated_code : bool context_option
+  | OPTION_Dump_summary : bool context_option
+  | OPTION_Dump_everything : bool context_option
+  | OPTION_Selfcheck_gc : bool context_option
+  | OPTION_Keep_intermediates : bool context_option
 
 type output_kind =
-  | Assembler
-  | Object_file
-  | Dynamic_library
-  | Executable
+    OUTPUT_Assembler
+  | OUTPUT_Object_file
+  | OUTPUT_Dynamic_library
+  | OUTPUT_Executable
 
 type type_kind =
-  | Void
-  | Void_ptr
-  | Bool
-  | Char
-  | Signed_char
-  | Unsigned_char
-  | Short
-  | Unsigned_short
-  | Int
-  | Unsigned_int
-  | Long
-  | Unsigned_long
-  | Long_long
-  | Unsigned_long_long
-  | Float
-  | Double
-  | Long_double
-  | Const_char_ptr
-  | Size_t
-  | File_ptr
-  | Complex_float
-  | Complex_double
-  | Complex_long_double
+    TYPE_Void
+  | TYPE_Void_ptr
+  | TYPE_Bool
+  | TYPE_Char
+  | TYPE_Signed_char
+  | TYPE_Unsigned_char
+  | TYPE_Short
+  | TYPE_Unsigned_short
+  | TYPE_Int
+  | TYPE_Unsigned_int
+  | TYPE_Long
+  | TYPE_Unsigned_long
+  | TYPE_Long_long
+  | TYPE_Unsigned_long_long
+  | TYPE_Float
+  | TYPE_Double
+  | TYPE_Long_double
+  | TYPE_Const_char_ptr
+  | TYPE_Size_t
+  | TYPE_File_ptr
+  | TYPE_Complex_float
+  | TYPE_Complex_double
+  | TYPE_Complex_long_double
 
 let function_kind = function
-  | Exported -> GCC_JIT_FUNCTION_EXPORTED
-  | Internal -> GCC_JIT_FUNCTION_INTERNAL
-  | Imported -> GCC_JIT_FUNCTION_IMPORTED
-  | Always_inline -> GCC_JIT_FUNCTION_ALWAYS_INLINE
-
-let lvalue' = function
-  | `Lvalue lval -> lval
-  | `Param param ->
-      gcc_jit_param_as_lvalue param
+    FUNCTION_Exported -> GCC_JIT_FUNCTION_EXPORTED
+  | FUNCTION_Internal -> GCC_JIT_FUNCTION_INTERNAL
+  | FUNCTION_Imported -> GCC_JIT_FUNCTION_IMPORTED
+  | FUNCTION_Always_inline -> GCC_JIT_FUNCTION_ALWAYS_INLINE
 
 let type_kind = function
-  | Void -> GCC_JIT_TYPE_VOID
-  | Void_ptr -> GCC_JIT_TYPE_VOID_PTR
-  | Bool -> GCC_JIT_TYPE_BOOL
-  | Char -> GCC_JIT_TYPE_CHAR
-  | Signed_char -> GCC_JIT_TYPE_SIGNED_CHAR
-  | Unsigned_char -> GCC_JIT_TYPE_UNSIGNED_CHAR
-  | Short -> GCC_JIT_TYPE_SHORT
-  | Unsigned_short -> GCC_JIT_TYPE_UNSIGNED_SHORT
-  | Int -> GCC_JIT_TYPE_INT
-  | Unsigned_int -> GCC_JIT_TYPE_UNSIGNED_INT
-  | Long -> GCC_JIT_TYPE_LONG
-  | Unsigned_long -> GCC_JIT_TYPE_UNSIGNED_LONG
-  | Long_long -> GCC_JIT_TYPE_LONG_LONG
-  | Unsigned_long_long -> GCC_JIT_TYPE_UNSIGNED_LONG_LONG
-  | Float -> GCC_JIT_TYPE_FLOAT
-  | Double -> GCC_JIT_TYPE_DOUBLE
-  | Long_double -> GCC_JIT_TYPE_LONG_DOUBLE
-  | Const_char_ptr -> GCC_JIT_TYPE_CONST_CHAR_PTR
-  | Size_t -> GCC_JIT_TYPE_SIZE_T
-  | File_ptr -> GCC_JIT_TYPE_FILE_PTR
-  | Complex_float -> GCC_JIT_TYPE_COMPLEX_FLOAT
-  | Complex_double -> GCC_JIT_TYPE_COMPLEX_DOUBLE
-  | Complex_long_double -> GCC_JIT_TYPE_COMPLEX_LONG_DOUBLE
-
-(* let object' = function *)
-(*   | `Location loc -> gcc_jit_location_as_object loc *)
-(*   | `Type typ -> gcc_jit_type_as_object typ *)
-(*   | `Struct struc -> gcc_jit_type_as_object (gcc_jit_struct_as_type struc) *)
-(*   | `Field field -> gcc_jit_field_as_object field *)
-(*   | `Function fn -> gcc_jit_function_as_object fn *)
-(*   | `Block block -> gcc_jit_block_as_object block *)
-(*   | `Rvalue rvalue -> gcc_jit_rvalue_as_object rvalue *)
-(*   | `Lvalue lvalue -> gcc_jit_lvalue_as_object lvalue *)
-(*   | `Param param -> gcc_jit_param_as_object param *)
+    TYPE_Void -> GCC_JIT_TYPE_VOID
+  | TYPE_Void_ptr -> GCC_JIT_TYPE_VOID_PTR
+  | TYPE_Bool -> GCC_JIT_TYPE_BOOL
+  | TYPE_Char -> GCC_JIT_TYPE_CHAR
+  | TYPE_Signed_char -> GCC_JIT_TYPE_SIGNED_CHAR
+  | TYPE_Unsigned_char -> GCC_JIT_TYPE_UNSIGNED_CHAR
+  | TYPE_Short -> GCC_JIT_TYPE_SHORT
+  | TYPE_Unsigned_short -> GCC_JIT_TYPE_UNSIGNED_SHORT
+  | TYPE_Int -> GCC_JIT_TYPE_INT
+  | TYPE_Unsigned_int -> GCC_JIT_TYPE_UNSIGNED_INT
+  | TYPE_Long -> GCC_JIT_TYPE_LONG
+  | TYPE_Unsigned_long -> GCC_JIT_TYPE_UNSIGNED_LONG
+  | TYPE_Long_long -> GCC_JIT_TYPE_LONG_LONG
+  | TYPE_Unsigned_long_long -> GCC_JIT_TYPE_UNSIGNED_LONG_LONG
+  | TYPE_Float -> GCC_JIT_TYPE_FLOAT
+  | TYPE_Double -> GCC_JIT_TYPE_DOUBLE
+  | TYPE_Long_double -> GCC_JIT_TYPE_LONG_DOUBLE
+  | TYPE_Const_char_ptr -> GCC_JIT_TYPE_CONST_CHAR_PTR
+  | TYPE_Size_t -> GCC_JIT_TYPE_SIZE_T
+  | TYPE_File_ptr -> GCC_JIT_TYPE_FILE_PTR
+  | TYPE_Complex_float -> GCC_JIT_TYPE_COMPLEX_FLOAT
+  | TYPE_Complex_double -> GCC_JIT_TYPE_COMPLEX_DOUBLE
+  | TYPE_Complex_long_double -> GCC_JIT_TYPE_COMPLEX_LONG_DOUBLE
 
 let binary_op = function
   | Plus -> GCC_JIT_BINARY_OP_PLUS
@@ -194,9 +172,15 @@ let unary_op = function
   | Logical_negate -> GCC_JIT_UNARY_OP_LOGICAL_NEGATE
 
 let global_kind = function
-  | Global_exported -> GCC_JIT_GLOBAL_EXPORTED
-  | Global_imported -> GCC_JIT_GLOBAL_IMPORTED
-  | Global_internal -> GCC_JIT_GLOBAL_INTERNAL
+  | GLOBAL_Exported -> GCC_JIT_GLOBAL_EXPORTED
+  | GLOBAL_Imported -> GCC_JIT_GLOBAL_IMPORTED
+  | GLOBAL_Internal -> GCC_JIT_GLOBAL_INTERNAL
+
+let output_kind = function
+  | OUTPUT_Assembler -> GCC_JIT_OUTPUT_KIND_ASSEMBLER
+  | OUTPUT_Object_file -> GCC_JIT_OUTPUT_KIND_OBJECT_FILE
+  | OUTPUT_Dynamic_library -> GCC_JIT_OUTPUT_KIND_DYNAMIC_LIBRARY
+  | OUTPUT_Executable -> GCC_JIT_OUTPUT_KIND_EXECUTABLE
 
 let typ' = function
   | `Struct struc ->
@@ -282,37 +266,31 @@ module Context = struct
 
   let set_option : type a. context -> a context_option -> a -> unit = fun ctx opt v ->
     match opt with
-    | Progname ->
+    | OPTION_Progname ->
         wrap3 ctx gcc_jit_context_set_str_option ctx GCC_JIT_STR_OPTION_PROGNAME v
-    | Optimization_level ->
+    | OPTION_Optimization_level ->
         wrap3 ctx gcc_jit_context_set_int_option ctx GCC_JIT_INT_OPTION_OPTIMIZATION_LEVEL v
-    | Debuginfo ->
+    | OPTION_Debuginfo ->
         wrap3 ctx gcc_jit_context_set_bool_option ctx GCC_JIT_BOOL_OPTION_DEBUGINFO v
-    | Dump_initial_tree ->
+    | OPTION_Dump_initial_tree ->
         wrap3 ctx gcc_jit_context_set_bool_option ctx GCC_JIT_BOOL_OPTION_DUMP_INITIAL_TREE v
-    | Dump_initial_gimple ->
+    | OPTION_Dump_initial_gimple ->
         wrap3 ctx gcc_jit_context_set_bool_option ctx GCC_JIT_BOOL_OPTION_DUMP_INITIAL_GIMPLE v
-    | Dump_generated_code ->
+    | OPTION_Dump_generated_code ->
         wrap3 ctx gcc_jit_context_set_bool_option ctx GCC_JIT_BOOL_OPTION_DUMP_GENERATED_CODE v
-    | Dump_summary ->
+    | OPTION_Dump_summary ->
         wrap3 ctx gcc_jit_context_set_bool_option ctx GCC_JIT_BOOL_OPTION_DUMP_SUMMARY v
-    | Dump_everything ->
+    | OPTION_Dump_everything ->
         wrap3 ctx gcc_jit_context_set_bool_option ctx GCC_JIT_BOOL_OPTION_DUMP_EVERYTHING v
-    | Selfcheck_gc ->
+    | OPTION_Selfcheck_gc ->
         wrap3 ctx gcc_jit_context_set_bool_option ctx GCC_JIT_BOOL_OPTION_SELFCHECK_GC v
-    | Keep_intermediates ->
+    | OPTION_Keep_intermediates ->
         wrap3 ctx gcc_jit_context_set_bool_option ctx GCC_JIT_BOOL_OPTION_KEEP_INTERMEDIATES v
 
   let compile ctx =
     let res = wrap1 ctx gcc_jit_context_compile ctx in
     Gc.finalise gcc_jit_result_release res;
     res
-
-  let output_kind = function
-    | Assembler -> GCC_JIT_OUTPUT_KIND_ASSEMBLER
-    | Object_file -> GCC_JIT_OUTPUT_KIND_OBJECT_FILE
-    | Dynamic_library -> GCC_JIT_OUTPUT_KIND_DYNAMIC_LIBRARY
-    | Executable -> GCC_JIT_OUTPUT_KIND_EXECUTABLE
 
   let compile_to_file ctx kind path =
     wrap3 ctx gcc_jit_context_compile_to_file ctx (output_kind kind) path
@@ -326,7 +304,7 @@ module Type = struct
     `Type (wrap3 ctx gcc_jit_context_get_int_type ctx (if signed then 1 else 0) n)
 
   let int ctx =
-    standard ctx Int
+    standard ctx TYPE_Int
 
   let pointer typ =
     let ctx = gcc_jit_object_get_context (gcc_jit_type_as_object (typ' typ)) in
