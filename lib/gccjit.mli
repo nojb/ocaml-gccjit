@@ -592,37 +592,39 @@ module RV : sig
       - [P* <-> Q*], for pointer types [P] and [Q] *)
 end
 
-(** {2:lvalues Lvalues}
+module LV : sig
+  (** {2:lvalues Lvalues}
 
-    An {!lvalue} is something that can of the left-hand side of an assignment: a
-    storage area (such as a variable). It is also usable as an {!rvalue}, where
-    the {!rvalue} is computed by reading from the storage area. *)
+      An {!lvalue} is something that can of the left-hand side of an assignment: a
+      storage area (such as a variable). It is also usable as an {!rvalue}, where
+      the {!rvalue} is computed by reading from the storage area. *)
 
-val get_address : ?loc:location -> [< lvalue] -> rvalue
-(** Taking the address of an {!lvalue}; analogous to [&(EXPR)] in C. *)
+  val address : ?loc:location -> [< lvalue] -> rvalue
+  (** Taking the address of an {!lvalue}; analogous to [&(EXPR)] in C. *)
 
-(** {2 Global variables} *)
+  (** {2 Global variables} *)
 
-val new_global : ?loc:location -> context -> global_kind -> [< type_] -> string -> lvalue
-(** Add a new global variable of the given type and name to the context.
+  val global : ?loc:location -> context -> global_kind -> [< type_] -> string -> lvalue
+  (** Add a new global variable of the given type and name to the context.
 
-    The {!global_kind} parameter determines the visibility of the {e global}
-    outside of the {!result}. *)
+      The {!global_kind} parameter determines the visibility of the {e global}
+      outside of the {!result}. *)
 
-(** {2 Working with pointers, structs, and unions} *)
+  (** {2 Working with pointers, structs, and unions} *)
 
-val dereference : ?loc:location -> [< rvalue] -> lvalue
-(** Dereferencing a pointer; analogous to [*(EXPR)] in C. *)
+  val deref : ?loc:location -> [< rvalue] -> lvalue
+  (** Dereferencing a pointer; analogous to [*(EXPR)] in C. *)
 
-val dereference_field : ?loc:location -> [< rvalue] -> field -> lvalue
-(** Accessing a field of an [rvalue] of pointer type, analogous [(EXPR)->field]
-    in C, itself equivalent to [(\*EXPR).FIELD] *)
+  val deref_field : ?loc:location -> [< rvalue] -> field -> lvalue
+  (** Accessing a field of an [rvalue] of pointer type, analogous [(EXPR)->field]
+      in C, itself equivalent to [(\*EXPR).FIELD] *)
 
-val new_array_access : ?loc:location -> [< rvalue] -> [< rvalue] -> lvalue
-(** Given an rvalue of pointer type [T *], get at the element [T] at the given
-    index, using standard C array indexing rules i.e. each increment of index
-    corresponds to [sizeof(T)] bytes. Analogous to [PTR[INDEX]] in C (or,
-    indeed, to [PTR + INDEX]). *)
+  val array_access : ?loc:location -> [< rvalue] -> [< rvalue] -> lvalue
+  (** Given an rvalue of pointer type [T *], get at the element [T] at the given
+      index, using standard C array indexing rules i.e. each increment of index
+      corresponds to [sizeof(T)] bytes. Analogous to [PTR[INDEX]] in C (or,
+      indeed, to [PTR + INDEX]). *)
+end
 
 (** {1:functions Creating and using functions} *)
 

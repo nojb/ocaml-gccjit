@@ -429,28 +429,30 @@ module RV = struct
     `Rvalue (wrap4 "RV.cast" ctx gcc_jit_context_new_cast ctx (loc' loc) (rvalue' rval) (typ' typ))
 end
 
-let get_address ?(loc = null_loc) lval =
-  let ctx = gcc_jit_object_get_context (gcc_jit_lvalue_as_object (lvalue' lval)) in
-  `Rvalue (wrap2 "get_address" ctx gcc_jit_lvalue_get_address (lvalue' lval) (loc' loc))
+module LV = struct
+  let address ?(loc = null_loc) lval =
+    let ctx = gcc_jit_object_get_context (gcc_jit_lvalue_as_object (lvalue' lval)) in
+    `Rvalue (wrap2 "LV.address" ctx gcc_jit_lvalue_get_address (lvalue' lval) (loc' loc))
 
-let new_global ?(loc = null_loc) ctx kind typ name =
-  `Lvalue
-    (wrap4 "new_global" ctx gcc_jit_context_new_global ctx
-       (loc' loc) (global_kind kind) (typ' typ) name)
+  let global ?(loc = null_loc) ctx kind typ name =
+    `Lvalue
+      (wrap4 "LV.global" ctx gcc_jit_context_new_global ctx
+         (loc' loc) (global_kind kind) (typ' typ) name)
 
-let dereference ?(loc = null_loc) rval =
-  let ctx = gcc_jit_object_get_context (gcc_jit_rvalue_as_object (rvalue' rval)) in
-  `Lvalue (wrap2 "dereference" ctx gcc_jit_rvalue_dereference (rvalue' rval) (loc' loc))
+  let deref ?(loc = null_loc) rval =
+    let ctx = gcc_jit_object_get_context (gcc_jit_rvalue_as_object (rvalue' rval)) in
+    `Lvalue (wrap2 "LV.deref" ctx gcc_jit_rvalue_dereference (rvalue' rval) (loc' loc))
 
-let dereference_field ?(loc = null_loc) rval (`Field fld) =
-  let ctx = gcc_jit_object_get_context (gcc_jit_rvalue_as_object (rvalue' rval)) in
-  `Lvalue (wrap3 "dereference_field" ctx gcc_jit_rvalue_dereference_field (rvalue' rval) (loc' loc) fld)
+  let deref_field ?(loc = null_loc) rval (`Field fld) =
+    let ctx = gcc_jit_object_get_context (gcc_jit_rvalue_as_object (rvalue' rval)) in
+    `Lvalue (wrap3 "LV.deref_field" ctx gcc_jit_rvalue_dereference_field (rvalue' rval) (loc' loc) fld)
 
-let new_array_access ?(loc = null_loc) rval1 rval2 =
-  let ctx = gcc_jit_object_get_context (gcc_jit_rvalue_as_object (rvalue' rval1)) in
-  `Lvalue
-    (wrap3 "new_array_access" ctx gcc_jit_context_new_array_access ctx (loc' loc)
-       (rvalue' rval1) (rvalue' rval2))
+  let array_access ?(loc = null_loc) rval1 rval2 =
+    let ctx = gcc_jit_object_get_context (gcc_jit_rvalue_as_object (rvalue' rval1)) in
+    `Lvalue
+      (wrap3 "LV.array_access" ctx gcc_jit_context_new_array_access ctx (loc' loc)
+         (rvalue' rval1) (rvalue' rval2))
+end
 
 let new_param ?(loc = null_loc) ctx typ name =
   `Param (wrap4 "new_param" ctx gcc_jit_context_new_param ctx (loc' loc) (typ' typ) name)
