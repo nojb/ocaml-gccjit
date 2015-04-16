@@ -394,6 +394,10 @@ module RValue = struct
   let cast ?(loc = null_loc) ctx rval typ =
     wrap4 ctx gcc_jit_context_new_cast ctx loc rval typ
 
+  let access_field ?(loc = null_loc) rval fld =
+    let ctx = gcc_jit_object_get_context (gcc_jit_rvalue_as_object rval) in
+    wrap3 ctx gcc_jit_rvalue_access_field rval loc fld
+
   let lvalue lval =
     let ctx = gcc_jit_object_get_context (gcc_jit_lvalue_as_object lval) in
     wrap1 ctx gcc_jit_lvalue_as_rvalue lval
@@ -419,9 +423,13 @@ module LValue = struct
     let ctx = gcc_jit_object_get_context (gcc_jit_rvalue_as_object rval) in
     wrap3 ctx gcc_jit_rvalue_dereference_field rval loc fld
 
-  let array_access ?(loc = null_loc) rval1 rval2 =
+  let access_array ?(loc = null_loc) rval1 rval2 =
     let ctx = gcc_jit_object_get_context (gcc_jit_rvalue_as_object rval1) in
     wrap3 ctx gcc_jit_context_new_array_access ctx loc rval1 rval2
+
+  let access_field ?(loc = null_loc) lval fld =
+    let ctx = gcc_jit_object_get_context (gcc_jit_lvalue_as_object lval) in
+    wrap3 ctx gcc_jit_lvalue_access_field lval loc fld
 
   let param param =
     let ctx = gcc_jit_object_get_context (gcc_jit_param_as_object param) in

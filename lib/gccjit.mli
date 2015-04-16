@@ -597,6 +597,8 @@ module RValue : sig
       - [int <-> bool]
       - [P* <-> Q*], for pointer types [P] and [Q] *)
 
+  val access_field : ?loc:location -> rvalue -> field -> rvalue
+
   val lvalue : lvalue -> rvalue
 
   val param : param -> rvalue
@@ -629,11 +631,13 @@ module LValue : sig
   (** Accessing a field of an [rvalue] of pointer type, analogous [(EXPR)->field]
       in C, itself equivalent to [(\*EXPR).FIELD] *)
 
-  val array_access : ?loc:location -> rvalue -> rvalue -> lvalue
+  val access_array : ?loc:location -> rvalue -> rvalue -> lvalue
   (** Given an rvalue of pointer type [T *], get at the element [T] at the given
       index, using standard C array indexing rules i.e. each increment of index
       corresponds to [sizeof(T)] bytes. Analogous to [PTR[INDEX]] in C (or,
       indeed, to [PTR + INDEX]). *)
+
+  val access_field : ?loc:location -> lvalue -> field -> lvalue
 
   val param : param -> lvalue
 end
