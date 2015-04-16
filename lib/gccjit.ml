@@ -38,7 +38,6 @@ type struct_ = gcc_jit_struct
 type type_ = gcc_jit_type
 type function_ = gcc_jit_function
 type block = gcc_jit_block
-(* type object_ = [ location | type_ | field | function_ | block | rvalue ] *)
 
 let null_loc = Ctypes.(coerce (ptr void) gcc_jit_location null)
 
@@ -255,9 +254,6 @@ module Context = struct
   let dump_reproducer_to_file ctx path =
     wrap2 ctx gcc_jit_context_dump_reproducer_to_file ctx path
 
-  (* let get_debug_string obj = *)
-  (*   gcc_jit_object_get_debug_string (object' obj) *)
-
   let set_option : type a. context -> a context_option -> a -> unit = fun ctx opt v ->
     match opt with
     | OPTION_Progname ->
@@ -308,6 +304,9 @@ module Struct = struct
     in
     let a = Ctypes.CArray.of_list gcc_jit_field fields in
     wrap3 ctx gcc_jit_struct_set_fields struc loc (List.length fields) (Ctypes.CArray.start a)
+
+  let to_string struc =
+    gcc_jit_object_get_debug_string (gcc_jit_type_as_object (gcc_jit_struct_as_type struc))
 end
 
 module Type = struct
@@ -348,6 +347,9 @@ module Type = struct
   let union ctx ?(loc = null_loc) name fields =
     let a = Ctypes.CArray.of_list gcc_jit_field fields in
     wrap3 ctx gcc_jit_context_new_union_type ctx loc name (List.length fields) (Ctypes.CArray.start a)
+
+  let to_string typ =
+    gcc_jit_object_get_debug_string (gcc_jit_type_as_object typ)
 end
 
 module RValue = struct
@@ -411,6 +413,9 @@ module RValue = struct
   let param param =
     let ctx = gcc_jit_object_get_context (gcc_jit_param_as_object param) in
     wrap1 ctx gcc_jit_param_as_rvalue param
+
+  let to_string rval =
+    gcc_jit_object_get_debug_string (gcc_jit_rvalue_as_object rval)
 end
 
 module LValue = struct
@@ -440,11 +445,17 @@ module LValue = struct
   let param param =
     let ctx = gcc_jit_object_get_context (gcc_jit_param_as_object param) in
     wrap1 ctx gcc_jit_param_as_lvalue param
+
+  let to_string lval =
+    gcc_jit_object_get_debug_string (gcc_jit_lvalue_as_object lval)
 end
 
 module Param = struct
   let create ctx ?(loc = null_loc) typ name =
     wrap4 ctx gcc_jit_context_new_param ctx loc typ name
+
+  let to_string param =
+    gcc_jit_object_get_debug_string (gcc_jit_param_as_object param)
 end
 
 module Function = struct
@@ -468,6 +479,9 @@ module Function = struct
   let local ?(loc = null_loc) fn typ name =
     let ctx = gcc_jit_object_get_context (gcc_jit_function_as_object fn) in
     wrap4 ctx gcc_jit_function_new_local fn loc typ name
+
+  let to_string fn =
+    gcc_jit_object_get_debug_string (gcc_jit_function_as_object fn)
 end
 
 module Block = struct
@@ -510,11 +524,17 @@ module Block = struct
   let return_void ?(loc = null_loc) blk =
     let ctx = gcc_jit_object_get_context (gcc_jit_block_as_object blk) in
     wrap2 ctx gcc_jit_block_end_with_void_return blk loc
+
+  let to_string blk =
+    gcc_jit_object_get_debug_string (gcc_jit_block_as_object blk)
 end
 
 module Location = struct
   let create ctx path line col =
     wrap4 ctx gcc_jit_context_new_location ctx path line col
+
+  let to_string loc =
+    gcc_jit_object_get_debug_string (gcc_jit_location_as_object loc)
 end
 
 module Result = struct

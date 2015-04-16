@@ -347,21 +347,6 @@ module Context : sig
       variable within the generated C source, and not all are necessarily then
       used). *)
 
-  (* val get_debug_string : [< object_] -> string *)
-  (** Get a human-readable description of this object.
-
-      For example,
-
-      {[
-        Printf.printf "obj: %s\n" (get_debug_string obj)
-      ]}
-
-      might give this text on [stdout]:
-
-      {[
-        obj: 4.0 * (float)i
-      ]} *)
-
   (** {2 Options} *)
 
   val set_option : context -> 'a context_option -> 'a -> unit
@@ -444,6 +429,9 @@ module Struct : sig
   (** Populate the fields of a formerly-opaque struct type.
 
       This can only be called once on a given struct type. *)
+
+  val to_string : struct_ -> string
+  (** Get a human-readable description of this object. *)
 end
 
 module Type : sig
@@ -476,6 +464,9 @@ module Type : sig
 
   val union : context -> ?loc:location -> string -> field list -> type_
   (** Unions work similarly to structs. *)
+
+  val to_string : type_ -> string
+  (** Get a human-readable description of this object. *)
 end
 
 module RValue : sig
@@ -588,6 +579,9 @@ module RValue : sig
   val lvalue : lvalue -> rvalue
 
   val param : param -> rvalue
+
+  val to_string : rvalue -> string
+  (** Get a human-readable description of this object. *)
 end
 
 module LValue : sig
@@ -622,6 +616,9 @@ module LValue : sig
   val access_field : ?loc:location -> lvalue -> field -> lvalue
 
   val param : param -> lvalue
+
+  val to_string : lvalue -> string
+  (** Get a human-readable description of this object. *)
 end
 
 (** {1:functions Creating and using functions} *)
@@ -634,6 +631,9 @@ module Param : sig
   val create : context -> ?loc:location -> type_ -> string -> param
   (** In preparation for creating a function, create a new parameter of the given
       type and name. *)
+
+  val to_string : param -> string
+  (** Get a human-readable description of this object. *)
 end
 
 module Function : sig
@@ -656,6 +656,9 @@ module Function : sig
 
   val local : ?loc:location -> function_ -> type_ -> string -> lvalue
   (** Add a new local variable within the function, of the given type and name. *)
+
+  val to_string : function_ -> string
+  (** Get a human-readable description of this object. *)
 end
 
 module Block : sig
@@ -756,6 +759,9 @@ module Block : sig
       {[
         return;
       ]} *)
+
+  val to_string : block -> string
+  (** Get a human-readable description of this object. *)
 end
 
 module Location : sig
@@ -794,6 +800,9 @@ module Location : sig
 
   val create : context -> string -> int -> int -> location
   (** Create a {!location} instance representing the given source location. *)
+
+  val to_string : location -> string
+  (** Get a human-readable description of this object. *)
 end
 
 module Result : sig
