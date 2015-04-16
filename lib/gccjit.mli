@@ -24,9 +24,9 @@
 
     See {{:https://gcc.gnu.org/wiki/JIT}GCC wiki page} for more information. *)
 
-exception Error of string * string
-(** This exception is raised if an error occurs.  The first argument is the API
-    function name and the second one is an explanatory string. *)
+exception Error of string
+(** This exception (containing an explanatory string) is raised if an error
+    occurs. *)
 
 type context
 (** A {!context} encapsulates the state of a compilation.  You can set up
