@@ -286,10 +286,15 @@ module Context = struct
     wrap3 ctx gcc_jit_context_compile_to_file ctx (output_kind kind) path
 end
 
-module Struct = struct
-  let field ctx ?(loc = null_loc) typ name =
+module Field = struct
+  let create ctx ?(loc = null_loc) typ name =
     wrap4 ctx gcc_jit_context_new_field ctx loc typ name
 
+  let to_string fld =
+    gcc_jit_object_get_debug_string (gcc_jit_field_as_object fld)
+end
+
+module Struct = struct
   let create ctx ?(loc = null_loc) name fields =
     let a = Ctypes.CArray.of_list gcc_jit_field fields in
     wrap3 ctx gcc_jit_context_new_struct_type ctx loc name
@@ -562,11 +567,16 @@ module type S = sig
     val compile_to_file : output_kind -> string -> unit
   end
 
+  module Field : sig
+    val create : ?loc:location -> type_ -> string -> field
+    val to_string : field -> string
+  end
+
   module Struct : sig
-    val field : ?loc:location -> type_ -> string -> field
     val create : ?loc:location -> string -> field list -> struct_
     val opaque : ?loc:location -> string -> struct_
     val set_fields : ?loc:location -> struct_ -> field list -> unit
+    val to_string : struct_ -> string
   end
 
   module Type : sig
@@ -580,6 +590,7 @@ module type S = sig
     val function_ptr : ?loc:location -> ?variadic:bool -> type_ list -> type_ -> type_
     val struct_ : struct_ -> type_
     val union : ?loc:location -> string -> field list -> type_
+    val to_string : type_ -> string
   end
 
   module RValue : sig
@@ -600,6 +611,7 @@ module type S = sig
     val access_field : ?loc:location -> rvalue -> field -> rvalue
     val lvalue : lvalue -> rvalue
     val param : param -> rvalue
+    val to_string : rvalue -> string
   end
 
   module LValue : sig
@@ -610,10 +622,12 @@ module type S = sig
     val access_array : ?loc:location -> rvalue -> rvalue -> lvalue
     val access_field : ?loc:location -> lvalue -> field -> lvalue
     val param : param -> lvalue
+    val to_string : lvalue -> string
   end
 
   module Param : sig
     val create : ?loc:location -> type_ -> string -> param
+    val to_string : param -> string
   end
 
   module Function : sig
@@ -622,6 +636,7 @@ module type S = sig
     val param : function_ -> int -> param
     val dump_dot : function_ -> string -> unit
     val local : ?loc:location -> function_ -> type_ -> string -> lvalue
+    val to_string : function_ -> string
   end
 
   module Block : sig
@@ -635,10 +650,12 @@ module type S = sig
     val jump : ?loc:location -> block -> block -> unit
     val return : ?loc:location -> block -> rvalue -> unit
     val return_void : ?loc:location -> block -> unit
+    val to_string : block -> string
   end
 
   module Location : sig
     val create : string -> int -> int -> location
+    val to_string : location -> string
   end
 
   module Result : sig
@@ -662,12 +679,18 @@ module Make () = struct
     let compile_to_file = compile_to_file ctx
   end
 
+  module Field = struct
+    open Field
+    let create = create ctx
+    let to_string = to_string
+  end
+
   module Struct = struct
     open Struct
-    let field = field ctx
     let create = create ctx
     let opaque = opaque ctx
     let set_fields = set_fields
+    let to_string = to_string
   end
 
   module Type = struct
@@ -682,6 +705,7 @@ module Make () = struct
     let function_ptr = function_ptr ctx
     let struct_ = struct_
     let union = union ctx
+    let to_string = to_string
   end
 
   module RValue = struct
@@ -703,6 +727,7 @@ module Make () = struct
     let access_field = access_field
     let lvalue = lvalue
     let param = param
+    let to_string = to_string
   end
 
   module LValue = struct
@@ -714,11 +739,13 @@ module Make () = struct
     let access_array = access_array
     let access_field = access_field
     let param = param
+    let to_string = to_string
   end
 
   module Param = struct
     open Param
     let create = create ctx
+    let to_string = to_string
   end
 
   module Function = struct
@@ -728,6 +755,7 @@ module Make () = struct
     let param = param
     let dump_dot = dump_dot
     let local = local
+    let to_string = to_string
   end
 
   module Block = struct
@@ -742,11 +770,13 @@ module Make () = struct
     let jump = jump
     let return = return
     let return_void = return_void
+    let to_string = to_string
   end
 
   module Location = struct
     open Location
     let create = create ctx
+    let to_string = to_string
   end
 
   module Result = struct

@@ -377,6 +377,14 @@ module Context : sig
       further compilation. *)
 end
 
+module Field : sig
+  val create : context -> ?loc:location -> type_ -> string -> field
+  (** Create a field, with the given type and name. *)
+
+  val to_string : field -> string
+  (** Get a human-readable description of this object. *)
+end
+
 module Struct : sig
   (** {2 Structures and unions}
 
@@ -413,9 +421,6 @@ module Struct : sig
           let field_next = new_field ctx node_ptr "m_next" in
           set_fields node [ field_hash; field_next ]
         ]} *)
-
-  val field : context -> ?loc:location -> type_ -> string -> field
-  (** Create a field, with the given type and name. *)
 
   val create : context -> ?loc:location -> string -> field list -> struct_
   (** Create a struct type, with the given name and fields. *)
@@ -876,11 +881,16 @@ module type S = sig
     val compile_to_file : output_kind -> string -> unit
   end
 
+  module Field : sig
+    val create : ?loc:location -> type_ -> string -> field
+    val to_string : field -> string
+  end
+
   module Struct : sig
-    val field : ?loc:location -> type_ -> string -> field
     val create : ?loc:location -> string -> field list -> struct_
     val opaque : ?loc:location -> string -> struct_
     val set_fields : ?loc:location -> struct_ -> field list -> unit
+    val to_string : struct_ -> string
   end
 
   module Type : sig
@@ -894,6 +904,7 @@ module type S = sig
     val function_ptr : ?loc:location -> ?variadic:bool -> type_ list -> type_ -> type_
     val struct_ : struct_ -> type_
     val union : ?loc:location -> string -> field list -> type_
+    val to_string : type_ -> string
   end
 
   module RValue : sig
@@ -914,6 +925,7 @@ module type S = sig
     val access_field : ?loc:location -> rvalue -> field -> rvalue
     val lvalue : lvalue -> rvalue
     val param : param -> rvalue
+    val to_string : rvalue -> string
   end
 
   module LValue : sig
@@ -924,10 +936,12 @@ module type S = sig
     val access_array : ?loc:location -> rvalue -> rvalue -> lvalue
     val access_field : ?loc:location -> lvalue -> field -> lvalue
     val param : param -> lvalue
+    val to_string : lvalue -> string
   end
 
   module Param : sig
     val create : ?loc:location -> type_ -> string -> param
+    val to_string : param -> string
   end
 
   module Function : sig
@@ -936,6 +950,7 @@ module type S = sig
     val param : function_ -> int -> param
     val dump_dot : function_ -> string -> unit
     val local : ?loc:location -> function_ -> type_ -> string -> lvalue
+    val to_string : function_ -> string
   end
 
   module Block : sig
@@ -949,10 +964,12 @@ module type S = sig
     val jump : ?loc:location -> block -> block -> unit
     val return : ?loc:location -> block -> rvalue -> unit
     val return_void : ?loc:location -> block -> unit
+    val to_string : block -> string
   end
 
   module Location : sig
     val create : string -> int -> int -> location
+    val to_string : location -> string
   end
 
   module Result : sig
