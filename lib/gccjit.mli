@@ -632,33 +632,37 @@ end
 
 (** {1:functions Creating and using functions} *)
 
-(** {2 Params}
+module Param : sig
+  (** {2 Params}
 
-    A {!param} represents a parameter to a function. *)
+      A {!param} represents a parameter to a function. *)
 
-val new_param : ?loc:location -> context -> [< type_] -> string -> param
-(** In preparation for creating a function, create a new parameter of the given
-    type and name. *)
+  val create : ?loc:location -> context -> [< type_] -> string -> param
+  (** In preparation for creating a function, create a new parameter of the given
+      type and name. *)
+end
 
-(** {2 Functions} *)
+module Function : sig
+  (** {2 Functions} *)
 
-val new_function :
-  ?loc:location -> context -> ?variadic:bool -> function_kind -> [< type_] -> string -> param list -> function_
-(** Create a gcc_jit_function with the given name and parameters.  See
-    {!function_kind}. *)
+  val create :
+    ?loc:location -> context -> ?variadic:bool -> function_kind -> [< type_] -> string -> param list -> function_
+  (** Create a gcc_jit_function with the given name and parameters.  See
+      {!function_kind}. *)
 
-val get_builtin_function : context -> string -> function_
-(** Create a reference to a builtin function (sometimes called intrinsic
-    functions). *)
+  val builtin : context -> string -> function_
+  (** Create a reference to a builtin function (sometimes called intrinsic
+      functions). *)
 
-val get_param : function_ -> int -> param
-(** Get a specific param of a function by index (0-based). *)
+  val param : function_ -> int -> param
+  (** Get a specific param of a function by index (0-based). *)
 
-val dump_to_dot : function_ -> string -> unit
-(** Emit the function in graphviz format to the given path. *)
+  val dump_dot : function_ -> string -> unit
+  (** Emit the function in graphviz format to the given path. *)
 
-val new_local : ?loc:location -> function_ -> [< type_] -> string -> lvalue
-(** Add a new local variable within the function, of the given type and name. *)
+  val local : ?loc:location -> function_ -> [< type_] -> string -> lvalue
+  (** Add a new local variable within the function, of the given type and name. *)
+end
 
 (** {2 Blocks}
 

@@ -460,30 +460,34 @@ module LV = struct
     (param :> lvalue)
 end
 
-let new_param ?(loc = null_loc) ctx typ name =
-  `Param (wrap4 "new_param" ctx gcc_jit_context_new_param ctx (loc' loc) (typ' typ) name)
+module Param = struct
+  let create ?(loc = null_loc) ctx typ name =
+    `Param (wrap4 "new_param" ctx gcc_jit_context_new_param ctx (loc' loc) (typ' typ) name)
+end
 
-let new_function ?(loc = null_loc) ctx ?(variadic = false) kind ret name args =
-  let a = Ctypes.CArray.of_list gcc_jit_param (List.map (function `Param p -> p) args) in
-  `Function
-    (wrap8 "new_function" ctx gcc_jit_context_new_function
-       ctx (loc' loc) (function_kind kind) (typ' ret) name (List.length args) (Ctypes.CArray.start a)
-       (if variadic then 1 else 0))
+module Function = struct
+  let create ?(loc = null_loc) ctx ?(variadic = false) kind ret name args =
+    let a = Ctypes.CArray.of_list gcc_jit_param (List.map (function `Param p -> p) args) in
+    `Function
+      (wrap8 "new_function" ctx gcc_jit_context_new_function
+         ctx (loc' loc) (function_kind kind) (typ' ret) name (List.length args) (Ctypes.CArray.start a)
+         (if variadic then 1 else 0))
 
-let get_builtin_function ctx name =
-  `Function (wrap2 "new_builtin_function" ctx gcc_jit_context_get_builtin_function ctx name)
+  let builtin ctx name =
+    `Function (wrap2 "new_builtin_function" ctx gcc_jit_context_get_builtin_function ctx name)
 
-let get_param (`Function fn) i =
-  let ctx = gcc_jit_object_get_context (gcc_jit_function_as_object fn) in
-  `Param (wrap2 "get_param" ctx gcc_jit_function_get_param fn i)
+  let param (`Function fn) i =
+    let ctx = gcc_jit_object_get_context (gcc_jit_function_as_object fn) in
+    `Param (wrap2 "get_param" ctx gcc_jit_function_get_param fn i)
 
-let dump_to_dot (`Function fn) path =
-  let ctx = gcc_jit_object_get_context (gcc_jit_function_as_object fn) in
-  wrap2 "dump_to_dot" ctx gcc_jit_function_dump_to_dot fn path
+  let dump_dot (`Function fn) path =
+    let ctx = gcc_jit_object_get_context (gcc_jit_function_as_object fn) in
+    wrap2 "dump_to_dot" ctx gcc_jit_function_dump_to_dot fn path
 
-let new_local ?(loc = null_loc) (`Function fn) typ name =
-  let ctx = gcc_jit_object_get_context (gcc_jit_function_as_object fn) in
-  `Lvalue (wrap4 "new_local" ctx gcc_jit_function_new_local fn (loc' loc) (typ' typ) name)
+  let local ?(loc = null_loc) (`Function fn) typ name =
+    let ctx = gcc_jit_object_get_context (gcc_jit_function_as_object fn) in
+    `Lvalue (wrap4 "new_local" ctx gcc_jit_function_new_local fn (loc' loc) (typ' typ) name)
+end
 
 let new_block (`Function fn) ?name () =
   let ctx = gcc_jit_object_get_context (gcc_jit_function_as_object fn) in
