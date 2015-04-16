@@ -690,7 +690,7 @@ module Block : sig
         (void)expression;
       ]} *)
 
-  val assignment : ?loc:location -> block -> lvalue -> rvalue -> unit
+  val assign : ?loc:location -> block -> lvalue -> rvalue -> unit
   (** Add evaluation of an {!rvalue}, assigning the result to the given {!lvalue}.
       This is roughly equivalent to this C code:
 
@@ -698,7 +698,7 @@ module Block : sig
         lvalue = rvalue;
       ]} *)
 
-  val assignment_op : ?loc:location -> block -> lvalue -> binary_op -> rvalue -> unit
+  val assign_op : ?loc:location -> block -> lvalue -> binary_op -> rvalue -> unit
   (** Add evaluation of an rvalue, using the result to modify an lvalue.  This
       is analogous to ["+="] and friends:
 
@@ -723,7 +723,7 @@ module Block : sig
       debugging how your project's internal representation gets converted to the
       [libgccjit] IR.  *)
 
-  val conditional : ?loc:location -> block -> rvalue -> block -> block -> unit
+  val cond_jump : ?loc:location -> block -> rvalue -> block -> block -> unit
   (** Terminate a block by adding evaluation of an rvalue, branching on the
       result to the appropriate successor block.  This is roughly equivalent to
       this C code:

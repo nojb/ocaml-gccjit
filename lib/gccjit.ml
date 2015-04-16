@@ -488,11 +488,11 @@ module Block = struct
     let ctx = gcc_jit_object_get_context (gcc_jit_block_as_object blk) in
     wrap3 ctx gcc_jit_block_add_eval blk loc rval
 
-  let assignment ?(loc = null_loc) blk lval rval =
+  let assign ?(loc = null_loc) blk lval rval =
     let ctx = gcc_jit_object_get_context (gcc_jit_block_as_object blk) in
     wrap4 ctx gcc_jit_block_add_assignment blk loc lval rval
 
-  let assignment_op ?(loc = null_loc) blk lval op rval =
+  let assign_op ?(loc = null_loc) blk lval op rval =
     let ctx = gcc_jit_object_get_context (gcc_jit_block_as_object blk) in
     wrap5 ctx gcc_jit_block_add_assignment_op blk loc lval (binary_op op) rval
 
@@ -500,7 +500,7 @@ module Block = struct
     let ctx = gcc_jit_object_get_context (gcc_jit_block_as_object blk) in
     wrap3 ctx gcc_jit_block_add_comment blk loc str
 
-  let conditional ?(loc = null_loc) blk rval blk1 blk2 =
+  let cond_jump ?(loc = null_loc) blk rval blk1 blk2 =
     let ctx = gcc_jit_object_get_context (gcc_jit_block_as_object blk) in
     wrap5 ctx gcc_jit_block_end_with_conditional blk loc rval blk1 blk2
 
