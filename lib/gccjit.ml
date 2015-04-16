@@ -318,6 +318,9 @@ module Type = struct
   let int_gen ctx ?(signed = false) n =
     `Type (wrap3 "get_int_type" ctx gcc_jit_context_get_int_type ctx (if signed then 1 else 0) n)
 
+  let int ctx =
+    standard ctx Int
+
   let pointer typ =
     let ctx = gcc_jit_object_get_context (gcc_jit_type_as_object (typ' typ)) in
     `Type (wrap1 "get_pointer" ctx gcc_jit_type_get_pointer (typ' typ))

@@ -397,6 +397,9 @@ module Type : sig
   val int_gen : context -> ?signed:bool -> int -> type_
   (** Get the integer type of the given size and signedness. *)
 
+  val int : context -> type_
+  (** Standard [int] type. *)
+
   (** {2 Pointers, const, and volatile} *)
 
   val pointer : [< type_] -> type_
