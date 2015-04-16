@@ -428,6 +428,9 @@ module RV = struct
   let cast ?(loc = null_loc) ctx rval typ =
     `Rvalue (wrap4 ctx gcc_jit_context_new_cast ctx (loc' loc) (rvalue' rval) (typ' typ))
 
+  let lvalue lval =
+    (lval :> rvalue)
+
   let param param =
     (param :> rvalue)
 end
@@ -489,47 +492,49 @@ module Function = struct
     `Lvalue (wrap4 ctx gcc_jit_function_new_local fn (loc' loc) (typ' typ) name)
 end
 
-let new_block (`Function fn) ?name () =
-  let ctx = gcc_jit_object_get_context (gcc_jit_function_as_object fn) in
-  `Block (wrap2 ctx gcc_jit_function_new_block fn name)
+module Block = struct
+  let create (`Function fn) ?name () =
+    let ctx = gcc_jit_object_get_context (gcc_jit_function_as_object fn) in
+    `Block (wrap2 ctx gcc_jit_function_new_block fn name)
 
-let get_function (`Block blk) =
-  let ctx = gcc_jit_object_get_context (gcc_jit_block_as_object blk) in
-  `Function (wrap1 ctx gcc_jit_block_get_function blk)
+  let parent (`Block blk) =
+    let ctx = gcc_jit_object_get_context (gcc_jit_block_as_object blk) in
+    `Function (wrap1 ctx gcc_jit_block_get_function blk)
 
-let add_eval ?(loc = null_loc) (`Block blk) rval =
-  let ctx = gcc_jit_object_get_context (gcc_jit_block_as_object blk) in
-  wrap3 ctx gcc_jit_block_add_eval blk (loc' loc) (rvalue' rval)
+  let eval ?(loc = null_loc) (`Block blk) rval =
+    let ctx = gcc_jit_object_get_context (gcc_jit_block_as_object blk) in
+    wrap3 ctx gcc_jit_block_add_eval blk (loc' loc) (rvalue' rval)
 
-let add_assignment ?(loc = null_loc) (`Block blk) lval rval =
-  let ctx = gcc_jit_object_get_context (gcc_jit_block_as_object blk) in
-  wrap4 ctx gcc_jit_block_add_assignment blk (loc' loc) (lvalue' lval) (rvalue' rval)
+  let assignment ?(loc = null_loc) (`Block blk) lval rval =
+    let ctx = gcc_jit_object_get_context (gcc_jit_block_as_object blk) in
+    wrap4 ctx gcc_jit_block_add_assignment blk (loc' loc) (lvalue' lval) (rvalue' rval)
 
-let add_assignment_op ?(loc = null_loc) (`Block blk) lval op rval =
-  let ctx = gcc_jit_object_get_context (gcc_jit_block_as_object blk) in
-  wrap5 ctx gcc_jit_block_add_assignment_op blk (loc' loc)
-    (lvalue' lval) (binary_op op) (rvalue' rval)
+  let assignment_op ?(loc = null_loc) (`Block blk) lval op rval =
+    let ctx = gcc_jit_object_get_context (gcc_jit_block_as_object blk) in
+    wrap5 ctx gcc_jit_block_add_assignment_op blk (loc' loc)
+      (lvalue' lval) (binary_op op) (rvalue' rval)
 
-let add_comment ?(loc = null_loc) (`Block blk) str =
-  let ctx = gcc_jit_object_get_context (gcc_jit_block_as_object blk) in
-  wrap3 ctx gcc_jit_block_add_comment blk (loc' loc) str
+  let comment ?(loc = null_loc) (`Block blk) str =
+    let ctx = gcc_jit_object_get_context (gcc_jit_block_as_object blk) in
+    wrap3 ctx gcc_jit_block_add_comment blk (loc' loc) str
 
-let end_with_conditional ?(loc = null_loc) (`Block blk) rval (`Block blk1) (`Block blk2) =
-  let ctx = gcc_jit_object_get_context (gcc_jit_block_as_object blk) in
-  wrap5 ctx gcc_jit_block_end_with_conditional blk (loc' loc)
-    (rvalue' rval) blk1 blk2
+  let conditional ?(loc = null_loc) (`Block blk) rval (`Block blk1) (`Block blk2) =
+    let ctx = gcc_jit_object_get_context (gcc_jit_block_as_object blk) in
+    wrap5 ctx gcc_jit_block_end_with_conditional blk (loc' loc)
+      (rvalue' rval) blk1 blk2
 
-let end_with_jump ?(loc = null_loc) (`Block blk) (`Block blk1) =
-  let ctx = gcc_jit_object_get_context (gcc_jit_block_as_object blk) in
-  wrap3 ctx gcc_jit_block_end_with_jump blk (loc' loc) blk1
+  let jump ?(loc = null_loc) (`Block blk) (`Block blk1) =
+    let ctx = gcc_jit_object_get_context (gcc_jit_block_as_object blk) in
+    wrap3 ctx gcc_jit_block_end_with_jump blk (loc' loc) blk1
 
-let end_with_return ?(loc = null_loc) (`Block blk) rval =
-  let ctx = gcc_jit_object_get_context (gcc_jit_block_as_object blk) in
-  wrap3 ctx gcc_jit_block_end_with_return blk (loc' loc) (rvalue' rval)
+  let return ?(loc = null_loc) (`Block blk) rval =
+    let ctx = gcc_jit_object_get_context (gcc_jit_block_as_object blk) in
+    wrap3 ctx gcc_jit_block_end_with_return blk (loc' loc) (rvalue' rval)
 
-let end_with_void_return ?(loc = null_loc) (`Block blk) =
-  let ctx = gcc_jit_object_get_context (gcc_jit_block_as_object blk) in
-  wrap2 ctx gcc_jit_block_end_with_void_return blk (loc' loc)
+  let return_void ?(loc = null_loc) (`Block blk) =
+    let ctx = gcc_jit_object_get_context (gcc_jit_block_as_object blk) in
+    wrap2 ctx gcc_jit_block_end_with_void_return blk (loc' loc)
+end
 
 let new_location ctx path line col =
   `Location (wrap4 ctx gcc_jit_context_new_location ctx path line col)

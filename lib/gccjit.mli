@@ -55,13 +55,13 @@ type location = [ `Location of Gccjit_bindings.gcc_jit_location ]
 
     See {{!locations}Source locations}. *)
 
-type param = [ `Param of Gccjit_bindings.gcc_jit_param ]
+type param
 
-type lvalue = [ `Lvalue of Gccjit_bindings.gcc_jit_lvalue | param ]
+type lvalue
 (** A [lvalue] is a storage location within your code (e.g. a variable, a
     parameter, etc).  It is also a [rvalue]. *)
 
-type rvalue = [ `Rvalue of Gccjit_bindings.gcc_jit_rvalue | lvalue ]
+type rvalue
 (** A [rvalue] is an expression within your code, with some type. *)
 
 type field = [ `Field of Gccjit_bindings.gcc_jit_field ]
@@ -98,13 +98,13 @@ type block = [ `Block of Gccjit_bindings.gcc_jit_block ]
     It's OK to have more than one {e return} from a function (i.e., multiple
     blocks that terminate by returning. *)
 
-type object_ =
-  [ location
-  | type_
-  | field
-  | function_
-  | block
-  | rvalue ]
+(* type object_ = *)
+(*   [ location *)
+(*   | type_ *)
+(*   | field *)
+(*   | function_ *)
+(*   | block *)
+(*   | rvalue ] *)
 
 type unary_op =
   | Negate
@@ -366,7 +366,7 @@ val dump_reproducer_to_file : context -> string -> unit
     variable within the generated C source, and not all are necessarily then
     used). *)
 
-val get_debug_string : [< object_] -> string
+(* val get_debug_string : [< object_] -> string *)
 (** Get a human-readable description of this object.
 
     For example,
@@ -542,24 +542,24 @@ module RV : sig
 
   (** {2 Unary operations} *)
 
-  val unary_op : ?loc:location -> context -> unary_op -> type_ -> [< rvalue] -> rvalue
+  val unary_op : ?loc:location -> context -> unary_op -> type_ -> rvalue -> rvalue
   (** Build a unary operation out of an input {!rvalue}.  See {!unary_op}. *)
 
   (** {2 Binary operations} *)
 
-  val binary_op : ?loc:location -> context -> binary_op -> type_ -> [< rvalue] -> [< rvalue] -> rvalue
+  val binary_op : ?loc:location -> context -> binary_op -> type_ -> rvalue -> rvalue -> rvalue
   (** Build a binary operation out of two constituent {{!rvalue}rvalues}. See
       {!binary_op}. *)
 
   (** {2 Comparisons} *)
 
-  val comparison : ?loc:location -> context -> comparison -> [< rvalue] -> [< rvalue] -> rvalue
+  val comparison : ?loc:location -> context -> comparison -> rvalue -> rvalue -> rvalue
   (** Build a boolean {!rvalue} out of the comparison of two other
       {{!rvalue}rvalues}. *)
 
   (** {2 Function calls} *)
 
-  val call : ?loc:location -> context -> function_ -> [< rvalue] list -> rvalue
+  val call : ?loc:location -> context -> function_ -> rvalue list -> rvalue
   (** Given a function and the given table of argument rvalues, construct a call
       to the function, with the result as an {!rvalue}.
 
@@ -577,7 +577,7 @@ module RV : sig
         add_eval block (new_call ctx printf_func args)
       ]} *)
 
-  val indirect_call : ?loc:location -> context -> [< rvalue] -> [< rvalue] list -> rvalue
+  val indirect_call : ?loc:location -> context -> rvalue -> rvalue list -> rvalue
   (** Call through a function pointer. *)
 
   (** {2 Type-coercion} *)
@@ -591,6 +591,8 @@ module RV : sig
       - [int <-> bool]
       - [P* <-> Q*], for pointer types [P] and [Q] *)
 
+  val lvalue : lvalue -> rvalue
+
   val param : param -> rvalue
 end
 
@@ -601,7 +603,7 @@ module LV : sig
       storage area (such as a variable). It is also usable as an {!rvalue}, where
       the {!rvalue} is computed by reading from the storage area. *)
 
-  val address : ?loc:location -> [< lvalue] -> rvalue
+  val address : ?loc:location -> lvalue -> rvalue
   (** Taking the address of an {!lvalue}; analogous to [&(EXPR)] in C. *)
 
   (** {2 Global variables} *)
@@ -614,14 +616,14 @@ module LV : sig
 
   (** {2 Working with pointers, structs, and unions} *)
 
-  val deref : ?loc:location -> [< rvalue] -> lvalue
+  val deref : ?loc:location -> rvalue -> lvalue
   (** Dereferencing a pointer; analogous to [*(EXPR)] in C. *)
 
-  val deref_field : ?loc:location -> [< rvalue] -> field -> lvalue
+  val deref_field : ?loc:location -> rvalue -> field -> lvalue
   (** Accessing a field of an [rvalue] of pointer type, analogous [(EXPR)->field]
       in C, itself equivalent to [(\*EXPR).FIELD] *)
 
-  val array_access : ?loc:location -> [< rvalue] -> [< rvalue] -> lvalue
+  val array_access : ?loc:location -> rvalue -> rvalue -> lvalue
   (** Given an rvalue of pointer type [T *], get at the element [T] at the given
       index, using standard C array indexing rules i.e. each increment of index
       corresponds to [sizeof(T)] bytes. Analogous to [PTR[INDEX]] in C (or,
@@ -664,103 +666,105 @@ module Function : sig
   (** Add a new local variable within the function, of the given type and name. *)
 end
 
-(** {2 Blocks}
+module Block : sig
+  (** {2 Blocks}
 
-    A {!block} represents a basic block within a function i.e. a sequence of
-    statements with a single entry point and a single exit point.
+      A {!block} represents a basic block within a function i.e. a sequence of
+      statements with a single entry point and a single exit point.
 
-    The first basic block that you create within a function will be the entrypoint.
+      The first basic block that you create within a function will be the entrypoint.
 
-    Each basic block that you create within a function must be terminated,
-    either with a conditional, a jump, or a return.
+      Each basic block that you create within a function must be terminated,
+      either with a conditional, a jump, or a return.
 
-    It's legal to have multiple basic blocks that return within one function. *)
+      It's legal to have multiple basic blocks that return within one function. *)
 
-val new_block : function_ -> ?name:string -> unit -> block
-(** Create a block.  You can give it a meaningful name, which may show up in
-    dumps of the internal representation, and in error messages. *)
+  val create : function_ -> ?name:string -> unit -> block
+  (** Create a block.  You can give it a meaningful name, which may show up in
+      dumps of the internal representation, and in error messages. *)
 
-val get_function : block -> function_
-(** Which function is this block within? *)
+  val parent : block -> function_
+  (** Which function is this block within? *)
 
-(** {2:code Statements} *)
+  (** {2:code Statements} *)
 
-val add_eval : ?loc:location -> block -> [< rvalue] -> unit
-(** Add evaluation of an {!rvalue}, discarding the result (e.g. a function call
-    that {e returns} void).  This is equivalent to this C code:
+  val eval : ?loc:location -> block -> rvalue -> unit
+  (** Add evaluation of an {!rvalue}, discarding the result (e.g. a function call
+      that {e returns} void).  This is equivalent to this C code:
 
-    {[
-      (void)expression;
-    ]} *)
+      {[
+        (void)expression;
+      ]} *)
 
-val add_assignment : ?loc:location -> block -> [< lvalue] -> rvalue -> unit
-(** Add evaluation of an {!rvalue}, assigning the result to the given {!lvalue}.
-    This is roughly equivalent to this C code:
+  val assignment : ?loc:location -> block -> lvalue -> rvalue -> unit
+  (** Add evaluation of an {!rvalue}, assigning the result to the given {!lvalue}.
+      This is roughly equivalent to this C code:
 
-    {[
-      lvalue = rvalue;
-    ]} *)
+      {[
+        lvalue = rvalue;
+      ]} *)
 
-val add_assignment_op : ?loc:location -> block -> [< lvalue] -> binary_op -> rvalue -> unit
-(** Add evaluation of an rvalue, using the result to modify an lvalue.  This
-    is analogous to ["+="] and friends:
+  val assignment_op : ?loc:location -> block -> lvalue -> binary_op -> rvalue -> unit
+  (** Add evaluation of an rvalue, using the result to modify an lvalue.  This
+      is analogous to ["+="] and friends:
 
-    {[
-      lvalue += rvalue;
-      lvalue *= rvalue;
-      lvalue /= rvalue;
-      etc
-    ]}
+      {[
+        lvalue += rvalue;
+        lvalue *= rvalue;
+        lvalue /= rvalue;
+        etc
+      ]}
 
-    For example:
+      For example:
 
-    {[
-      (* "i++" *)
-      add_assignment_op loop_body i Plus (one ctx int_type)
-    ]} *)
+      {[
+        (* "i++" *)
+        add_assignment_op loop_body i Plus (one ctx int_type)
+      ]} *)
 
-val add_comment : ?loc:location -> block -> string -> unit
-(** Add a no-op textual comment to the internal representation of the code.
-    It will be optimized away, but will be visible in the dumps seen via
-    {!Dump_initial_tree} and {!Dump_initial_gimple} and thus may be of use when
-    debugging how your project's internal representation gets converted to the
-    [libgccjit] IR.  *)
+  val comment : ?loc:location -> block -> string -> unit
+  (** Add a no-op textual comment to the internal representation of the code.
+      It will be optimized away, but will be visible in the dumps seen via
+      {!Dump_initial_tree} and {!Dump_initial_gimple} and thus may be of use when
+      debugging how your project's internal representation gets converted to the
+      [libgccjit] IR.  *)
 
-val end_with_conditional : ?loc:location -> block -> [< rvalue] -> block -> block -> unit
-(** Terminate a block by adding evaluation of an rvalue, branching on the
-    result to the appropriate successor block.  This is roughly equivalent to
-    this C code:
+  val conditional : ?loc:location -> block -> rvalue -> block -> block -> unit
+  (** Terminate a block by adding evaluation of an rvalue, branching on the
+      result to the appropriate successor block.  This is roughly equivalent to
+      this C code:
 
-    {[
-      if (boolval)
-        goto on_true;
-      else
-        goto on_false;
-    ]} *)
+      {[
+        if (boolval)
+          goto on_true;
+        else
+          goto on_false;
+      ]} *)
 
-val end_with_jump : ?loc:location -> block -> block -> unit
-(** Terminate a block by adding a jump to the given target block.  This is
-    roughly equivalent to this C code:
+  val jump : ?loc:location -> block -> block -> unit
+  (** Terminate a block by adding a jump to the given target block.  This is
+      roughly equivalent to this C code:
 
-    {[
-      goto target;
-    ]} *)
+      {[
+        goto target;
+      ]} *)
 
-val end_with_return : ?loc:location -> block -> [< rvalue] -> unit
-(** Terminate a block by adding evaluation of an {!rvalue}, returning the
-    value.  This is roughly equivalent to this C code:
+  val return : ?loc:location -> block -> rvalue -> unit
+  (** Terminate a block by adding evaluation of an {!rvalue}, returning the
+      value.  This is roughly equivalent to this C code:
 
-    {[
-      return expression;
-    ]} *)
+      {[
+        return expression;
+      ]} *)
 
-val end_with_void_return : ?loc:location -> block -> unit
-(** Terminate a block by adding a valueless return, for use within a function
-    with [void] return type.  This is equivalent to this C code:
+  val return_void : ?loc:location -> block -> unit
+  (** Terminate a block by adding a valueless return, for use within a function
+      with [void] return type.  This is equivalent to this C code:
 
-    {[
-      return;
-    ]} *)
+      {[
+        return;
+      ]} *)
+end
 
 (** {1:locations Source Locations}
 
