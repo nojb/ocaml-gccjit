@@ -673,7 +673,7 @@ module Block : sig
 
       It's legal to have multiple basic blocks that return within one function. *)
 
-  val create : function_ -> ?name:string -> unit -> block
+  val create : ?name:string -> function_ -> block
   (** Create a block.  You can give it a meaningful name, which may show up in
       dumps of the internal representation, and in error messages. *)
 
