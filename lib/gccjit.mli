@@ -429,13 +429,13 @@ module Struct : sig
           set_fields node [ field_hash; field_next ]
         ]} *)
 
-  val field : ?loc:location -> context -> type_ -> string -> field
+  val field : context -> ?loc:location -> type_ -> string -> field
   (** Create a field, with the given type and name. *)
 
-  val create : ?loc:location -> context -> string -> field list -> struct_
+  val create : context -> ?loc:location -> string -> field list -> struct_
   (** Create a struct type, with the given name and fields. *)
 
-  val opaque_struct : ?loc:location -> context -> string -> struct_
+  val opaque : context -> ?loc:location -> string -> struct_
   (** Construct a new struct type, with the given name, but without specifying the
       fields. The fields can be omitted (in which case the size of the struct is not
       known), or later specified using {!set_fields}. *)
@@ -467,14 +467,14 @@ module Type : sig
   val volatile : type_ -> type_
   (** Given type [T], get type [volatile T]. *)
 
-  val array : ?loc:location -> context -> type_ -> int -> type_
+  val array : context -> ?loc:location -> type_ -> int -> type_
   (** Given type [T], get type [T[N]] (for a constant [N]). *)
 
-  val function_ptr : ?loc:location -> context -> ?variadic:bool -> type_ list -> type_ -> type_
+  val function_ptr : context -> ?loc:location -> ?variadic:bool -> type_ list -> type_ -> type_
 
   val struct_ : struct_ -> type_
 
-  val union : ?loc:location -> context -> string -> field list -> type_
+  val union : context -> ?loc:location -> string -> field list -> type_
   (** Unions work similarly to structs. *)
 end
 
@@ -542,18 +542,18 @@ module RValue : sig
   (** Generate an {!rvalue} for the given [NIL]-terminated string, of type
       [Const_char_ptr]. *)
 
-  val unary_op : ?loc:location -> context -> unary_op -> type_ -> rvalue -> rvalue
+  val unary_op : context -> ?loc:location -> unary_op -> type_ -> rvalue -> rvalue
   (** Build a unary operation out of an input {!rvalue}.  See {!unary_op}. *)
 
-  val binary_op : ?loc:location -> context -> binary_op -> type_ -> rvalue -> rvalue -> rvalue
+  val binary_op : context -> ?loc:location -> binary_op -> type_ -> rvalue -> rvalue -> rvalue
   (** Build a binary operation out of two constituent {{!rvalue}rvalues}. See
       {!binary_op}. *)
 
-  val comparison : ?loc:location -> context -> comparison -> rvalue -> rvalue -> rvalue
+  val comparison : context -> ?loc:location -> comparison -> rvalue -> rvalue -> rvalue
   (** Build a boolean {!rvalue} out of the comparison of two other
       {{!rvalue}rvalues}. *)
 
-  val call : ?loc:location -> context -> function_ -> rvalue list -> rvalue
+  val call : context -> ?loc:location -> function_ -> rvalue list -> rvalue
   (** Given a function and the given table of argument rvalues, construct a call
       to the function, with the result as an {!rvalue}.
 
@@ -571,10 +571,10 @@ module RValue : sig
         add_eval block (new_call ctx printf_func args)
       ]} *)
 
-  val indirect_call : ?loc:location -> context -> rvalue -> rvalue list -> rvalue
+  val indirect_call : context -> ?loc:location -> rvalue -> rvalue list -> rvalue
   (** Call through a function pointer. *)
 
-  val cast : ?loc:location -> context -> rvalue -> type_ -> rvalue
+  val cast : context -> ?loc:location -> rvalue -> type_ -> rvalue
   (** Given an {!rvalue} of [T], construct another {!rvalue} of another type.
 
       Currently only a limited set of conversions are possible:
@@ -600,7 +600,7 @@ module LValue : sig
   val address : ?loc:location -> lvalue -> rvalue
   (** Taking the address of an {!lvalue}; analogous to [&(EXPR)] in C. *)
 
-  val global : ?loc:location -> context -> global_kind -> type_ -> string -> lvalue
+  val global : context -> ?loc:location -> global_kind -> type_ -> string -> lvalue
   (** Add a new global variable of the given type and name to the context.
 
       The {!global_kind} parameter determines the visibility of the {e global}
@@ -631,7 +631,7 @@ module Param : sig
 
       A {!param} represents a parameter to a function. *)
 
-  val create : ?loc:location -> context -> type_ -> string -> param
+  val create : context -> ?loc:location -> type_ -> string -> param
   (** In preparation for creating a function, create a new parameter of the given
       type and name. *)
 end
@@ -640,7 +640,7 @@ module Function : sig
   (** {2 Functions} *)
 
   val create :
-    ?loc:location -> context -> ?variadic:bool -> function_kind -> type_ -> string -> param list -> function_
+    context -> ?loc:location -> ?variadic:bool -> function_kind -> type_ -> string -> param list -> function_
   (** Create a gcc_jit_function with the given name and parameters.  See
       {!function_kind}. *)
 
@@ -870,7 +870,7 @@ module type S = sig
   module Struct : sig
     val field : ?loc:location -> type_ -> string -> field
     val create : ?loc:location -> string -> field list -> struct_
-    val opaque_struct : ?loc:location -> string -> struct_
+    val opaque : ?loc:location -> string -> struct_
     val set_fields : ?loc:location -> struct_ -> field list -> unit
   end
 
@@ -952,3 +952,5 @@ module type S = sig
     val release : result -> unit
   end
 end
+
+module Make () : S

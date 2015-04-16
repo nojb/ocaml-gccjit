@@ -228,8 +228,8 @@ let get_first_error ctx =
   gcc_jit_context_get_first_error ctx
 
 module Context = struct
-  let acquire ctx =
-    gcc_jit_context_acquire ctx
+  let acquire () =
+    gcc_jit_context_acquire ()
 
   let release ctx =
     gcc_jit_context_release ctx
@@ -291,15 +291,15 @@ module Context = struct
 end
 
 module Struct = struct
-  let field ?(loc = null_loc) ctx typ name =
+  let field ctx ?(loc = null_loc) typ name =
     wrap4 ctx gcc_jit_context_new_field ctx loc typ name
 
-  let create ?(loc = null_loc) ctx name fields =
+  let create ctx ?(loc = null_loc) name fields =
     let a = Ctypes.CArray.of_list gcc_jit_field fields in
     wrap3 ctx gcc_jit_context_new_struct_type ctx loc name
       (List.length fields) (Ctypes.CArray.start a)
 
-  let opaque_struct ?(loc = null_loc) ctx name =
+  let opaque ctx ?(loc = null_loc) name =
     wrap2 ctx gcc_jit_context_new_opaque_struct ctx loc name
 
   let set_fields ?(loc = null_loc) struc fields =
@@ -332,10 +332,10 @@ module Type = struct
     let ctx = gcc_jit_object_get_context (gcc_jit_type_as_object typ) in
     wrap1 ctx gcc_jit_type_get_volatile typ
 
-  let array ?(loc = null_loc) ctx typ n =
+  let array ctx ?(loc = null_loc) typ n =
     wrap4 ctx gcc_jit_context_new_array_type ctx loc typ n
 
-  let function_ptr ?(loc = null_loc) ctx ?(variadic = false) args ret =
+  let function_ptr ctx ?(loc = null_loc) ?(variadic = false) args ret =
     let a = Ctypes.CArray.of_list gcc_jit_type args in
     wrap5 ctx gcc_jit_context_new_function_ptr_type ctx
       loc ret (List.length args) (Ctypes.CArray.start a)
@@ -345,7 +345,7 @@ module Type = struct
     let ctx = gcc_jit_object_get_context (gcc_jit_type_as_object (gcc_jit_struct_as_type str)) in
     wrap1 ctx gcc_jit_struct_as_type str
 
-  let union ?(loc = null_loc) ctx name fields =
+  let union ctx ?(loc = null_loc) name fields =
     let a = Ctypes.CArray.of_list gcc_jit_field fields in
     wrap3 ctx gcc_jit_context_new_union_type ctx loc name (List.length fields) (Ctypes.CArray.start a)
 end
@@ -377,27 +377,27 @@ module RValue = struct
   let string_literal ctx str =
     wrap2 ctx gcc_jit_context_new_string_literal ctx str
 
-  let unary_op ?(loc = null_loc) ctx op typ rval =
+  let unary_op ctx ?(loc = null_loc) op typ rval =
     wrap5 ctx gcc_jit_context_new_unary_op ctx
       loc (unary_op op) typ rval
 
-  let binary_op ?(loc = null_loc) ctx op typ rval1 rval2 =
+  let binary_op ctx ?(loc = null_loc) op typ rval1 rval2 =
     wrap6 ctx gcc_jit_context_new_binary_op ctx loc (binary_op op)
       typ rval1 rval2
 
-  let comparison ?(loc = null_loc) ctx cmp rval1 rval2 =
+  let comparison ctx ?(loc = null_loc) cmp rval1 rval2 =
     wrap5 ctx gcc_jit_context_new_comparison ctx loc (comparison cmp) rval1 rval2
 
-  let call ?(loc = null_loc) ctx fn args =
+  let call ctx ?(loc = null_loc) fn args =
     let a = Ctypes.CArray.of_list gcc_jit_rvalue args in
     wrap5 ctx gcc_jit_context_new_call ctx loc fn (List.length args) (Ctypes.CArray.start a)
 
-  let indirect_call ?(loc = null_loc) ctx rval args =
+  let indirect_call ctx ?(loc = null_loc) rval args =
     let a = Ctypes.CArray.of_list gcc_jit_rvalue args in
     wrap5 ctx gcc_jit_context_new_call_through_ptr ctx
       loc rval (List.length args) (Ctypes.CArray.start a)
 
-  let cast ?(loc = null_loc) ctx rval typ =
+  let cast ctx ?(loc = null_loc) rval typ =
     wrap4 ctx gcc_jit_context_new_cast ctx loc rval typ
 
   let access_field ?(loc = null_loc) rval fld =
@@ -418,7 +418,7 @@ module LValue = struct
     let ctx = gcc_jit_object_get_context (gcc_jit_lvalue_as_object lval) in
     wrap2 ctx gcc_jit_lvalue_get_address lval loc
 
-  let global ?(loc = null_loc) ctx kind typ name =
+  let global ctx ?(loc = null_loc) kind typ name =
     wrap4 ctx gcc_jit_context_new_global ctx loc (global_kind kind) typ name
 
   let deref ?(loc = null_loc) rval =
@@ -443,12 +443,12 @@ module LValue = struct
 end
 
 module Param = struct
-  let create ?(loc = null_loc) ctx typ name =
+  let create ctx ?(loc = null_loc) typ name =
     wrap4 ctx gcc_jit_context_new_param ctx loc typ name
 end
 
 module Function = struct
-  let create ?(loc = null_loc) ctx ?(variadic = false) kind ret name args =
+  let create ctx ?(loc = null_loc) ?(variadic = false) kind ret name args =
     let a = Ctypes.CArray.of_list gcc_jit_param args in
     wrap8 ctx gcc_jit_context_new_function
       ctx loc (function_kind kind) ret name (List.length args) (Ctypes.CArray.start a)
@@ -545,7 +545,7 @@ module type S = sig
   module Struct : sig
     val field : ?loc:location -> type_ -> string -> field
     val create : ?loc:location -> string -> field list -> struct_
-    val opaque_struct : ?loc:location -> string -> struct_
+    val opaque : ?loc:location -> string -> struct_
     val set_fields : ?loc:location -> struct_ -> field list -> unit
   end
 
@@ -625,5 +625,114 @@ module type S = sig
     val code : result -> string -> ('a -> 'b) Ctypes.fn -> 'a -> 'b
     val global : result -> string -> 'a Ctypes.typ -> 'a Ctypes.ptr
     val release : result -> unit
+  end
+end
+
+module Make () = struct
+  let ctx = Context.acquire ()
+
+  module Context = struct
+    open Context
+    let release () = release ctx
+    let dump_to_file = dump_to_file ctx
+    let set_logfile = set_logfile ctx
+    let dump_reproducer_to_file = dump_reproducer_to_file ctx
+    let set_option o v = set_option ctx o v
+    let compile () = compile ctx
+    let compile_to_file = compile_to_file ctx
+  end
+
+  module Struct = struct
+    open Struct
+    let field = field ctx
+    let create = create ctx
+    let opaque = opaque ctx
+    let set_fields = set_fields
+  end
+
+  module Type = struct
+    open Type
+    let standard = standard ctx
+    let int_gen = int_gen ctx
+    let int = int ctx
+    let pointer = pointer
+    let const = const
+    let volatile = volatile
+    let array = array ctx
+    let function_ptr = function_ptr ctx
+    let struct_ = struct_
+    let union = union ctx
+  end
+
+  module RValue = struct
+    open RValue
+    let type_of = type_of
+    let int = int ctx
+    let zero = zero ctx
+    let one = one ctx
+    let double = double ctx
+    let ptr typ p = ptr ctx typ p
+    let null = null ctx
+    let string_literal = string_literal ctx
+    let unary_op = unary_op ctx
+    let binary_op = binary_op ctx
+    let comparison = comparison ctx
+    let call = call ctx
+    let indirect_call = indirect_call ctx
+    let cast = cast ctx
+    let access_field = access_field
+    let lvalue = lvalue
+    let param = param
+  end
+
+  module LValue = struct
+    open LValue
+    let address = address
+    let global = global ctx
+    let deref = deref
+    let deref_field = deref_field
+    let access_array = access_array
+    let access_field = access_field
+    let param = param
+  end
+
+  module Param = struct
+    open Param
+    let create = create ctx
+  end
+
+  module Function = struct
+    open Function
+    let create = create ctx
+    let builtin = builtin ctx
+    let param = param
+    let dump_dot = dump_dot
+    let local = local
+  end
+
+  module Block = struct
+    open Block
+    let create = create
+    let parent = parent
+    let eval = eval
+    let assign = assign
+    let assign_op = assign_op
+    let comment = comment
+    let cond_jump = cond_jump
+    let jump = jump
+    let return = return
+    let return_void = return_void
+  end
+
+  module Location = struct
+    open Location
+    let create = create ctx
+  end
+
+  module Result = struct
+    open Result
+    let code = code
+    let global = global
+    let release = release
   end
 end
