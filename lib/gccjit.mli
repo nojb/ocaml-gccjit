@@ -386,86 +386,88 @@ val get_debug_string : [< object_] -> string
 val set_option : context -> 'a context_option -> 'a -> unit
 (** Set an option of the {!context}. *)
 
-(** {1:types Types} *)
+module Type : sig
+  (** {1:types Types} *)
 
-(** {2 Standard types} *)
+  (** {2 Standard types} *)
 
-val get_standard_type : context -> type_kind -> type_
-(** Access a specific type.  See {!type_kind}. *)
+  val standard : context -> type_kind -> type_
+  (** Access a specific type.  See {!type_kind}. *)
 
-val get_int_type : context -> ?signed:bool -> int -> type_
-(** Get the integer type of the given size and signedness. *)
+  val int_gen : context -> ?signed:bool -> int -> type_
+  (** Get the integer type of the given size and signedness. *)
 
-(** {2 Pointers, const, and volatile} *)
+  (** {2 Pointers, const, and volatile} *)
 
-val get_pointer : [< type_] -> type_
-(** Given type [T], get type [T*] *)
+  val pointer : [< type_] -> type_
+  (** Given type [T], get type [T*] *)
 
-val get_const : [< type_] -> type_
-(** Given type [T], get type [const T]. *)
+  val const : [< type_] -> type_
+  (** Given type [T], get type [const T]. *)
 
-val get_volatile : [< type_] -> type_
-(** Given type [T], get type [volatile T]. *)
+  val volatile : [< type_] -> type_
+  (** Given type [T], get type [volatile T]. *)
 
-val new_array_type : ?loc:location -> context -> [< type_] -> int -> type_
-(** Given type [T], get type [T[N]] (for a constant [N]). *)
+  val array : ?loc:location -> context -> [< type_] -> int -> type_
+  (** Given type [T], get type [T[N]] (for a constant [N]). *)
 
-val new_function_ptr_type : ?loc:location -> context -> ?variadic:bool -> type_ list -> type_ -> type_
+  val function_ptr : ?loc:location -> context -> ?variadic:bool -> type_ list -> type_ -> type_
 
-(** {2 Structures and unions}
+  (** {2 Structures and unions}
 
-    You can model C struct types by creating [struct_] and [field] instances, in
-    either order:
+      You can model C struct types by creating [struct_] and [field] instances, in
+      either order:
 
-    - by creating the fields, then the structure. For example, to model:
+      - by creating the fields, then the structure. For example, to model:
 
-      {[
-        struct coord {double x; double y; };
-      ]}
+        {[
+          struct coord {double x; double y; };
+        ]}
 
-      you could call:
+        you could call:
 
-      {[
-        let field_x = new_field ctx double_type "x" in
-        let field_y = new_field ctx double_type "y" in
-        let coord = new_struct_type ctx "coord" [ field_x ; field_y ]
-      ]}
+        {[
+          let field_x = new_field ctx double_type "x" in
+          let field_y = new_field ctx double_type "y" in
+          let coord = new_struct_type ctx "coord" [ field_x ; field_y ]
+        ]}
 
-    - by creating the structure, then populating it with fields, typically to
-      allow modelling self-referential structs such as:
+      - by creating the structure, then populating it with fields, typically to
+        allow modelling self-referential structs such as:
 
-      {[
-        struct node { int m_hash; struct node *m_next; };
-      ]}
+        {[
+          struct node { int m_hash; struct node *m_next; };
+        ]}
 
-      like this:
+        like this:
 
-      {[
-        let node = new_opaque_struct ctx "node" in
-        let node_ptr = get_pointer node in
-        let field_hash = new_field ctx int_type "m_hash" in
-        let field_next = new_field ctx node_ptr "m_next" in
-        set_fields node [ field_hash; field_next ]
-      ]} *)
+        {[
+          let node = new_opaque_struct ctx "node" in
+          let node_ptr = get_pointer node in
+          let field_hash = new_field ctx int_type "m_hash" in
+          let field_next = new_field ctx node_ptr "m_next" in
+          set_fields node [ field_hash; field_next ]
+        ]} *)
 
-val new_field : ?loc:location -> context -> [< type_] -> string -> field
-(** Create a field, with the given type and name. *)
+  val field : ?loc:location -> context -> [< type_] -> string -> field
+  (** Create a field, with the given type and name. *)
 
-val new_struct_type : ?loc:location -> context -> string -> field list -> struct_
-(** Create a struct type, with the given name and fields. *)
+  val struct_ : ?loc:location -> context -> string -> field list -> struct_
+  (** Create a struct type, with the given name and fields. *)
 
-val new_opaque_struct : ?loc:location -> context -> string -> struct_
-(** Construct a new struct type, with the given name, but without specifying the
-    fields. The fields can be omitted (in which case the size of the struct is not
-    known), or later specified using {!set_fields}. *)
+  val opaque_struct : ?loc:location -> context -> string -> struct_
+  (** Construct a new struct type, with the given name, but without specifying the
+      fields. The fields can be omitted (in which case the size of the struct is not
+      known), or later specified using {!set_fields}. *)
 
-val set_fields : ?loc:location -> struct_ -> field list -> unit
-(** Populate the fields of a formerly-opaque struct type.
+  val set_fields : ?loc:location -> struct_ -> field list -> unit
+  (** Populate the fields of a formerly-opaque struct type.
 
-    This can only be called once on a given struct type. *)
+      This can only be called once on a given struct type. *)
 
-val new_union : ?loc:location -> context -> string -> field list -> type_
-(** Unions work similarly to structs. *)
+  val union : ?loc:location -> context -> string -> field list -> type_
+  (** Unions work similarly to structs. *)
+end
 
 (** {1 Expressions} *)
 
