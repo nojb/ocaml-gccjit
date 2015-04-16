@@ -386,7 +386,7 @@ val get_debug_string : [< object_] -> string
 val set_option : context -> 'a context_option -> 'a -> unit
 (** Set an option of the {!context}. *)
 
-module Type : sig
+module T : sig
   (** {1:types Types} *)
 
   (** {2 Standard types} *)
@@ -474,121 +474,123 @@ end
 
 (** {1 Expressions} *)
 
-(** {2:rvalues Rvalues}
+module RV : sig
+  (** {2:rvalues Rvalues}
 
-    A {!rvalue} is an expression that can be computed.
+      A {!rvalue} is an expression that can be computed.
 
-    It can be simple, e.g.:
+      It can be simple, e.g.:
 
-    - an integer value e.g. [0] or [42]
-    - a string literal e.g. ["Hello world"]
-    - a variable e.g. i. These are also {{!lvalues}lvalues} (see below).
+      - an integer value e.g. [0] or [42]
+      - a string literal e.g. ["Hello world"]
+      - a variable e.g. i. These are also {{!lvalues}lvalues} (see below).
 
-    or compound e.g.:
+      or compound e.g.:
 
-    - a unary expression e.g. [!cond]
-    - a binary expression e.g. [(a + b)]
-    - a function call e.g. [get_distance (&player_ship, &target)]
-    - etc.
+      - a unary expression e.g. [!cond]
+      - a binary expression e.g. [(a + b)]
+      - a function call e.g. [get_distance (&player_ship, &target)]
+      - etc.
 
-    Every {!rvalue} has an associated {{!type_}type}, and the API will check to
-    ensure that types match up correctly (otherwise the context will emit an
-    error). *)
+      Every {!rvalue} has an associated {{!type_}type}, and the API will check to
+      ensure that types match up correctly (otherwise the context will emit an
+      error). *)
 
-val get_type : rvalue -> type_
-(** Get the type of this {!rvalue}. *)
+  val type_of : rvalue -> type_
+  (** Get the type of this {!rvalue}. *)
 
-(** {2 Simple expressions} *)
+  (** {2 Simple expressions} *)
 
-val new_rvalue_from_int : context -> type_ -> int -> rvalue
-(** Given a numeric type (integer or floating point), build an {!rvalue} for the
-    given constant int value. *)
+  val int : context -> type_ -> int -> rvalue
+  (** Given a numeric type (integer or floating point), build an {!rvalue} for the
+      given constant int value. *)
 
-val zero : context -> type_ -> rvalue
-(** Given a numeric type (integer or floating point), get the {!rvalue} for
-    zero. Essentially this is just a shortcut for:
+  val zero : context -> type_ -> rvalue
+  (** Given a numeric type (integer or floating point), get the {!rvalue} for
+      zero. Essentially this is just a shortcut for:
 
-    {[
-      new_rvalue_from_int ctx numeric_type 0
-    ]} *)
+      {[
+        new_rvalue_from_int ctx numeric_type 0
+      ]} *)
 
-val one : context -> type_ -> rvalue
-(** Given a numeric type (integer or floating point), get the {!rvalue} for
-    one. Essentially this is just a shortcut for:
+  val one : context -> type_ -> rvalue
+  (** Given a numeric type (integer or floating point), get the {!rvalue} for
+      one. Essentially this is just a shortcut for:
 
-    {[
-      new_rvalue_from_int ctx numeric_type 1
-    ]} *)
+      {[
+        new_rvalue_from_int ctx numeric_type 1
+      ]} *)
 
-val new_rvalue_from_double : context -> type_ -> float -> rvalue
-(** Given a numeric type (integer or floating point), build an {!rvalue} for the
-    given constant double value. *)
+  val double : context -> type_ -> float -> rvalue
+  (** Given a numeric type (integer or floating point), build an {!rvalue} for the
+      given constant double value. *)
 
-val new_rvalue_from_ptr : context -> type_ -> 'a Ctypes.ptr -> rvalue
-(** Given a pointer type, build an {!rvalue} for the given address. *)
+  val ptr : context -> type_ -> 'a Ctypes.ptr -> rvalue
+  (** Given a pointer type, build an {!rvalue} for the given address. *)
 
-val null : context -> type_ -> rvalue
-(** Given a pointer type, build an {!rvalue} for [NULL]. Essentially this is
-    just a shortcut for:
+  val null : context -> type_ -> rvalue
+  (** Given a pointer type, build an {!rvalue} for [NULL]. Essentially this is
+      just a shortcut for:
 
-    {[
-      new_rvalue_from_ptr ctx pointer_type Ctypes.null
-    ]} *)
+      {[
+        new_rvalue_from_ptr ctx pointer_type Ctypes.null
+      ]} *)
 
-val new_string_literal : context -> string -> rvalue
-(** Generate an {!rvalue} for the given [NIL]-terminated string, of type
-    [Const_char_ptr]. *)
+  val string_literal : context -> string -> rvalue
+  (** Generate an {!rvalue} for the given [NIL]-terminated string, of type
+      [Const_char_ptr]. *)
 
-(** {2 Unary operations} *)
+  (** {2 Unary operations} *)
 
-val new_unary_op : ?loc:location -> context -> unary_op -> type_ -> [< rvalue] -> rvalue
-(** Build a unary operation out of an input {!rvalue}.  See {!unary_op}. *)
+  val unary_op : ?loc:location -> context -> unary_op -> type_ -> [< rvalue] -> rvalue
+  (** Build a unary operation out of an input {!rvalue}.  See {!unary_op}. *)
 
-(** {2 Binary operations} *)
+  (** {2 Binary operations} *)
 
-val new_binary_op : ?loc:location -> context -> binary_op -> type_ -> [< rvalue] -> [< rvalue] -> rvalue
-(** Build a binary operation out of two constituent {{!rvalue}rvalues}. See
-    {!binary_op}. *)
+  val binary_op : ?loc:location -> context -> binary_op -> type_ -> [< rvalue] -> [< rvalue] -> rvalue
+  (** Build a binary operation out of two constituent {{!rvalue}rvalues}. See
+      {!binary_op}. *)
 
-(** {2 Comparisons} *)
+  (** {2 Comparisons} *)
 
-val new_comparison : ?loc:location -> context -> comparison -> [< rvalue] -> [< rvalue] -> rvalue
-(** Build a boolean {!rvalue} out of the comparison of two other
-    {{!rvalue}rvalues}. *)
+  val comparison : ?loc:location -> context -> comparison -> [< rvalue] -> [< rvalue] -> rvalue
+  (** Build a boolean {!rvalue} out of the comparison of two other
+      {{!rvalue}rvalues}. *)
 
-(** {2 Function calls} *)
+  (** {2 Function calls} *)
 
-val new_call : ?loc:location -> context -> function_ -> [< rvalue] list -> rvalue
-(** Given a function and the given table of argument rvalues, construct a call
-    to the function, with the result as an {!rvalue}.
+  val call : ?loc:location -> context -> function_ -> [< rvalue] list -> rvalue
+  (** Given a function and the given table of argument rvalues, construct a call
+      to the function, with the result as an {!rvalue}.
 
-    {3 Note}
+      {3 Note}
 
-    [new_call] merely builds a [rvalue] i.e. an expression that can be
-    evaluated, perhaps as part of a more complicated expression.  The call won't
-    happen unless you add a statement to a function that evaluates the expression.
+      [new_call] merely builds a [rvalue] i.e. an expression that can be
+      evaluated, perhaps as part of a more complicated expression.  The call won't
+      happen unless you add a statement to a function that evaluates the expression.
 
-    For example, if you want to call a function and discard the result (or to call a
-    function with [void] return type), use [add_eval]:
+      For example, if you want to call a function and discard the result (or to call a
+      function with [void] return type), use [add_eval]:
 
-    {[
-      (* Add "(void)printf (args);". *)
-      add_eval block (new_call ctx printf_func args)
-    ]} *)
+      {[
+        (* Add "(void)printf (args);". *)
+        add_eval block (new_call ctx printf_func args)
+      ]} *)
 
-val new_call_through_ptr : ?loc:location -> context -> [< rvalue] -> [< rvalue] list -> rvalue
-(** Call through a function pointer. *)
+  val indirect_call : ?loc:location -> context -> [< rvalue] -> [< rvalue] list -> rvalue
+  (** Call through a function pointer. *)
 
-(** {2 Type-coercion} *)
+  (** {2 Type-coercion} *)
 
-val new_cast : ?loc:location -> context -> rvalue -> type_ -> rvalue
-(** Given an {!rvalue} of [T], construct another {!rvalue} of another type.
+  val cast : ?loc:location -> context -> rvalue -> type_ -> rvalue
+  (** Given an {!rvalue} of [T], construct another {!rvalue} of another type.
 
-    Currently only a limited set of conversions are possible:
+      Currently only a limited set of conversions are possible:
 
-    - [int <-> float]
-    - [int <-> bool]
-    - [P* <-> Q*], for pointer types [P] and [Q] *)
+      - [int <-> float]
+      - [int <-> bool]
+      - [P* <-> Q*], for pointer types [P] and [Q] *)
+end
 
 (** {2:lvalues Lvalues}
 
