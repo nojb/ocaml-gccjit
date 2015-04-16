@@ -449,18 +449,14 @@ end
 module Type : sig
   (** {1:types Types} *)
 
-  (** {2 Standard types} *)
-
   val standard : context -> type_kind -> type_
-  (** Access a specific type.  See {!type_kind}. *)
+  (** Access a standard type.  See {!type_kind}. *)
 
   val int_gen : context -> ?signed:bool -> int -> type_
   (** Get the integer type of the given size and signedness. *)
 
   val int : context -> type_
   (** Standard [int] type. *)
-
-  (** {2 Pointers, const, and volatile} *)
 
   val pointer : type_ -> type_
   (** Given type [T], get type [T*] *)
@@ -482,10 +478,8 @@ module Type : sig
   (** Unions work similarly to structs. *)
 end
 
-(** {1 Expressions} *)
-
 module RValue : sig
-  (** {2:rvalues Rvalues}
+  (** {1:rvalues Rvalues}
 
       A {!rvalue} is an expression that can be computed.
 
@@ -508,8 +502,6 @@ module RValue : sig
 
   val type_of : rvalue -> type_
   (** Get the type of this {!rvalue}. *)
-
-  (** {2 Simple expressions} *)
 
   val int : context -> type_ -> int -> rvalue
   (** Given a numeric type (integer or floating point), build an {!rvalue} for the
@@ -550,24 +542,16 @@ module RValue : sig
   (** Generate an {!rvalue} for the given [NIL]-terminated string, of type
       [Const_char_ptr]. *)
 
-  (** {2 Unary operations} *)
-
   val unary_op : ?loc:location -> context -> unary_op -> type_ -> rvalue -> rvalue
   (** Build a unary operation out of an input {!rvalue}.  See {!unary_op}. *)
-
-  (** {2 Binary operations} *)
 
   val binary_op : ?loc:location -> context -> binary_op -> type_ -> rvalue -> rvalue -> rvalue
   (** Build a binary operation out of two constituent {{!rvalue}rvalues}. See
       {!binary_op}. *)
 
-  (** {2 Comparisons} *)
-
   val comparison : ?loc:location -> context -> comparison -> rvalue -> rvalue -> rvalue
   (** Build a boolean {!rvalue} out of the comparison of two other
       {{!rvalue}rvalues}. *)
-
-  (** {2 Function calls} *)
 
   val call : ?loc:location -> context -> function_ -> rvalue list -> rvalue
   (** Given a function and the given table of argument rvalues, construct a call
@@ -590,8 +574,6 @@ module RValue : sig
   val indirect_call : ?loc:location -> context -> rvalue -> rvalue list -> rvalue
   (** Call through a function pointer. *)
 
-  (** {2 Type-coercion} *)
-
   val cast : ?loc:location -> context -> rvalue -> type_ -> rvalue
   (** Given an {!rvalue} of [T], construct another {!rvalue} of another type.
 
@@ -609,7 +591,7 @@ module RValue : sig
 end
 
 module LValue : sig
-  (** {2:lvalues Lvalues}
+  (** {1:lvalues Lvalues}
 
       An {!lvalue} is something that can of the left-hand side of an assignment: a
       storage area (such as a variable). It is also usable as an {!rvalue}, where
@@ -618,15 +600,11 @@ module LValue : sig
   val address : ?loc:location -> lvalue -> rvalue
   (** Taking the address of an {!lvalue}; analogous to [&(EXPR)] in C. *)
 
-  (** {2 Global variables} *)
-
   val global : ?loc:location -> context -> global_kind -> type_ -> string -> lvalue
   (** Add a new global variable of the given type and name to the context.
 
       The {!global_kind} parameter determines the visibility of the {e global}
       outside of the {!result}. *)
-
-  (** {2 Working with pointers, structs, and unions} *)
 
   val deref : ?loc:location -> rvalue -> lvalue
   (** Dereferencing a pointer; analogous to [*(EXPR)] in C. *)
