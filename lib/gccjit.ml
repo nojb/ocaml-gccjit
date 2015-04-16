@@ -302,9 +302,23 @@ module Context = struct
         wrap3 ctx gcc_jit_context_set_bool_option ctx GCC_JIT_BOOL_OPTION_SELFCHECK_GC v
     | Keep_intermediates ->
         wrap3 ctx gcc_jit_context_set_bool_option ctx GCC_JIT_BOOL_OPTION_KEEP_INTERMEDIATES v
+
+  let compile ctx =
+    let res = wrap1 ctx gcc_jit_context_compile ctx in
+    Gc.finalise gcc_jit_result_release res;
+    res
+
+  let output_kind = function
+    | Assembler -> GCC_JIT_OUTPUT_KIND_ASSEMBLER
+    | Object_file -> GCC_JIT_OUTPUT_KIND_OBJECT_FILE
+    | Dynamic_library -> GCC_JIT_OUTPUT_KIND_DYNAMIC_LIBRARY
+    | Executable -> GCC_JIT_OUTPUT_KIND_EXECUTABLE
+
+  let compile_to_file ctx kind path =
+    wrap3 ctx gcc_jit_context_compile_to_file ctx (output_kind kind) path
 end
 
-module T = struct
+module Type = struct
   let standard ctx kind =
     `Type (wrap2 ctx gcc_jit_context_get_type ctx (type_kind kind))
 
@@ -363,7 +377,7 @@ module T = struct
          (List.length fields) (Ctypes.CArray.start a))
 end
 
-module RV = struct
+module RValue = struct
   let type_of rval =
     let ctx = gcc_jit_object_get_context (gcc_jit_rvalue_as_object rval) in
     `Type (wrap1 ctx gcc_jit_rvalue_get_type rval) (* CHECK *)
@@ -422,7 +436,7 @@ module RV = struct
     wrap1 ctx gcc_jit_param_as_rvalue param
 end
 
-module LV = struct
+module LValue = struct
   let address ?(loc = null_loc) lval =
     let ctx = gcc_jit_object_get_context (gcc_jit_lvalue_as_object lval) in
     wrap2 ctx gcc_jit_lvalue_get_address lval loc
@@ -517,30 +531,20 @@ module Block = struct
     wrap2 ctx gcc_jit_block_end_with_void_return blk loc
 end
 
-let new_location ctx path line col =
-  wrap4 ctx gcc_jit_context_new_location ctx path line col
+module Location = struct
+  let create ctx path line col =
+    wrap4 ctx gcc_jit_context_new_location ctx path line col
+end
 
-let compile ctx =
-  let res = wrap1 ctx gcc_jit_context_compile ctx in
-  Gc.finalise gcc_jit_result_release res;
-  res
+module Result = struct
+  let code res name fn =
+    let p = gcc_jit_result_get_code res name in
+    Ctypes.(coerce (ptr void) (Foreign.funptr ~name fn) p)
 
-let get_code res name fn =
-  let p = gcc_jit_result_get_code res name in
-  Ctypes.(coerce (ptr void) (Foreign.funptr ~name fn) p)
+  let global res name typ =
+    let p = gcc_jit_result_get_global res name in
+    Ctypes.(coerce (ptr void) (ptr typ)) p
 
-let get_global res name typ =
-  let p = gcc_jit_result_get_global res name in
-  Ctypes.(coerce (ptr void) (ptr typ)) p
-
-let release_result res =
-  gcc_jit_result_release res
-
-let output_kind = function
-  | Assembler -> GCC_JIT_OUTPUT_KIND_ASSEMBLER
-  | Object_file -> GCC_JIT_OUTPUT_KIND_OBJECT_FILE
-  | Dynamic_library -> GCC_JIT_OUTPUT_KIND_DYNAMIC_LIBRARY
-  | Executable -> GCC_JIT_OUTPUT_KIND_EXECUTABLE
-
-let compile_to_file ctx kind path =
-  wrap3 ctx gcc_jit_context_compile_to_file ctx (output_kind kind) path
+  let release res =
+    gcc_jit_result_release res
+end

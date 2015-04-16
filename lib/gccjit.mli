@@ -378,9 +378,33 @@ module Context : sig
 
   val set_option : context -> 'a context_option -> 'a -> unit
   (** Set an option of the {!context}. *)
+
+  (** {1 Compiling a context}
+
+    Once populated, a {!context} can be compiled to machine code, either
+    in-memory via {!compile} or to disk via {!compile_to_file}.
+
+    You can compile a context multiple times (using either form of compilation),
+    although any errors that occur on the context will prevent any future
+    compilation of that context. *)
+
+  val compile : context -> result
+  (** This calls into GCC and builds the code, returning a {!result}.  See
+      {{!inmemory}In-memory compilation}. *)
+
+  (** {2 Ahead-of-time compilation}
+
+      Although [libgccjit] is primarily aimed at just-in-time compilation, it can
+      also be used for implementing more traditional ahead-of-time compilers, via
+      the {!compile_to_file} API entrypoint. *)
+
+  val compile_to_file : context -> output_kind -> string -> unit
+  (** Compile the context to a file of the given kind.  This can be called more
+      that once on a given context, although any errors that occur will block
+      further compilation. *)
 end
 
-module T : sig
+module Type : sig
   (** {1:types Types} *)
 
   (** {2 Standard types} *)
@@ -468,7 +492,7 @@ end
 
 (** {1 Expressions} *)
 
-module RV : sig
+module RValue : sig
   (** {2:rvalues Rvalues}
 
       A {!rvalue} is an expression that can be computed.
@@ -590,7 +614,7 @@ module RV : sig
   val param : param -> rvalue
 end
 
-module LV : sig
+module LValue : sig
   (** {2:lvalues Lvalues}
 
       An {!lvalue} is something that can of the left-hand side of an assignment: a
@@ -760,119 +784,100 @@ module Block : sig
       ]} *)
 end
 
-(** {1:locations Source Locations}
+module Location : sig
+  (** {1:locations Source Locations}
 
-    A {!location} encapsulates a source code location, so that you can (optionally)
-    associate locations in your language with statements in the JIT-compiled code,
-    allowing the debugger to single-step through your language.
+      A {!location} encapsulates a source code location, so that you can (optionally)
+      associate locations in your language with statements in the JIT-compiled code,
+      allowing the debugger to single-step through your language.
 
-    {!location} instances are optional: you can always omit them to any API
-    entrypoint accepting one.
+      {!location} instances are optional: you can always omit them to any API
+      entrypoint accepting one.
 
-    You can construct them using {!new_location}.
+      You can construct them using {!new_location}.
 
-    You need to enable [Debuginfo] on the {!context} for these locations to
-    actually be usable by the debugger:
+      You need to enable [Debuginfo] on the {!context} for these locations to
+      actually be usable by the debugger:
 
-    {[
-      set_option ctx Debuginfo true
-    ]}
+      {[
+        set_option ctx Debuginfo true
+      ]}
 
-    {3 Faking it}
+      {3 Faking it}
 
-    If you don't have source code for your internal representation, but need to
-    debug, you can generate a C-like representation of the functions in your
-    context using {!dump_to_file}:
+      If you don't have source code for your internal representation, but need to
+      debug, you can generate a C-like representation of the functions in your
+      context using {!dump_to_file}:
 
-    {[
-      dump_to_file ctx ~update_locs:true "/tmp/something.c"
-    ]}
+      {[
+        dump_to_file ctx ~update_locs:true "/tmp/something.c"
+      ]}
 
-    This will dump C-like code to the given path. If the update_locations
-    argument is true, this will also set up {!location} information throughout
-    the context, pointing at the dump file as if it were a source file, giving
-    you something you can step through in the debugger. *)
+      This will dump C-like code to the given path. If the update_locations
+      argument is true, this will also set up {!location} information throughout
+      the context, pointing at the dump file as if it were a source file, giving
+      you something you can step through in the debugger. *)
 
-val new_location : context -> string -> int -> int -> location
-(** Create a {!location} instance representing the given source location. *)
+  val create : context -> string -> int -> int -> location
+  (** Create a {!location} instance representing the given source location. *)
+end
 
-(** {1 Compiling a context}
+module Result : sig
+  (** {2:inmemory In-memory compilation} *)
 
-    Once populated, a {!context} can be compiled to machine code, either
-    in-memory via {!compile} or to disk via {!compile_to_file}.
+  val code : result -> string -> ('a -> 'b) Ctypes.fn -> 'a -> 'b
+  (** Locate a given function within the built machine code.
 
-    You can compile a context multiple times (using either form of compilation),
-    although any errors that occur on the context will prevent any future
-    compilation of that context. *)
+      Functions are looked up by name. For this to succeed, a function with a name
+      matching funcname must have been created on result's context (or a parent
+      context) via a call to {!new_function} with kind [Exported]:
 
-(** {2 In-memory compilation} *)
+      {[
+        new_function ctx Exported any_return_type funcname (* etc. *)
+      ]}
 
-val compile : context -> result
-(** This calls into GCC and builds the code, returning a {!result}. *)
+      If such a function is not found, an error will be raised.
 
-val get_code : result -> string -> ('a -> 'b) Ctypes.fn -> 'a -> 'b
-(** Locate a given function within the built machine code.
+      If the function is found, the result is cast to the given Ctypes signature.
+      Care must be taken to pass a signature compatible with that of function
+      being extracted.
 
-    Functions are looked up by name. For this to succeed, a function with a name
-    matching funcname must have been created on result's context (or a parent
-    context) via a call to {!new_function} with kind [Exported]:
+      Note that the resulting machine code becomes invalid after {!release_result}
+      is called on the {!result}; attempting to call it after that may lead to a
+      segmentation fault. *)
 
-    {[
-      new_function ctx Exported any_return_type funcname (* etc. *)
-    ]}
+  val global : result -> string -> 'a Ctypes.typ -> 'a Ctypes.ptr
+  (** Locate a given global within the built machine code.
 
-    If such a function is not found, an error will be raised.
+      Globals are looked up by name. For this to succeed, a global with a name
+      matching name must have been created on result's context (or a parent context)
+      via a call to {!new_global} with kind [Global_exported].
 
-    If the function is found, the result is cast to the given Ctypes signature.
-    Care must be taken to pass a signature compatible with that of function
-    being extracted.
+      If the global is found, the result is cast to the Given [Ctypes] type.
 
-    Note that the resulting machine code becomes invalid after {!release_result}
-    is called on the {!result}; attempting to call it after that may lead to a
-    segmentation fault. *)
+      This is a pointer to the global, so e.g. for an [int] this is an [int *].
 
-val get_global : result -> string -> 'a Ctypes.typ -> 'a Ctypes.ptr
-(** Locate a given global within the built machine code.
+      For example, given an [int foo;] created this way:
 
-    Globals are looked up by name. For this to succeed, a global with a name
-    matching name must have been created on result's context (or a parent context)
-    via a call to {!new_global} with kind [Global_exported].
+      {[
+        let exported_global = new_global ctx Global_exported int_type "foo"
+      ]}
 
-    If the global is found, the result is cast to the Given [Ctypes] type.
+      we can access it like this:
 
-    This is a pointer to the global, so e.g. for an [int] this is an [int *].
+      {[
+        let ptr_to_foo = get_global result "foo" Ctypes.int
+      ]}
 
-    For example, given an [int foo;] created this way:
+      If such a global is not found, an error will be raised.
 
-    {[
-      let exported_global = new_global ctx Global_exported int_type "foo"
-    ]}
+      Note that the resulting address becomes invalid after {!release_result}
+      is called on the {!result}; attempting to use it after that may lead to a
+      segmentation fault.  *)
 
-    we can access it like this:
-
-    {[
-      let ptr_to_foo = get_global result "foo" Ctypes.int
-    ]}
-
-    If such a global is not found, an error will be raised.
-
-    Note that the resulting address becomes invalid after {!release_result}
-    is called on the {!result}; attempting to use it after that may lead to a
-    segmentation fault.  *)
-
-val release_result : result -> unit
-(** Once we're done with the code, this unloads the built [.so] file. This
-    cleans up the result; after calling this, it’s no longer valid to use the
-    result, or any code or globals that were obtained by calling {!get_code} or
-    {!get_global} on it. *)
-
-(** {2 Ahead-of-time compilation}
-
-    Although [libgccjit] is primarily aimed at just-in-time compilation, it can
-    also be used for implementing more traditional ahead-of-time compilers, via
-    the {!compile_to_file} API entrypoint. *)
-
-val compile_to_file : context -> output_kind -> string -> unit
-(** Compile the context to a file of the given kind.  This can be called more
-    that once on a given context, although any errors that occur will block
-    further compilation. *)
+  val release : result -> unit
+  (** Once we're done with the code, this unloads the built [.so] file. This
+      cleans up the result; after calling this, it’s no longer valid to use the
+      result, or any code or globals that were obtained by calling {!get_code} or
+      {!get_global} on it. *)
+end
