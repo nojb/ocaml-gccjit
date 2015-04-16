@@ -34,8 +34,8 @@ type param = gcc_jit_param
 type lvalue = gcc_jit_lvalue
 type rvalue = gcc_jit_rvalue
 type field = gcc_jit_field
-type struct_ = [ `Struct of gcc_jit_struct ]
-type type_ = [ `Type of gcc_jit_type | struct_ ]
+type struct_ = gcc_jit_struct
+type type_ = gcc_jit_type
 type function_ = gcc_jit_function
 type block = gcc_jit_block
 (* type object_ = [ location | type_ | field | function_ | block | rvalue ] *)
@@ -182,12 +182,6 @@ let output_kind = function
   | OUTPUT_Dynamic_library -> GCC_JIT_OUTPUT_KIND_DYNAMIC_LIBRARY
   | OUTPUT_Executable -> GCC_JIT_OUTPUT_KIND_EXECUTABLE
 
-let typ' = function
-  | `Struct struc ->
-      gcc_jit_struct_as_type struc
-  | `Type typ ->
-      typ
-
 let wrap1 ctx f x1 =
   let y = f x1 in
   match gcc_jit_context_get_first_error ctx with
@@ -298,97 +292,92 @@ end
 
 module Type = struct
   let standard ctx kind =
-    `Type (wrap2 ctx gcc_jit_context_get_type ctx (type_kind kind))
+    wrap2 ctx gcc_jit_context_get_type ctx (type_kind kind)
 
   let int_gen ctx ?(signed = false) n =
-    `Type (wrap3 ctx gcc_jit_context_get_int_type ctx (if signed then 1 else 0) n)
+    wrap3 ctx gcc_jit_context_get_int_type ctx (if signed then 1 else 0) n
 
   let int ctx =
     standard ctx TYPE_Int
 
   let pointer typ =
-    let ctx = gcc_jit_object_get_context (gcc_jit_type_as_object (typ' typ)) in
-    `Type (wrap1 ctx gcc_jit_type_get_pointer (typ' typ))
+    let ctx = gcc_jit_object_get_context (gcc_jit_type_as_object typ) in
+    wrap1 ctx gcc_jit_type_get_pointer typ
 
   let const typ =
-    let ctx = gcc_jit_object_get_context (gcc_jit_type_as_object (typ' typ)) in
-    `Type (wrap1 ctx gcc_jit_type_get_const (typ' typ))
+    let ctx = gcc_jit_object_get_context (gcc_jit_type_as_object typ) in
+    wrap1 ctx gcc_jit_type_get_const typ
 
   let volatile typ =
-    let ctx = gcc_jit_object_get_context (gcc_jit_type_as_object (typ' typ)) in
-    `Type (wrap1 ctx gcc_jit_type_get_volatile (typ' typ))
+    let ctx = gcc_jit_object_get_context (gcc_jit_type_as_object typ) in
+    wrap1 ctx gcc_jit_type_get_volatile typ
 
   let array ?(loc = null_loc) ctx typ n =
-    `Type (wrap4 ctx gcc_jit_context_new_array_type ctx loc (typ' typ) n)
+    wrap4 ctx gcc_jit_context_new_array_type ctx loc typ n
 
   let function_ptr ?(loc = null_loc) ctx ?(variadic = false) args ret =
-    let a = Ctypes.CArray.of_list gcc_jit_type (List.map typ' args) in
-    `Type
-      (wrap5 ctx gcc_jit_context_new_function_ptr_type ctx
-         loc (typ' ret) (List.length args) (Ctypes.CArray.start a)
-         (if variadic then 1 else 0))
+    let a = Ctypes.CArray.of_list gcc_jit_type args in
+    wrap5 ctx gcc_jit_context_new_function_ptr_type ctx
+      loc ret (List.length args) (Ctypes.CArray.start a)
+      (if variadic then 1 else 0)
 
   let field ?(loc = null_loc) ctx typ name =
-    wrap4 ctx gcc_jit_context_new_field ctx loc (typ' typ) name
+    wrap4 ctx gcc_jit_context_new_field ctx loc typ name
 
   let struct_ ?(loc = null_loc) ctx name fields =
     let a = Ctypes.CArray.of_list gcc_jit_field fields in
-    `Struct
-      (wrap3 ctx gcc_jit_context_new_struct_type ctx loc name
-         (List.length fields) (Ctypes.CArray.start a))
+    wrap3 ctx gcc_jit_context_new_struct_type ctx loc name
+      (List.length fields) (Ctypes.CArray.start a)
 
   let opaque_struct ?(loc = null_loc) ctx name =
-    `Struct (wrap2 ctx gcc_jit_context_new_opaque_struct ctx loc name)
+    wrap2 ctx gcc_jit_context_new_opaque_struct ctx loc name
 
-  let set_fields ?(loc = null_loc) (`Struct struc) fields =
+  let set_fields ?(loc = null_loc) struc fields =
     let ctx =
       gcc_jit_object_get_context (gcc_jit_type_as_object (gcc_jit_struct_as_type struc))
     in
     let a = Ctypes.CArray.of_list gcc_jit_field fields in
-    wrap3 ctx gcc_jit_struct_set_fields struc loc
-      (List.length fields) (Ctypes.CArray.start a)
+    wrap3 ctx gcc_jit_struct_set_fields struc loc (List.length fields) (Ctypes.CArray.start a)
 
   let union ?(loc = null_loc) ctx name fields =
     let a = Ctypes.CArray.of_list gcc_jit_field fields in
-    `Type
-      (wrap3 ctx gcc_jit_context_new_union_type ctx loc name
-         (List.length fields) (Ctypes.CArray.start a))
+    wrap3 ctx gcc_jit_context_new_union_type ctx loc name (List.length fields) (Ctypes.CArray.start a)
 end
 
 module RValue = struct
   let type_of rval =
     let ctx = gcc_jit_object_get_context (gcc_jit_rvalue_as_object rval) in
-    `Type (wrap1 ctx gcc_jit_rvalue_get_type rval) (* CHECK *)
+    wrap1 ctx gcc_jit_rvalue_get_type rval
 
   let int ctx typ n =
-    wrap3 ctx gcc_jit_context_new_rvalue_from_int ctx (typ' typ) n
+    wrap3 ctx gcc_jit_context_new_rvalue_from_int ctx typ n
 
-  let zero (ctx : context) (typ : type_) : rvalue =
-    wrap2 ctx gcc_jit_context_zero ctx (typ' typ)
+  let zero ctx typ : rvalue =
+    wrap2 ctx gcc_jit_context_zero ctx typ
 
   let one ctx typ =
-    wrap2 ctx gcc_jit_context_one ctx (typ' typ)
+    wrap2 ctx gcc_jit_context_one ctx typ
 
   let double ctx typ f =
-    wrap3 ctx gcc_jit_context_new_rvalue_from_double ctx (typ' typ) f
+    wrap3 ctx gcc_jit_context_new_rvalue_from_double ctx typ f
 
   let ptr ctx typ ptr =
-    wrap3 ctx gcc_jit_context_new_rvalue_from_ptr ctx (typ' typ)
+    wrap3 ctx gcc_jit_context_new_rvalue_from_ptr ctx typ
       (Ctypes.to_voidp ptr)
 
   let null ctx typ =
-    wrap2 ctx gcc_jit_context_null ctx (typ' typ)
+    wrap2 ctx gcc_jit_context_null ctx typ
 
   let string_literal ctx str =
     wrap2 ctx gcc_jit_context_new_string_literal ctx str
 
   let unary_op ?(loc = null_loc) ctx op typ rval =
     wrap5 ctx gcc_jit_context_new_unary_op ctx
-      loc (unary_op op) (typ' typ) rval
+      loc (unary_op op) typ rval
 
   let binary_op ?(loc = null_loc) ctx op typ rval1 rval2 =
     wrap6 ctx gcc_jit_context_new_binary_op ctx loc (binary_op op)
-      (typ' typ) rval1 rval2
+      typ rval1 rval2
 
   let comparison ?(loc = null_loc) ctx cmp rval1 rval2 =
     wrap5 ctx gcc_jit_context_new_comparison ctx loc (comparison cmp) rval1 rval2
@@ -403,7 +392,7 @@ module RValue = struct
       loc rval (List.length args) (Ctypes.CArray.start a)
 
   let cast ?(loc = null_loc) ctx rval typ =
-    wrap4 ctx gcc_jit_context_new_cast ctx loc rval (typ' typ)
+    wrap4 ctx gcc_jit_context_new_cast ctx loc rval typ
 
   let lvalue lval =
     let ctx = gcc_jit_object_get_context (gcc_jit_lvalue_as_object lval) in
@@ -420,7 +409,7 @@ module LValue = struct
     wrap2 ctx gcc_jit_lvalue_get_address lval loc
 
   let global ?(loc = null_loc) ctx kind typ name =
-    wrap4 ctx gcc_jit_context_new_global ctx loc (global_kind kind) (typ' typ) name
+    wrap4 ctx gcc_jit_context_new_global ctx loc (global_kind kind) typ name
 
   let deref ?(loc = null_loc) rval =
     let ctx = gcc_jit_object_get_context (gcc_jit_rvalue_as_object rval) in
@@ -441,14 +430,14 @@ end
 
 module Param = struct
   let create ?(loc = null_loc) ctx typ name =
-    wrap4 ctx gcc_jit_context_new_param ctx loc (typ' typ) name
+    wrap4 ctx gcc_jit_context_new_param ctx loc typ name
 end
 
 module Function = struct
   let create ?(loc = null_loc) ctx ?(variadic = false) kind ret name args =
     let a = Ctypes.CArray.of_list gcc_jit_param args in
     wrap8 ctx gcc_jit_context_new_function
-      ctx loc (function_kind kind) (typ' ret) name (List.length args) (Ctypes.CArray.start a)
+      ctx loc (function_kind kind) ret name (List.length args) (Ctypes.CArray.start a)
       (if variadic then 1 else 0)
 
   let builtin ctx name =
@@ -464,7 +453,7 @@ module Function = struct
 
   let local ?(loc = null_loc) fn typ name =
     let ctx = gcc_jit_object_get_context (gcc_jit_function_as_object fn) in
-    wrap4 ctx gcc_jit_function_new_local fn loc (typ' typ) name
+    wrap4 ctx gcc_jit_function_new_local fn loc typ name
 end
 
 module Block = struct

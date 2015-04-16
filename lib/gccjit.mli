@@ -69,11 +69,11 @@ type field
     struct type (using {!new_struct_type}).  Fields cannot be shared between
     structs. *)
 
-type struct_ = [ `Struct of Gccjit_bindings.gcc_jit_struct ]
+type struct_
 (** A [structure] encapsulates a struct type, either one that we have the layout
     for, or an opaque type. *)
 
-type type_ = [ `Type of Gccjit_bindings.gcc_jit_type | struct_ ]
+type type_
 (** A [typ] encapsulates a type e.g. [int] or a [struct foo*]. *)
 
 type function_
@@ -408,16 +408,16 @@ module Type : sig
 
   (** {2 Pointers, const, and volatile} *)
 
-  val pointer : [< type_] -> type_
+  val pointer : type_ -> type_
   (** Given type [T], get type [T*] *)
 
-  val const : [< type_] -> type_
+  val const : type_ -> type_
   (** Given type [T], get type [const T]. *)
 
-  val volatile : [< type_] -> type_
+  val volatile : type_ -> type_
   (** Given type [T], get type [volatile T]. *)
 
-  val array : ?loc:location -> context -> [< type_] -> int -> type_
+  val array : ?loc:location -> context -> type_ -> int -> type_
   (** Given type [T], get type [T[N]] (for a constant [N]). *)
 
   val function_ptr : ?loc:location -> context -> ?variadic:bool -> type_ list -> type_ -> type_
@@ -458,7 +458,7 @@ module Type : sig
           set_fields node [ field_hash; field_next ]
         ]} *)
 
-  val field : ?loc:location -> context -> [< type_] -> string -> field
+  val field : ?loc:location -> context -> type_ -> string -> field
   (** Create a field, with the given type and name. *)
 
   val struct_ : ?loc:location -> context -> string -> field list -> struct_
@@ -614,7 +614,7 @@ module LValue : sig
 
   (** {2 Global variables} *)
 
-  val global : ?loc:location -> context -> global_kind -> [< type_] -> string -> lvalue
+  val global : ?loc:location -> context -> global_kind -> type_ -> string -> lvalue
   (** Add a new global variable of the given type and name to the context.
 
       The {!global_kind} parameter determines the visibility of the {e global}
@@ -645,7 +645,7 @@ module Param : sig
 
       A {!param} represents a parameter to a function. *)
 
-  val create : ?loc:location -> context -> [< type_] -> string -> param
+  val create : ?loc:location -> context -> type_ -> string -> param
   (** In preparation for creating a function, create a new parameter of the given
       type and name. *)
 end
@@ -654,7 +654,7 @@ module Function : sig
   (** {2 Functions} *)
 
   val create :
-    ?loc:location -> context -> ?variadic:bool -> function_kind -> [< type_] -> string -> param list -> function_
+    ?loc:location -> context -> ?variadic:bool -> function_kind -> type_ -> string -> param list -> function_
   (** Create a gcc_jit_function with the given name and parameters.  See
       {!function_kind}. *)
 
@@ -668,7 +668,7 @@ module Function : sig
   val dump_dot : function_ -> string -> unit
   (** Emit the function in graphviz format to the given path. *)
 
-  val local : ?loc:location -> function_ -> [< type_] -> string -> lvalue
+  val local : ?loc:location -> function_ -> type_ -> string -> lvalue
   (** Add a new local variable within the function, of the given type and name. *)
 end
 
