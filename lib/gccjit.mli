@@ -115,19 +115,7 @@ type binary_op =
   | Logical_and
   | Logical_or
 
-type comparison =
-    Eq
-  (** [(EXPR_A) == (EXPR_B).] *)
-  | Ne
-  (** [(EXPR_A) != (EXPR_B).] *)
-  | Lt
-  (** [(EXPR_A) < (EXPR_B).] *)
-  | Le
-  (** [(EXPR_A) <= (EXPR_B).] *)
-  | Gt
-  (** [(EXPR_A) > (EXPR_B).] *)
-  | Ge
-  (** [(EXPR_A) >= (EXPR_B).] *)
+type comparison = Eq | Ne | Lt | Le | Gt | Ge
 
 (** Kinds of function.  *)
 type function_kind =
