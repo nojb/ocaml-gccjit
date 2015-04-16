@@ -290,6 +290,26 @@ module Context = struct
     wrap3 ctx gcc_jit_context_compile_to_file ctx (output_kind kind) path
 end
 
+module Struct = struct
+  let field ?(loc = null_loc) ctx typ name =
+    wrap4 ctx gcc_jit_context_new_field ctx loc typ name
+
+  let create ?(loc = null_loc) ctx name fields =
+    let a = Ctypes.CArray.of_list gcc_jit_field fields in
+    wrap3 ctx gcc_jit_context_new_struct_type ctx loc name
+      (List.length fields) (Ctypes.CArray.start a)
+
+  let opaque_struct ?(loc = null_loc) ctx name =
+    wrap2 ctx gcc_jit_context_new_opaque_struct ctx loc name
+
+  let set_fields ?(loc = null_loc) struc fields =
+    let ctx =
+      gcc_jit_object_get_context (gcc_jit_type_as_object (gcc_jit_struct_as_type struc))
+    in
+    let a = Ctypes.CArray.of_list gcc_jit_field fields in
+    wrap3 ctx gcc_jit_struct_set_fields struc loc (List.length fields) (Ctypes.CArray.start a)
+end
+
 module Type = struct
   let standard ctx kind =
     wrap2 ctx gcc_jit_context_get_type ctx (type_kind kind)
@@ -321,23 +341,9 @@ module Type = struct
       loc ret (List.length args) (Ctypes.CArray.start a)
       (if variadic then 1 else 0)
 
-  let field ?(loc = null_loc) ctx typ name =
-    wrap4 ctx gcc_jit_context_new_field ctx loc typ name
-
-  let struct_ ?(loc = null_loc) ctx name fields =
-    let a = Ctypes.CArray.of_list gcc_jit_field fields in
-    wrap3 ctx gcc_jit_context_new_struct_type ctx loc name
-      (List.length fields) (Ctypes.CArray.start a)
-
-  let opaque_struct ?(loc = null_loc) ctx name =
-    wrap2 ctx gcc_jit_context_new_opaque_struct ctx loc name
-
-  let set_fields ?(loc = null_loc) struc fields =
-    let ctx =
-      gcc_jit_object_get_context (gcc_jit_type_as_object (gcc_jit_struct_as_type struc))
-    in
-    let a = Ctypes.CArray.of_list gcc_jit_field fields in
-    wrap3 ctx gcc_jit_struct_set_fields struc loc (List.length fields) (Ctypes.CArray.start a)
+  let struct_ str =
+    let ctx = gcc_jit_object_get_context (gcc_jit_type_as_object (gcc_jit_struct_as_type str)) in
+    wrap1 ctx gcc_jit_struct_as_type str
 
   let union ?(loc = null_loc) ctx name fields =
     let a = Ctypes.CArray.of_list gcc_jit_field fields in

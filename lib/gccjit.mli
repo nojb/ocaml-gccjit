@@ -392,36 +392,7 @@ module Context : sig
       further compilation. *)
 end
 
-module Type : sig
-  (** {1:types Types} *)
-
-  (** {2 Standard types} *)
-
-  val standard : context -> type_kind -> type_
-  (** Access a specific type.  See {!type_kind}. *)
-
-  val int_gen : context -> ?signed:bool -> int -> type_
-  (** Get the integer type of the given size and signedness. *)
-
-  val int : context -> type_
-  (** Standard [int] type. *)
-
-  (** {2 Pointers, const, and volatile} *)
-
-  val pointer : type_ -> type_
-  (** Given type [T], get type [T*] *)
-
-  val const : type_ -> type_
-  (** Given type [T], get type [const T]. *)
-
-  val volatile : type_ -> type_
-  (** Given type [T], get type [volatile T]. *)
-
-  val array : ?loc:location -> context -> type_ -> int -> type_
-  (** Given type [T], get type [T[N]] (for a constant [N]). *)
-
-  val function_ptr : ?loc:location -> context -> ?variadic:bool -> type_ list -> type_ -> type_
-
+module Struct : sig
   (** {2 Structures and unions}
 
       You can model C struct types by creating [struct_] and [field] instances, in
@@ -461,7 +432,7 @@ module Type : sig
   val field : ?loc:location -> context -> type_ -> string -> field
   (** Create a field, with the given type and name. *)
 
-  val struct_ : ?loc:location -> context -> string -> field list -> struct_
+  val create : ?loc:location -> context -> string -> field list -> struct_
   (** Create a struct type, with the given name and fields. *)
 
   val opaque_struct : ?loc:location -> context -> string -> struct_
@@ -473,6 +444,39 @@ module Type : sig
   (** Populate the fields of a formerly-opaque struct type.
 
       This can only be called once on a given struct type. *)
+end
+
+module Type : sig
+  (** {1:types Types} *)
+
+  (** {2 Standard types} *)
+
+  val standard : context -> type_kind -> type_
+  (** Access a specific type.  See {!type_kind}. *)
+
+  val int_gen : context -> ?signed:bool -> int -> type_
+  (** Get the integer type of the given size and signedness. *)
+
+  val int : context -> type_
+  (** Standard [int] type. *)
+
+  (** {2 Pointers, const, and volatile} *)
+
+  val pointer : type_ -> type_
+  (** Given type [T], get type [T*] *)
+
+  val const : type_ -> type_
+  (** Given type [T], get type [const T]. *)
+
+  val volatile : type_ -> type_
+  (** Given type [T], get type [volatile T]. *)
+
+  val array : ?loc:location -> context -> type_ -> int -> type_
+  (** Given type [T], get type [T[N]] (for a constant [N]). *)
+
+  val function_ptr : ?loc:location -> context -> ?variadic:bool -> type_ list -> type_ -> type_
+
+  val struct_ : struct_ -> type_
 
   val union : ?loc:location -> context -> string -> field list -> type_
   (** Unions work similarly to structs. *)
