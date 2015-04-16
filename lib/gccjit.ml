@@ -258,58 +258,60 @@ let wrap8 ctx f x1 x2 x3 x4 x5 x6 x7 x8 =
 let get_first_error ctx =
   gcc_jit_context_get_first_error ctx
 
-let acquire_context ctx =
-  gcc_jit_context_acquire ctx
+module Context = struct
+  let acquire ctx =
+    gcc_jit_context_acquire ctx
 
-let release_context ctx =
-  gcc_jit_context_release ctx
+  let release ctx =
+    gcc_jit_context_release ctx
 
-let new_child_context ctx =
-  wrap1 ctx gcc_jit_context_new_child_context ctx
+  let child_context ctx =
+    wrap1 ctx gcc_jit_context_new_child_context ctx
 
-let dump_to_file ctx ?(update_locs = false) path =
-  wrap3 ctx gcc_jit_context_dump_to_file ctx path (if update_locs then 1 else 0)
+  let dump_to_file ctx ?(update_locs = false) path =
+    wrap3 ctx gcc_jit_context_dump_to_file ctx path (if update_locs then 1 else 0)
 
-external int_of_file_descr : Unix.file_descr -> int = "%identity"
+  external int_of_file_descr : Unix.file_descr -> int = "%identity"
 
-let set_logfile ctx = function
-  | None ->
-      wrap4 ctx gcc_jit_context_set_logfile ctx Ctypes.null 0 0
-  | Some fd ->
-      let f = match fdopen (int_of_file_descr fd) "a" with
-        | None -> raise (Error "fdopen")
-        | Some f -> f
-      in
-      wrap4 ctx gcc_jit_context_set_logfile ctx f 0 0
+  let set_logfile ctx = function
+    | None ->
+        wrap4 ctx gcc_jit_context_set_logfile ctx Ctypes.null 0 0
+    | Some fd ->
+        let f = match fdopen (int_of_file_descr fd) "a" with
+          | None -> raise (Error "fdopen")
+          | Some f -> f
+        in
+        wrap4 ctx gcc_jit_context_set_logfile ctx f 0 0
 
-let dump_reproducer_to_file ctx path =
-  wrap2 ctx gcc_jit_context_dump_reproducer_to_file ctx path
+  let dump_reproducer_to_file ctx path =
+    wrap2 ctx gcc_jit_context_dump_reproducer_to_file ctx path
 
-let get_debug_string obj =
-  gcc_jit_object_get_debug_string (object' obj)
+  let get_debug_string obj =
+    gcc_jit_object_get_debug_string (object' obj)
 
-let set_option : type a. context -> a context_option -> a -> unit = fun ctx opt v ->
-  match opt with
-  | Progname ->
-      wrap3 ctx gcc_jit_context_set_str_option ctx GCC_JIT_STR_OPTION_PROGNAME v
-  | Optimization_level ->
-      wrap3 ctx gcc_jit_context_set_int_option ctx GCC_JIT_INT_OPTION_OPTIMIZATION_LEVEL v
-  | Debuginfo ->
-      wrap3 ctx gcc_jit_context_set_bool_option ctx GCC_JIT_BOOL_OPTION_DEBUGINFO v
-  | Dump_initial_tree ->
-      wrap3 ctx gcc_jit_context_set_bool_option ctx GCC_JIT_BOOL_OPTION_DUMP_INITIAL_TREE v
-  | Dump_initial_gimple ->
-      wrap3 ctx gcc_jit_context_set_bool_option ctx GCC_JIT_BOOL_OPTION_DUMP_INITIAL_GIMPLE v
-  | Dump_generated_code ->
-      wrap3 ctx gcc_jit_context_set_bool_option ctx GCC_JIT_BOOL_OPTION_DUMP_GENERATED_CODE v
-  | Dump_summary ->
-      wrap3 ctx gcc_jit_context_set_bool_option ctx GCC_JIT_BOOL_OPTION_DUMP_SUMMARY v
-  | Dump_everything ->
-      wrap3 ctx gcc_jit_context_set_bool_option ctx GCC_JIT_BOOL_OPTION_DUMP_EVERYTHING v
-  | Selfcheck_gc ->
-      wrap3 ctx gcc_jit_context_set_bool_option ctx GCC_JIT_BOOL_OPTION_SELFCHECK_GC v
-  | Keep_intermediates ->
-      wrap3 ctx gcc_jit_context_set_bool_option ctx GCC_JIT_BOOL_OPTION_KEEP_INTERMEDIATES v
+  let set_option : type a. context -> a context_option -> a -> unit = fun ctx opt v ->
+    match opt with
+    | Progname ->
+        wrap3 ctx gcc_jit_context_set_str_option ctx GCC_JIT_STR_OPTION_PROGNAME v
+    | Optimization_level ->
+        wrap3 ctx gcc_jit_context_set_int_option ctx GCC_JIT_INT_OPTION_OPTIMIZATION_LEVEL v
+    | Debuginfo ->
+        wrap3 ctx gcc_jit_context_set_bool_option ctx GCC_JIT_BOOL_OPTION_DEBUGINFO v
+    | Dump_initial_tree ->
+        wrap3 ctx gcc_jit_context_set_bool_option ctx GCC_JIT_BOOL_OPTION_DUMP_INITIAL_TREE v
+    | Dump_initial_gimple ->
+        wrap3 ctx gcc_jit_context_set_bool_option ctx GCC_JIT_BOOL_OPTION_DUMP_INITIAL_GIMPLE v
+    | Dump_generated_code ->
+        wrap3 ctx gcc_jit_context_set_bool_option ctx GCC_JIT_BOOL_OPTION_DUMP_GENERATED_CODE v
+    | Dump_summary ->
+        wrap3 ctx gcc_jit_context_set_bool_option ctx GCC_JIT_BOOL_OPTION_DUMP_SUMMARY v
+    | Dump_everything ->
+        wrap3 ctx gcc_jit_context_set_bool_option ctx GCC_JIT_BOOL_OPTION_DUMP_EVERYTHING v
+    | Selfcheck_gc ->
+        wrap3 ctx gcc_jit_context_set_bool_option ctx GCC_JIT_BOOL_OPTION_SELFCHECK_GC v
+    | Keep_intermediates ->
+        wrap3 ctx gcc_jit_context_set_bool_option ctx GCC_JIT_BOOL_OPTION_KEEP_INTERMEDIATES v
+end
 
 module T = struct
   let standard ctx kind =

@@ -47,7 +47,7 @@ type context
 type result
 (** A {!result} encapsulates the result of an in-memory compilation. *)
 
-type location = [ `Location of Gccjit_bindings.gcc_jit_location ]
+type location
 (** A {!location} encapsulates a source code location, so that you can
     (optionally) associate locations in your languages with statements in the
     JIT-compiled code, alowing the debugger to single-step through your
@@ -64,7 +64,7 @@ type lvalue
 type rvalue
 (** A [rvalue] is an expression within your code, with some type. *)
 
-type field = [ `Field of Gccjit_bindings.gcc_jit_field ]
+type field
 (** A [field] encapsulates a field within a struct; it is used when creating a
     struct type (using {!new_struct_type}).  Fields cannot be shared between
     structs. *)
@@ -76,12 +76,12 @@ type struct_ = [ `Struct of Gccjit_bindings.gcc_jit_struct ]
 type type_ = [ `Type of Gccjit_bindings.gcc_jit_type | struct_ ]
 (** A [typ] encapsulates a type e.g. [int] or a [struct foo*]. *)
 
-type function_ = [ `Function of Gccjit_bindings.gcc_jit_function ]
+type function_
 (** A [function_] encapsulates a function: either one that you're creating yourself, or
     a reference to one that you're dynamically linking to within the ret of the
     process. *)
 
-type block = [ `Block of Gccjit_bindings.gcc_jit_block ]
+type block
 (** A [block] encapsulates a {e basic block} of statements within a function
     (i.e. with one entry point and one exit point).
 
@@ -97,14 +97,6 @@ type block = [ `Block of Gccjit_bindings.gcc_jit_block ]
 
     It's OK to have more than one {e return} from a function (i.e., multiple
     blocks that terminate by returning. *)
-
-(* type object_ = *)
-(*   [ location *)
-(*   | type_ *)
-(*   | field *)
-(*   | function_ *)
-(*   | block *)
-(*   | rvalue ] *)
 
 type unary_op =
   | Negate
@@ -256,135 +248,137 @@ type type_kind =
   | Complex_double
   | Complex_long_double
 
-(** {1 Compilation contexts} *)
+module Context : sig
+  (** {1 Compilation contexts} *)
 
-(** {2 Lifetime-management} *)
+  (** {2 Lifetime-management} *)
 
-val acquire_context : unit -> context
-(** This function acquires a new {!context} instance, which is independent of
-    any others that may be present within this process. *)
+  val acquire : unit -> context
+  (** This function acquires a new {!context} instance, which is independent of
+      any others that may be present within this process. *)
 
-val release_context : context -> unit
-(** This function releases all resources associated with the given context.
-    Both the context itsel and all of its object instances are claed up.  It
-    should be called exactly once on a given context.
+  val release : context -> unit
+  (** This function releases all resources associated with the given context.
+      Both the context itsel and all of its object instances are claed up.  It
+      should be called exactly once on a given context.
 
-    It is invalid to use the context or any of its {e contextual} objects
-    after calling this. *)
+      It is invalid to use the context or any of its {e contextual} objects
+      after calling this. *)
 
-val new_child_context : context -> context
-(** Given an existing JIT context, create a child context.
+  val child_context : context -> context
+  (** Given an existing JIT context, create a child context.
 
-    The child inherits a copy of all option-settings from the parent.
+      The child inherits a copy of all option-settings from the parent.
 
-    The child can reference objects created within the parent, but not vice-versa.
+      The child can reference objects created within the parent, but not vice-versa.
 
-    The lifetime of the child context must be bounded by that of the parent: you
-    should release a child context before releasing the parent context.
+      The lifetime of the child context must be bounded by that of the parent: you
+      should release a child context before releasing the parent context.
 
-    If you use a function from a parent context within a child context, you have
-    to compile the parent context before you can compile the child context, and
-    the {!result} of the parent context must outlive the {!result} of the
-    child context.
+      If you use a function from a parent context within a child context, you have
+      to compile the parent context before you can compile the child context, and
+      the {!result} of the parent context must outlive the {!result} of the
+      child context.
 
-    This allows caching of shared initializations. For example, you could create
-    types and declarations of global functions in a parent context once within a
-    process, and then create child contexts whenever a function or loop becomes
-    hot. Each such child context can be used for JIT-compiling just one function
-    or loop, but can reference types and helper functions created within the
-    parent context.
+      This allows caching of shared initializations. For example, you could create
+      types and declarations of global functions in a parent context once within a
+      process, and then create child contexts whenever a function or loop becomes
+      hot. Each such child context can be used for JIT-compiling just one function
+      or loop, but can reference types and helper functions created within the
+      parent context.
 
-    Contexts can be arbitrarily nested, provided the above rules are followed,
-    but it's probably not worth going above 2 or 3 levels, and there will likely
-    be a performance hit for such nesting. *)
+      Contexts can be arbitrarily nested, provided the above rules are followed,
+      but it's probably not worth going above 2 or 3 levels, and there will likely
+      be a performance hit for such nesting. *)
 
-(** {2 Thread-safety}
+  (** {2 Thread-safety}
 
-    Instances of {!context} created via {!acquire_context} are independent from each
-    other: only one thread may use a given context at once, but multiple threads
-    could each have their own contexts without needing locks.
+      Instances of {!context} created via {!acquire_context} are independent from each
+      other: only one thread may use a given context at once, but multiple threads
+      could each have their own contexts without needing locks.
 
-    Contexts created via {!new_child_context} are related to their parent
-    context. They can be partitioned by their ultimate ancestor into independent
-    "family trees". Only one thread within a process may use a given "family
-    tree" of such contexts at once, and if you're using multiple threads you
-    should provide your own locking around entire such context partitions. *)
+      Contexts created via {!new_child_context} are related to their parent
+      context. They can be partitioned by their ultimate ancestor into independent
+      "family trees". Only one thread within a process may use a given "family
+      tree" of such contexts at once, and if you're using multiple threads you
+      should provide your own locking around entire such context partitions. *)
 
-(** {2 Debugging} *)
+  (** {2 Debugging} *)
 
-val dump_to_file : context -> ?update_locs:bool -> string -> unit
-(** To help with debugging: dump a C-like representation to the given path,
-    describing what's been set up on the context.  If [~update_locs] true, then
-    also set up {!location} information throughout the context, pointing at the
-    dump file as if it were a source file.  This may be of use in conjunction
-    with {!Debuginfo} to allow stepping through the code in a debugger. *)
+  val dump_to_file : context -> ?update_locs:bool -> string -> unit
+  (** To help with debugging: dump a C-like representation to the given path,
+      describing what's been set up on the context.  If [~update_locs] true, then
+      also set up {!location} information throughout the context, pointing at the
+      dump file as if it were a source file.  This may be of use in conjunction
+      with {!Debuginfo} to allow stepping through the code in a debugger. *)
 
-val set_logfile : context -> Unix.file_descr option -> unit
-(** To help with debugging; enable ongoing logging of the context's activity to
-    the given file descriptor.
+  val set_logfile : context -> Unix.file_descr option -> unit
+  (** To help with debugging; enable ongoing logging of the context's activity to
+      the given file descriptor.
 
-    {[
-      set_logfile ctx logfile
-    ]}
+      {[
+        set_logfile ctx logfile
+      ]}
 
-    Examples of information logged include:
+      Examples of information logged include:
 
-    - API calls
-    - the various steps involved within compilation
-    - activity on any {!result} instances created by the context
-    - activity within any child contexts
-    - An example of a log can be seen here, though the precise format and kinds of
-      information logged is subject to change.
+      - API calls
+      - the various steps involved within compilation
+      - activity on any {!result} instances created by the context
+      - activity within any child contexts
+      - An example of a log can be seen here, though the precise format and kinds of
+        information logged is subject to change.
 
-    The caller remains responsible for closing [logfile], and it must not be
-    closed until all users are released. In particular, note that child
-    {{!context}contexts} and {!result} instances created by the {!context} will
-    use the logfile.
+      The caller remains responsible for closing [logfile], and it must not be
+      closed until all users are released. In particular, note that child
+      {{!context}contexts} and {!result} instances created by the {!context} will
+      use the logfile.
 
-    There may a performance cost for logging.
+      There may a performance cost for logging.
 
-    You can turn off logging on [ctx] by passing [None] for [logfile]. Doing so
-    only affects the context; it does not affect child {{!context}contexts} or
-    {!result} instances already created by the {!context}. *)
+      You can turn off logging on [ctx] by passing [None] for [logfile]. Doing so
+      only affects the context; it does not affect child {{!context}contexts} or
+      {!result} instances already created by the {!context}. *)
 
-val dump_reproducer_to_file : context -> string -> unit
-(** Write C source code into path that can be compiled into a self-contained
-    executable (i.e. with [libgccjit] as the only dependency). The generated
-    code will attempt to replay the API calls that have been made into the given
-    context.
+  val dump_reproducer_to_file : context -> string -> unit
+  (** Write C source code into path that can be compiled into a self-contained
+      executable (i.e. with [libgccjit] as the only dependency). The generated
+      code will attempt to replay the API calls that have been made into the given
+      context.
 
-    This may be useful when debugging the library or client code, for reducing a
-    complicated recipe for reproducing a bug into a simpler form. For example,
-    consider client code that parses some source file into some internal
-    representation, and then walks this IR, calling into [libgccjit]. If this
-    encounters a bug, a call to {!dump_reproducer_to_file} will write out C code
-    for a much simpler executable that performs the equivalent calls into
-    [libgccjit], without needing the client code and its data.
+      This may be useful when debugging the library or client code, for reducing a
+      complicated recipe for reproducing a bug into a simpler form. For example,
+      consider client code that parses some source file into some internal
+      representation, and then walks this IR, calling into [libgccjit]. If this
+      encounters a bug, a call to {!dump_reproducer_to_file} will write out C code
+      for a much simpler executable that performs the equivalent calls into
+      [libgccjit], without needing the client code and its data.
 
-    Typically you need to supply [-Wno-unused-variable] when compiling the
-    generated file (since the result of each API call is assigned to a unique
-    variable within the generated C source, and not all are necessarily then
-    used). *)
+      Typically you need to supply [-Wno-unused-variable] when compiling the
+      generated file (since the result of each API call is assigned to a unique
+      variable within the generated C source, and not all are necessarily then
+      used). *)
 
-(* val get_debug_string : [< object_] -> string *)
-(** Get a human-readable description of this object.
+  (* val get_debug_string : [< object_] -> string *)
+  (** Get a human-readable description of this object.
 
-    For example,
+      For example,
 
-    {[
-      Printf.printf "obj: %s\n" (get_debug_string obj)
-    ]}
+      {[
+        Printf.printf "obj: %s\n" (get_debug_string obj)
+      ]}
 
-    might give this text on [stdout]:
+      might give this text on [stdout]:
 
-    {[
-      obj: 4.0 * (float)i
-    ]} *)
+      {[
+        obj: 4.0 * (float)i
+      ]} *)
 
-(** {2 Options} *)
+  (** {2 Options} *)
 
-val set_option : context -> 'a context_option -> 'a -> unit
-(** Set an option of the {!context}. *)
+  val set_option : context -> 'a context_option -> 'a -> unit
+  (** Set an option of the {!context}. *)
+end
 
 module T : sig
   (** {1:types Types} *)
