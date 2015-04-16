@@ -855,3 +855,100 @@ module Result : sig
       result, or any code or globals that were obtained by calling {!get_code} or
       {!get_global} on it. *)
 end
+
+module type S = sig
+  module Context : sig
+    val release : unit -> unit
+    val dump_to_file : ?update_locs:bool -> string -> unit
+    val set_logfile : Unix.file_descr option -> unit
+    val dump_reproducer_to_file : string -> unit
+    val set_option : 'a context_option -> 'a -> unit
+    val compile : unit -> result
+    val compile_to_file : output_kind -> string -> unit
+  end
+
+  module Struct : sig
+    val field : ?loc:location -> type_ -> string -> field
+    val create : ?loc:location -> string -> field list -> struct_
+    val opaque_struct : ?loc:location -> string -> struct_
+    val set_fields : ?loc:location -> struct_ -> field list -> unit
+  end
+
+  module Type : sig
+    val standard : type_kind -> type_
+    val int_gen : ?signed:bool -> int -> type_
+    val int : type_
+    val pointer : type_ -> type_
+    val const : type_ -> type_
+    val volatile : type_ -> type_
+    val array : ?loc:location -> type_ -> int -> type_
+    val function_ptr : ?loc:location -> ?variadic:bool -> type_ list -> type_ -> type_
+    val struct_ : struct_ -> type_
+    val union : ?loc:location -> string -> field list -> type_
+  end
+
+  module RValue : sig
+    val type_of : rvalue -> type_
+    val int : type_ -> int -> rvalue
+    val zero : type_ -> rvalue
+    val one : type_ -> rvalue
+    val double : type_ -> float -> rvalue
+    val ptr : type_ -> 'a Ctypes.ptr -> rvalue
+    val null : type_ -> rvalue
+    val string_literal : string -> rvalue
+    val unary_op : ?loc:location -> unary_op -> type_ -> rvalue -> rvalue
+    val binary_op : ?loc:location -> binary_op -> type_ -> rvalue -> rvalue -> rvalue
+    val comparison : ?loc:location -> comparison -> rvalue -> rvalue -> rvalue
+    val call : ?loc:location -> function_ -> rvalue list -> rvalue
+    val indirect_call : ?loc:location -> rvalue -> rvalue list -> rvalue
+    val cast : ?loc:location -> rvalue -> type_ -> rvalue
+    val access_field : ?loc:location -> rvalue -> field -> rvalue
+    val lvalue : lvalue -> rvalue
+    val param : param -> rvalue
+  end
+
+  module LValue : sig
+    val address : ?loc:location -> lvalue -> rvalue
+    val global : ?loc:location -> global_kind -> type_ -> string -> lvalue
+    val deref : ?loc:location -> rvalue -> lvalue
+    val deref_field : ?loc:location -> rvalue -> field -> lvalue
+    val access_array : ?loc:location -> rvalue -> rvalue -> lvalue
+    val access_field : ?loc:location -> lvalue -> field -> lvalue
+    val param : param -> lvalue
+  end
+
+  module Param : sig
+    val create : ?loc:location -> type_ -> string -> param
+  end
+
+  module Function : sig
+    val create : ?loc:location -> ?variadic:bool -> function_kind -> type_ -> string -> param list -> function_
+    val builtin : string -> function_
+    val param : function_ -> int -> param
+    val dump_dot : function_ -> string -> unit
+    val local : ?loc:location -> function_ -> type_ -> string -> lvalue
+  end
+
+  module Block : sig
+    val create : ?name:string -> function_ -> block
+    val parent : block -> function_
+    val eval : ?loc:location -> block -> rvalue -> unit
+    val assign : ?loc:location -> block -> lvalue -> rvalue -> unit
+    val assign_op : ?loc:location -> block -> lvalue -> binary_op -> rvalue -> unit
+    val comment : ?loc:location -> block -> string -> unit
+    val cond_jump : ?loc:location -> block -> rvalue -> block -> block -> unit
+    val jump : ?loc:location -> block -> block -> unit
+    val return : ?loc:location -> block -> rvalue -> unit
+    val return_void : ?loc:location -> block -> unit
+  end
+
+  module Location : sig
+    val create : string -> int -> int -> location
+  end
+
+  module Result : sig
+    val code : result -> string -> ('a -> 'b) Ctypes.fn -> 'a -> 'b
+    val global : result -> string -> 'a Ctypes.typ -> 'a Ctypes.ptr
+    val release : result -> unit
+  end
+end
