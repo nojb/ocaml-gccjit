@@ -87,27 +87,6 @@ type binary_op =
 
 type comparison = Eq | Ne | Lt | Le | Gt | Ge
 
-(** Kinds of function.  *)
-type function_kind =
-    FUNCTION_Exported
-  (** Function is defined by the client code and visible by name outside of the
-      JIT. *)
-
-  | FUNCTION_Internal
-  (** Function is defined by the client code, but is invisible outside of the
-      JIT.  Analogous to a ["static"] function. *)
-
-  | FUNCTION_Imported
-  (** Function is not defined by the client code; we're merely referring to it.
-       Analogous to using an ["extern"] function from a header file. *)
-
-  | FUNCTION_Always_inline
-  (** Function is only ever inlined into other functions, and is invisible
-      outside of the JIT.  Analogous to prefixing with ["inline"] and adding
-      [__attribute__((always_inline))].  Inlining will only occur when the
-      optimization level is above 0; when optimization is off, this is
-      essentially the same as [FUNCTION_Internal]. *)
-
 type global_kind =
     GLOBAL_Exported
   | GLOBAL_Internal
@@ -621,6 +600,28 @@ end
     within the rest of the process. *)
 
 module Function : sig
+
+  (** Kinds of function.  *)
+  type function_kind =
+      Exported
+    (** Function is defined by the client code and visible by name outside of the
+        JIT. *)
+
+    | Internal
+    (** Function is defined by the client code, but is invisible outside of the
+        JIT.  Analogous to a ["static"] function. *)
+
+    | Imported
+    (** Function is not defined by the client code; we're merely referring to it.
+         Analogous to using an ["extern"] function from a header file. *)
+
+    | Always_inline
+    (** Function is only ever inlined into other functions, and is invisible
+        outside of the JIT.  Analogous to prefixing with ["inline"] and adding
+        [__attribute__((always_inline))].  Inlining will only occur when the
+        optimization level is above 0; when optimization is off, this is
+        essentially the same as [FUNCTION_Internal]. *)
+
   val create :
     context -> ?loc:location -> ?variadic:bool -> function_kind -> type_ -> string -> param list -> function_
   (** Create a function with the given name and parameters. *)
@@ -886,6 +887,11 @@ module type S = sig
   end
 
   module Function : sig
+    type function_kind =
+        Exported
+      | Internal
+      | Imported
+      | Always_inline
     val create : ?loc:location -> ?variadic:bool -> function_kind -> type_ -> string -> param list -> function_
     val builtin : string -> function_
     val param : function_ -> int -> param

@@ -60,12 +60,6 @@ type binary_op =
 
 type comparison = Eq | Ne | Lt | Le | Gt | Ge
 
-type function_kind =
-    FUNCTION_Exported
-  | FUNCTION_Internal
-  | FUNCTION_Imported
-  | FUNCTION_Always_inline
-
 type global_kind =
     GLOBAL_Exported
   | GLOBAL_Internal
@@ -113,12 +107,6 @@ type type_kind =
   | TYPE_Complex_float
   | TYPE_Complex_double
   | TYPE_Complex_long_double
-
-let function_kind = function
-    FUNCTION_Exported -> GCC_JIT_FUNCTION_EXPORTED
-  | FUNCTION_Internal -> GCC_JIT_FUNCTION_INTERNAL
-  | FUNCTION_Imported -> GCC_JIT_FUNCTION_IMPORTED
-  | FUNCTION_Always_inline -> GCC_JIT_FUNCTION_ALWAYS_INLINE
 
 let type_kind = function
     TYPE_Void -> GCC_JIT_TYPE_VOID
@@ -464,6 +452,19 @@ module Param = struct
 end
 
 module Function = struct
+
+  type function_kind =
+      Exported
+    | Internal
+    | Imported
+    | Always_inline
+
+  let function_kind = function
+      Exported -> GCC_JIT_FUNCTION_EXPORTED
+    | Internal -> GCC_JIT_FUNCTION_INTERNAL
+    | Imported -> GCC_JIT_FUNCTION_IMPORTED
+    | Always_inline -> GCC_JIT_FUNCTION_ALWAYS_INLINE
+
   let create ctx ?(loc = null_loc) ?(variadic = false) kind ret name args =
     let a = Ctypes.CArray.of_list gcc_jit_param args in
     wrap8 ctx gcc_jit_context_new_function
@@ -631,6 +632,11 @@ module type S = sig
   end
 
   module Function : sig
+    type function_kind =
+        Exported
+      | Internal
+      | Imported
+      | Always_inline
     val create : ?loc:location -> ?variadic:bool -> function_kind -> type_ -> string -> param list -> function_
     val builtin : string -> function_
     val param : function_ -> int -> param
@@ -749,6 +755,11 @@ module Make () = struct
   end
 
   module Function = struct
+    type function_kind = Function.function_kind =
+        Exported
+      | Internal
+      | Imported
+      | Always_inline
     open Function
     let create = create ctx
     let builtin = builtin ctx
