@@ -41,29 +41,28 @@ type block = gcc_jit_block
 
 let null_loc = Ctypes.(coerce (ptr void) gcc_jit_location null)
 
-type unary_op =
-  | Negate
-  | Bitwise_negate
-  | Logical_negate
+module Op = struct
+  type unary_op =
+    | Negate
+    | Bitwise_negate
+    | Logical_negate
 
-type binary_op =
-  | Plus
-  | Minus
-  | Mult
-  | Divide
-  | Modulo
-  | Bitwise_and
-  | Bitwise_xor
-  | Bitwise_or
-  | Logical_and
-  | Logical_or
+  type binary_op =
+    | Plus
+    | Minus
+    | Mult
+    | Divide
+    | Modulo
+    | Bitwise_and
+    | Bitwise_xor
+    | Bitwise_or
+    | Logical_and
+    | Logical_or
 
-type comparison = Eq | Ne | Lt | Le | Gt | Ge
+  type comparison = Eq | Ne | Lt | Le | Gt | Ge
+end
 
-type global_kind =
-    GLOBAL_Exported
-  | GLOBAL_Internal
-  | GLOBAL_Imported
+include Op
 
 let binary_op = function
   | Plus -> GCC_JIT_BINARY_OP_PLUS
@@ -89,11 +88,6 @@ let unary_op = function
   | Negate -> GCC_JIT_UNARY_OP_MINUS
   | Bitwise_negate -> GCC_JIT_UNARY_OP_BITWISE_NEGATE
   | Logical_negate -> GCC_JIT_UNARY_OP_LOGICAL_NEGATE
-
-let global_kind = function
-  | GLOBAL_Exported -> GCC_JIT_GLOBAL_EXPORTED
-  | GLOBAL_Imported -> GCC_JIT_GLOBAL_IMPORTED
-  | GLOBAL_Internal -> GCC_JIT_GLOBAL_INTERNAL
 
 let wrap1 ctx f x1 =
   let y = f x1 in
@@ -416,6 +410,16 @@ module LValue = struct
     let ctx = gcc_jit_object_get_context (gcc_jit_lvalue_as_object lval) in
     wrap2 ctx gcc_jit_lvalue_get_address lval loc
 
+  type global_kind =
+      Exported
+    | Internal
+    | Imported
+
+  let global_kind = function
+    | Exported -> GCC_JIT_GLOBAL_EXPORTED
+    | Imported -> GCC_JIT_GLOBAL_IMPORTED
+    | Internal -> GCC_JIT_GLOBAL_INTERNAL
+
   let global ctx ?(loc = null_loc) kind typ name =
     wrap4 ctx gcc_jit_context_new_global ctx loc (global_kind kind) typ name
 
@@ -558,6 +562,23 @@ end
 
 
 module type S = sig
+  type unary_op =
+      Negate
+    | Bitwise_negate
+    | Logical_negate
+  type binary_op =
+      Plus
+    | Minus
+    | Mult
+    | Divide
+    | Modulo
+    | Bitwise_and
+    | Bitwise_xor
+    | Bitwise_or
+    | Logical_and
+    | Logical_or
+  type comparison = Eq | Ne | Lt | Le | Gt | Ge
+
   module Context : sig
     val release : unit -> unit
     val dump_to_file : ?update_locs:bool -> string -> unit
@@ -657,6 +678,10 @@ module type S = sig
 
   module LValue : sig
     val address : ?loc:location -> lvalue -> rvalue
+    type global_kind =
+        Exported
+      | Internal
+      | Imported
     val global : ?loc:location -> global_kind -> type_ -> string -> lvalue
     val deref : ?loc:location -> rvalue -> lvalue
     val deref_field : ?loc:location -> rvalue -> field -> lvalue
@@ -713,6 +738,8 @@ end
 
 module Make () = struct
   let ctx = Context.create ()
+
+  include Op
 
   module Context = struct
     open Context
@@ -819,6 +846,10 @@ module Make () = struct
   module LValue = struct
     open LValue
     let address = address
+    type global_kind = LValue.global_kind =
+        Exported
+      | Internal
+      | Imported
     let global = global ctx
     let deref = deref
     let deref_field = deref_field

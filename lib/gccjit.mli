@@ -29,8 +29,8 @@ exception Error of string
     occurs. *)
 
 type context
-(** The type of compilation contexts.  See {{!contexts}Compilation Contexts} for
-    more information. *)
+(** The type of compilation contexts.  See {{!contexts}Compilation
+    Contexts}. *)
 
 type result
 (** A {!result} encapsulates the result of an in-memory compilation. *)
@@ -39,18 +39,18 @@ type location
 (** A {!location} encapsulates a source code location, so that you can
     (optionally) associate locations in your languages with statements in the
     JIT-compiled code, alowing the debugger to single-step through your
-    language.
-
-    See {{!locations}Source locations}. *)
+    language. See {{!locations}Source locations}. *)
 
 type param
+(** A {!param} is a function parameter.  See {{!params}Parameters}. *)
 
 type lvalue
+(** An {!lvalue} is something that can of the left-hand side of an assignment.
+    See {{!lvalues}Lvalues}. *)
 
 type rvalue
-(** A [rvalue] is an expression within your code, with some type.
-
-    See {!RValue}. *)
+(** A [rvalue] is an expression within your code, with some type. See
+    {{!rvalues}RValues}. *)
 
 type field
 (** The type of fields of structs and unions.  See {{!fields}Fields}. *)
@@ -59,11 +59,10 @@ type struct_
 (** The type of structure types. See {{!structs}Structure Types}. *)
 
 type type_
-(** The type of C types, e.g. [int] or a [struct foo*].
-
-    See {{!types}Types}. *)
+(** The type of C types, e.g. [int] or a [struct foo*]. See {{!types}Types}. *)
 
 type function_
+(** The type of functios.  See {{!functions}Functions}. *)
 
 type block
 (** The type of basic blocks.  See {{!blocks}Basic Blocks}. *)
@@ -86,11 +85,6 @@ type binary_op =
   | Logical_or
 
 type comparison = Eq | Ne | Lt | Le | Gt | Ge
-
-type global_kind =
-    GLOBAL_Exported
-  | GLOBAL_Internal
-  | GLOBAL_Imported
 
 (** {1:contexts Compilation Contexts}
 
@@ -550,6 +544,11 @@ module LValue : sig
   val address : ?loc:location -> lvalue -> rvalue
   (** Taking the address of an {!lvalue}; analogous to [&(EXPR)] in C. *)
 
+  type global_kind =
+      Exported
+    | Internal
+    | Imported
+
   val global : context -> ?loc:location -> global_kind -> type_ -> string -> lvalue
   (** Add a new global variable of the given type and name to the context.
 
@@ -577,7 +576,7 @@ module LValue : sig
   (** Get a human-readable description of this object. *)
 end
 
-(** {1 Params}
+(** {1:params Parameters}
 
     A value of type {!param} represents a parameter to a
     {{!functions}function}. *)
@@ -812,6 +811,22 @@ end
     resulting module. *)
 
 module type S = sig
+  type unary_op =
+      Negate
+    | Bitwise_negate
+    | Logical_negate
+  type binary_op =
+      Plus
+    | Minus
+    | Mult
+    | Divide
+    | Modulo
+    | Bitwise_and
+    | Bitwise_xor
+    | Bitwise_or
+    | Logical_and
+    | Logical_or
+  type comparison = Eq | Ne | Lt | Le | Gt | Ge
   module Context : sig
     val release : unit -> unit
     val dump_to_file : ?update_locs:bool -> string -> unit
@@ -911,6 +926,10 @@ module type S = sig
 
   module LValue : sig
     val address : ?loc:location -> lvalue -> rvalue
+    type global_kind =
+        Exported
+      | Internal
+      | Imported
     val global : ?loc:location -> global_kind -> type_ -> string -> lvalue
     val deref : ?loc:location -> rvalue -> lvalue
     val deref_field : ?loc:location -> rvalue -> field -> lvalue
