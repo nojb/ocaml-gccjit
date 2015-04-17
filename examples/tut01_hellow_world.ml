@@ -1,6 +1,8 @@
 (* Smoketest example for libgccjit.so *)
 
-open Gccjit
+module G = Gccjit.Make ()
+
+open G
 
 (* Let's try to inject the equivalent of:
 
@@ -9,40 +11,33 @@ open Gccjit
      {
         printf ("hello %s\n", name);
      } *)
-let create_code ctx =
-  let void_type = get_standard_type ctx Void in
-  let const_char_ptr_type = get_standard_type ctx Const_char_ptr in
-  let param_name = new_param ctx const_char_ptr_type "name" in
-  let func = new_function ctx Exported void_type "greet" [ param_name ] in
-  let param_format = new_param ctx const_char_ptr_type "format" in
-  let printf_func =
-    new_function ctx ~variadic:true Imported (get_standard_type ctx Int) "printf" [ param_format ]
-  in
-  let hello = new_string_literal ctx "hello %s\n" in
-  let block = new_block func () in
-  add_eval block (new_call ctx printf_func [ hello; (param_name :> rvalue) ]);
-  end_with_void_return block
+let create_code () =
+  let param_name = Param.create Type.(standard Const_char_ptr) "name" in
+  let func = Function.create Function.Exported Type.(standard Void) "greet" [ param_name ] in
+  let param_format = Param.create Type.(standard Const_char_ptr) "format" in
+  let printf_func = Function.create ~variadic:true Function.Imported Type.int "printf" [ param_format ] in
+  let hello = RValue.string_literal "hello %s\n" in
+  let block = Block.create func in
+  Block.eval block (RValue.call printf_func [ hello; RValue.param param_name ]);
+  Block.return_void block
 
 let () =
-  (* Get a "context" object for working with the library. *)
-  let ctx = acquire_context () in
-
   (* Set some options on the context.
      Let's see the code being generated, in assembler form. *)
-  set_option ctx Dump_generated_code false;
+  Context.set_option Context.Dump_generated_code true;
 
   (* Populate the context. *)
-  create_code ctx;
+  create_code ();
 
   (* Compile the code. *)
-  let result = compile ctx in
+  let result = Context.compile () in
 
   (* Extract the generated code from "result". *)
-  let greet = get_code result "greet" Ctypes.(string @-> returning void) in
+  let greet = Result.code result "greet" Ctypes.(string @-> returning void) in
 
   (* Now call the generated function: *)
   greet "world";
   flush stdout;
 
-  release_context ctx;
-  release_result result
+  Context.release ();
+  Result.release result

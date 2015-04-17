@@ -1,8 +1,9 @@
 (* Usage example for libgccjit.so *)
 
-open Gccjit
+module G = Gccjit.Make ()
+open G
 
-let create_code ctx =
+let create_code () =
   (* Let's try to inject the equivalent of:
 
       int square (int i)
@@ -10,35 +11,28 @@ let create_code ctx =
         return i * i;
       }
   *)
-  let int_type = get_standard_type ctx Int in
-  let param_i = new_param ctx int_type "i" in
-  let func = new_function ctx Exported int_type "square" [ param_i ] in
-
-  let block = new_block func () in
-
-  let expr = new_binary_op ctx Mult int_type param_i param_i in
-
-  end_with_return block expr
+  let param_i = Param.create Type.int "i" in
+  let func = Function.create Function.Exported Type.int "square" [ param_i ] in
+  let block = Block.create func in
+  let expr = RValue.binary_op Mult Type.int (RValue.param param_i) (RValue.param param_i) in
+  Block.return block expr
 
 let () =
-  (* Get a "context" object for working with the library. *)
-  let ctx = acquire_context () in
-
   (* Set some options on the context.
      Let's see the code being generated, in assembler form.  *)
-  set_option ctx Dump_generated_code false;
+  Context.set_option Context.Dump_generated_code true;
 
   (* Populate the context. *)
-  create_code ctx;
+  create_code ();
 
   (* Compile the code. *)
-  let result = compile ctx in
+  let result = Context.compile () in
 
   (* We're done with the context; we can release it: *)
-  release_context ctx;
+  Context.release ();
 
   (* Extract the generated code from "result". *)
-  let square = get_code result "square" Ctypes.(int @-> returning int) in
+  let square = Result.code result "square" Ctypes.(int @-> returning int) in
   Printf.printf "result: %d%!\n" (square 5);
 
-  release_result result
+  Result.release result

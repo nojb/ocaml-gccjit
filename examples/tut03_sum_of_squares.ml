@@ -1,8 +1,10 @@
 (* Usage example for libgccjit *)
 
-open Gccjit
+module G = Gccjit.Make ()
 
-let create_code ctx =
+open G
+
+let create_code () =
   (*
     Simple sum-of-squares, to test conditionals and looping
 
@@ -17,65 +19,58 @@ let create_code ctx =
       return sum;
    *)
 
-  let the_type = get_standard_type ctx Int in
-  let return_type = the_type in
-  let n = new_param ctx the_type "n" in
-  let func = new_function ctx Exported return_type "loop_test" [ n ] in
+  let n = Param.create Type.int "n" in
+  let func = Function.create Function.Exported Type.int "loop_test" [ n ] in
 
   (* Build locals:  *)
-  let i = new_local func the_type "i" in
-  let sum = new_local func the_type "sum" in
+  let i = Function.local func Type.int "i" in
+  let sum = Function.local func Type.int "sum" in
 
-  let b_initial = new_block func ~name:"initial" () in
-  let b_loop_cond = new_block func ~name:"loop_cond" () in
-  let b_loop_body = new_block func ~name:"loop_body" () in
-  let b_after_loop = new_block func ~name:"after_loop" () in
+  let b_initial = Block.create ~name:"initial" func in
+  let b_loop_cond = Block.create ~name:"loop_cond" func in
+  let b_loop_body = Block.create ~name:"loop_body" func in
+  let b_after_loop = Block.create ~name:"after_loop" func in
 
   (* sum = 0; *)
-  add_assignment b_initial sum (zero ctx the_type);
+  Block.assign b_initial sum (RValue.zero Type.int);
 
   (* i = 0; *)
-  add_assignment b_initial i (zero ctx the_type);
+  Block.assign b_initial i (RValue.zero Type.int);
 
-  end_with_jump b_initial b_loop_cond;
+  Block.jump b_initial b_loop_cond;
 
   (* if (i >= n) *)
-  end_with_conditional b_loop_cond (new_comparison ctx Ge i n) b_after_loop b_loop_body;
+  Block.cond_jump b_loop_cond (RValue.comparison Ge (RValue.lvalue i) (RValue.param n))
+    b_after_loop b_loop_body;
 
   (* sum += i * i *)
-  add_assignment_op b_loop_body sum Plus (new_binary_op ctx Mult the_type i i);
+  Block.assign_op b_loop_body sum Plus (RValue.binary_op Mult Type.int (RValue.lvalue i) (RValue.lvalue i));
 
   (* i++ *)
-  add_assignment_op b_loop_body i Plus (one ctx the_type);
+  Block.assign_op b_loop_body i Plus (RValue.one Type.int);
 
-  end_with_jump b_loop_body b_loop_cond;
+  Block.jump b_loop_body b_loop_cond;
 
   (* return sum *)
-  end_with_return b_after_loop sum
+  Block.return b_after_loop (RValue.lvalue sum)
 
 let () =
-  try
-    (* Get a "context" object for working with the library. *)
-    let ctx = acquire_context () in
+  (* Set some options on the context.  Let's see the code being generated, in
+     assembler form. *)
+  Context.set_option Context.Dump_generated_code true;
 
-    (* Set some options on the context.
-       Let's see the code being generated, in assembler form. *)
-    set_option ctx Dump_generated_code false;
+  (* Populate the context. *)
+  create_code ();
 
-    (* Populate the context. *)
-    create_code ctx;
+  (* Compile the code. *)
+  let result = Context.compile () in
 
-    (* Compile the code. *)
-    let result = compile ctx in
+  (* Extract the generated code from "result". *)
+  let loop_test = Result.code result "loop_test" Ctypes.(int @-> returning int) in
 
-    (* Extract the generated code from "result". *)
-    let loop_test = get_code result "loop_test" Ctypes.(int @-> returning int) in
+  (* Run the generated code. *)
+  let v = loop_test 10 in
+  Printf.printf "loop_test returned: %d\n%!" v;
 
-    (* Run the generated code. *)
-    let v = loop_test 10 in
-    Printf.printf "loop_test returned: %d\n%!" v;
-
-    release_context ctx;
-    release_result result
-  with
-  | Error _ -> exit 1
+  Context.release ();
+  Result.release result
