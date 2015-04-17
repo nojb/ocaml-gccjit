@@ -1,0 +1,123 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=iso-8859-1" http-equiv="Content-Type">
+<link rel="Start" href="index.html">
+<link rel="previous" href="Gccjit.Type.html">
+<link rel="next" href="Gccjit.LValue.html">
+<link rel="Up" href="Gccjit.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of exceptions" rel=Appendix href="index_exceptions.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Gccjit" rel="Chapter" href="Gccjit.html"><title>Gccjit.RValue</title>
+</head>
+<body>
+<div class="navbar"><a class="pre" href="Gccjit.Type.html" title="Gccjit.Type">Previous</a>
+&nbsp;<a class="up" href="Gccjit.html" title="Gccjit">Up</a>
+&nbsp;<a class="post" href="Gccjit.LValue.html" title="Gccjit.LValue">Next</a>
+</div>
+<h1>Module <a href="type_Gccjit.RValue.html">Gccjit.RValue</a></h1>
+
+<pre><span class="keyword">module</span> RValue: <code class="code"><span class="keyword">sig</span></code> <a href="Gccjit.RValue.html">..</a> <code class="code"><span class="keyword">end</span></code></pre><hr width="100%">
+
+<pre><span id="VALtype_of"><span class="keyword">val</span> type_of</span> : <code class="type"><a href="Gccjit.html#TYPErvalue">Gccjit.rvalue</a> -> <a href="Gccjit.html#TYPEtype_">Gccjit.type_</a></code></pre><div class="info ">
+Get the type of this <a href="Gccjit.html#TYPErvalue"><code class="code"><span class="constructor">Gccjit</span>.rvalue</code></a>.<br>
+</div>
+
+<pre><span id="VALint"><span class="keyword">val</span> int</span> : <code class="type"><a href="Gccjit.html#TYPEcontext">Gccjit.context</a> -> <a href="Gccjit.html#TYPEtype_">Gccjit.type_</a> -> int -> <a href="Gccjit.html#TYPErvalue">Gccjit.rvalue</a></code></pre><div class="info ">
+Given a numeric type (integer or floating point), build an <a href="Gccjit.html#TYPErvalue"><code class="code"><span class="constructor">Gccjit</span>.rvalue</code></a> for the
+      given constant int value.<br>
+</div>
+
+<pre><span id="VALzero"><span class="keyword">val</span> zero</span> : <code class="type"><a href="Gccjit.html#TYPEcontext">Gccjit.context</a> -> <a href="Gccjit.html#TYPEtype_">Gccjit.type_</a> -> <a href="Gccjit.html#TYPErvalue">Gccjit.rvalue</a></code></pre><div class="info ">
+Given a numeric type (integer or floating point), get the <a href="Gccjit.html#TYPErvalue"><code class="code"><span class="constructor">Gccjit</span>.rvalue</code></a> for
+      zero. Essentially this is just a shortcut for:
+<pre class="codepre"><code class="code">new_rvalue_from_int&nbsp;ctx&nbsp;numeric_type&nbsp;0<br>
+</code></pre><br>
+</div>
+
+<pre><span id="VALone"><span class="keyword">val</span> one</span> : <code class="type"><a href="Gccjit.html#TYPEcontext">Gccjit.context</a> -> <a href="Gccjit.html#TYPEtype_">Gccjit.type_</a> -> <a href="Gccjit.html#TYPErvalue">Gccjit.rvalue</a></code></pre><div class="info ">
+Given a numeric type (integer or floating point), get the <a href="Gccjit.html#TYPErvalue"><code class="code"><span class="constructor">Gccjit</span>.rvalue</code></a> for
+      one. Essentially this is just a shortcut for:
+<pre class="codepre"><code class="code">new_rvalue_from_int&nbsp;ctx&nbsp;numeric_type&nbsp;1<br>
+</code></pre><br>
+</div>
+
+<pre><span id="VALdouble"><span class="keyword">val</span> double</span> : <code class="type"><a href="Gccjit.html#TYPEcontext">Gccjit.context</a> -> <a href="Gccjit.html#TYPEtype_">Gccjit.type_</a> -> float -> <a href="Gccjit.html#TYPErvalue">Gccjit.rvalue</a></code></pre><div class="info ">
+Given a numeric type (integer or floating point), build an <a href="Gccjit.html#TYPErvalue"><code class="code"><span class="constructor">Gccjit</span>.rvalue</code></a> for the
+      given constant double value.<br>
+</div>
+
+<pre><span id="VALptr"><span class="keyword">val</span> ptr</span> : <code class="type"><a href="Gccjit.html#TYPEcontext">Gccjit.context</a> -> <a href="Gccjit.html#TYPEtype_">Gccjit.type_</a> -> 'a Ctypes.ptr -> <a href="Gccjit.html#TYPErvalue">Gccjit.rvalue</a></code></pre><div class="info ">
+Given a pointer type, build an <a href="Gccjit.html#TYPErvalue"><code class="code"><span class="constructor">Gccjit</span>.rvalue</code></a> for the given address.<br>
+</div>
+
+<pre><span id="VALnull"><span class="keyword">val</span> null</span> : <code class="type"><a href="Gccjit.html#TYPEcontext">Gccjit.context</a> -> <a href="Gccjit.html#TYPEtype_">Gccjit.type_</a> -> <a href="Gccjit.html#TYPErvalue">Gccjit.rvalue</a></code></pre><div class="info ">
+Given a pointer type, build an <a href="Gccjit.html#TYPErvalue"><code class="code"><span class="constructor">Gccjit</span>.rvalue</code></a> for <code class="code"><span class="constructor">NULL</span></code>. Essentially this is
+      just a shortcut for:
+<pre class="codepre"><code class="code">new_rvalue_from_ptr&nbsp;ctx&nbsp;pointer_type&nbsp;<span class="constructor">Ctypes</span>.null<br>
+</code></pre><br>
+</div>
+
+<pre><span id="VALstring_literal"><span class="keyword">val</span> string_literal</span> : <code class="type"><a href="Gccjit.html#TYPEcontext">Gccjit.context</a> -> string -> <a href="Gccjit.html#TYPErvalue">Gccjit.rvalue</a></code></pre><div class="info ">
+Generate an <a href="Gccjit.html#TYPErvalue"><code class="code"><span class="constructor">Gccjit</span>.rvalue</code></a> for the given <code class="code"><span class="constructor">NIL</span></code>-terminated string, of type
+      <code class="code"><span class="constructor">Const_char_ptr</span></code>.<br>
+</div>
+
+<pre><span id="VALunary_op"><span class="keyword">val</span> unary_op</span> : <code class="type"><a href="Gccjit.html#TYPEcontext">Gccjit.context</a> -><br>       ?loc:<a href="Gccjit.html#TYPElocation">Gccjit.location</a> -><br>       <a href="Gccjit.html#TYPEunary_op">Gccjit.unary_op</a> -> <a href="Gccjit.html#TYPEtype_">Gccjit.type_</a> -> <a href="Gccjit.html#TYPErvalue">Gccjit.rvalue</a> -> <a href="Gccjit.html#TYPErvalue">Gccjit.rvalue</a></code></pre><div class="info ">
+Build a unary operation out of an input <a href="Gccjit.html#TYPErvalue"><code class="code"><span class="constructor">Gccjit</span>.rvalue</code></a>.  See <a href="Gccjit.RValue.html#VALunary_op"><code class="code"><span class="constructor">Gccjit</span>.<span class="constructor">RValue</span>.unary_op</code></a>.<br>
+</div>
+
+<pre><span id="VALbinary_op"><span class="keyword">val</span> binary_op</span> : <code class="type"><a href="Gccjit.html#TYPEcontext">Gccjit.context</a> -><br>       ?loc:<a href="Gccjit.html#TYPElocation">Gccjit.location</a> -><br>       <a href="Gccjit.html#TYPEbinary_op">Gccjit.binary_op</a> -><br>       <a href="Gccjit.html#TYPEtype_">Gccjit.type_</a> -> <a href="Gccjit.html#TYPErvalue">Gccjit.rvalue</a> -> <a href="Gccjit.html#TYPErvalue">Gccjit.rvalue</a> -> <a href="Gccjit.html#TYPErvalue">Gccjit.rvalue</a></code></pre><div class="info ">
+Build a binary operation out of two constituent <a href="Gccjit.html#TYPErvalue">rvalues</a>. See
+      <a href="Gccjit.RValue.html#VALbinary_op"><code class="code"><span class="constructor">Gccjit</span>.<span class="constructor">RValue</span>.binary_op</code></a>.<br>
+</div>
+
+<pre><span id="VALcomparison"><span class="keyword">val</span> comparison</span> : <code class="type"><a href="Gccjit.html#TYPEcontext">Gccjit.context</a> -><br>       ?loc:<a href="Gccjit.html#TYPElocation">Gccjit.location</a> -><br>       <a href="Gccjit.html#TYPEcomparison">Gccjit.comparison</a> -> <a href="Gccjit.html#TYPErvalue">Gccjit.rvalue</a> -> <a href="Gccjit.html#TYPErvalue">Gccjit.rvalue</a> -> <a href="Gccjit.html#TYPErvalue">Gccjit.rvalue</a></code></pre><div class="info ">
+Build a boolean <a href="Gccjit.html#TYPErvalue"><code class="code"><span class="constructor">Gccjit</span>.rvalue</code></a> out of the comparison of two other
+      <a href="Gccjit.html#TYPErvalue">rvalues</a>.<br>
+</div>
+
+<pre><span id="VALcall"><span class="keyword">val</span> call</span> : <code class="type"><a href="Gccjit.html#TYPEcontext">Gccjit.context</a> -><br>       ?loc:<a href="Gccjit.html#TYPElocation">Gccjit.location</a> -><br>       <a href="Gccjit.html#TYPEfunction_">Gccjit.function_</a> -> <a href="Gccjit.html#TYPErvalue">Gccjit.rvalue</a> list -> <a href="Gccjit.html#TYPErvalue">Gccjit.rvalue</a></code></pre><div class="info ">
+Given a function and the given table of argument rvalues, construct a call
+      to the function, with the result as an <a href="Gccjit.html#TYPErvalue"><code class="code"><span class="constructor">Gccjit</span>.rvalue</code></a>.
+<p>
+
+      <h3 id="3_Note">Note</h3>
+<p>
+
+      <code class="code">new_call</code> merely builds a <code class="code">rvalue</code> i.e. an expression that can be
+      evaluated, perhaps as part of a more complicated expression.  The call won't
+      happen unless you add a statement to a function that evaluates the expression.
+<p>
+
+      For example, if you want to call a function and discard the result (or to call a
+      function with <code class="code">void</code> return type), use <code class="code">add_eval</code>:
+<pre class="codepre"><code class="code"><span class="comment">(*&nbsp;Add&nbsp;"(void)printf&nbsp;(args);".&nbsp;*)</span><br>
+add_eval&nbsp;block&nbsp;(new_call&nbsp;ctx&nbsp;printf_func&nbsp;args)<br>
+</code></pre><br>
+</div>
+
+<pre><span id="VALindirect_call"><span class="keyword">val</span> indirect_call</span> : <code class="type"><a href="Gccjit.html#TYPEcontext">Gccjit.context</a> -><br>       ?loc:<a href="Gccjit.html#TYPElocation">Gccjit.location</a> -> <a href="Gccjit.html#TYPErvalue">Gccjit.rvalue</a> -> <a href="Gccjit.html#TYPErvalue">Gccjit.rvalue</a> list -> <a href="Gccjit.html#TYPErvalue">Gccjit.rvalue</a></code></pre><div class="info ">
+Call through a function pointer.<br>
+</div>
+
+<pre><span id="VALcast"><span class="keyword">val</span> cast</span> : <code class="type"><a href="Gccjit.html#TYPEcontext">Gccjit.context</a> -><br>       ?loc:<a href="Gccjit.html#TYPElocation">Gccjit.location</a> -> <a href="Gccjit.html#TYPErvalue">Gccjit.rvalue</a> -> <a href="Gccjit.html#TYPEtype_">Gccjit.type_</a> -> <a href="Gccjit.html#TYPErvalue">Gccjit.rvalue</a></code></pre><div class="info ">
+Given an <a href="Gccjit.html#TYPErvalue"><code class="code"><span class="constructor">Gccjit</span>.rvalue</code></a> of <code class="code"><span class="constructor">T</span></code>, construct another <a href="Gccjit.html#TYPErvalue"><code class="code"><span class="constructor">Gccjit</span>.rvalue</code></a> of another type.
+      Currently only a limited set of conversions are possible:<ul>
+<li><code class="code">int &lt;-&gt; float</code></li>
+<li><code class="code">int &lt;-&gt; bool</code></li>
+<li><code class="code"><span class="constructor">P</span>* &lt;-&gt; <span class="constructor">Q</span>*</code>, for pointer types <code class="code"><span class="constructor">P</span></code> and <code class="code"><span class="constructor">Q</span></code></li>
+</ul>
+<br>
+</div>
+
+<pre><span id="VALaccess_field"><span class="keyword">val</span> access_field</span> : <code class="type">?loc:<a href="Gccjit.html#TYPElocation">Gccjit.location</a> -> <a href="Gccjit.html#TYPErvalue">Gccjit.rvalue</a> -> <a href="Gccjit.html#TYPEfield">Gccjit.field</a> -> <a href="Gccjit.html#TYPErvalue">Gccjit.rvalue</a></code></pre>
+<pre><span id="VALlvalue"><span class="keyword">val</span> lvalue</span> : <code class="type"><a href="Gccjit.html#TYPElvalue">Gccjit.lvalue</a> -> <a href="Gccjit.html#TYPErvalue">Gccjit.rvalue</a></code></pre>
+<pre><span id="VALparam"><span class="keyword">val</span> param</span> : <code class="type"><a href="Gccjit.html#TYPEparam">Gccjit.param</a> -> <a href="Gccjit.html#TYPErvalue">Gccjit.rvalue</a></code></pre>
+<pre><span id="VALto_string"><span class="keyword">val</span> to_string</span> : <code class="type"><a href="Gccjit.html#TYPErvalue">Gccjit.rvalue</a> -> string</code></pre><div class="info ">
+Get a human-readable description of this object.<br>
+</div>
+</body></html>

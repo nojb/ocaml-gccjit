@@ -1,0 +1,223 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=iso-8859-1" http-equiv="Content-Type">
+<link rel="Start" href="index.html">
+<link rel="previous" href="Gccjit.Struct.html">
+<link rel="next" href="Gccjit.RValue.html">
+<link rel="Up" href="Gccjit.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of exceptions" rel=Appendix href="index_exceptions.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Gccjit" rel="Chapter" href="Gccjit.html"><title>Gccjit.Type</title>
+</head>
+<body>
+<div class="navbar"><a class="pre" href="Gccjit.Struct.html" title="Gccjit.Struct">Previous</a>
+&nbsp;<a class="up" href="Gccjit.html" title="Gccjit">Up</a>
+&nbsp;<a class="post" href="Gccjit.RValue.html" title="Gccjit.RValue">Next</a>
+</div>
+<h1>Module <a href="type_Gccjit.Type.html">Gccjit.Type</a></h1>
+
+<pre><span class="keyword">module</span> Type: <code class="code"><span class="keyword">sig</span></code> <a href="Gccjit.Type.html">..</a> <code class="code"><span class="keyword">end</span></code></pre><hr width="100%">
+
+<pre><code><span id="TYPEtype_kind"><span class="keyword">type</span> <code class="type"></code>type_kind</span> = </code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTtype_kind.Void"><span class="constructor">Void</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTtype_kind.Void_ptr"><span class="constructor">Void_ptr</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTtype_kind.Bool"><span class="constructor">Bool</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTtype_kind.Char"><span class="constructor">Char</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTtype_kind.Signed_char"><span class="constructor">Signed_char</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTtype_kind.Unsigned_char"><span class="constructor">Unsigned_char</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTtype_kind.Short"><span class="constructor">Short</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTtype_kind.Unsigned_short"><span class="constructor">Unsigned_short</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTtype_kind.Int"><span class="constructor">Int</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTtype_kind.Unsigned_int"><span class="constructor">Unsigned_int</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTtype_kind.Long"><span class="constructor">Long</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTtype_kind.Unsigned_long"><span class="constructor">Unsigned_long</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTtype_kind.Long_long"><span class="constructor">Long_long</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTtype_kind.Unsigned_long_long"><span class="constructor">Unsigned_long_long</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTtype_kind.Float"><span class="constructor">Float</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTtype_kind.Double"><span class="constructor">Double</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTtype_kind.Long_double"><span class="constructor">Long_double</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTtype_kind.Const_char_ptr"><span class="constructor">Const_char_ptr</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTtype_kind.Size_t"><span class="constructor">Size_t</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTtype_kind.File_ptr"><span class="constructor">File_ptr</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTtype_kind.Complex_float"><span class="constructor">Complex_float</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTtype_kind.Complex_double"><span class="constructor">Complex_double</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTtype_kind.Complex_long_double"><span class="constructor">Complex_long_double</span></span></code></td>
+
+</tr></table>
+
+
+
+<pre><span id="VALget"><span class="keyword">val</span> get</span> : <code class="type"><a href="Gccjit.html#TYPEcontext">Gccjit.context</a> -> <a href="Gccjit.Type.html#TYPEtype_kind">type_kind</a> -> <a href="Gccjit.html#TYPEtype_">Gccjit.type_</a></code></pre><div class="info ">
+Access a standard type.  See <a href="Gccjit.Type.html#TYPEtype_kind"><code class="code"><span class="constructor">Gccjit</span>.<span class="constructor">Type</span>.type_kind</code></a>.<br>
+</div>
+
+<pre><span id="VALint"><span class="keyword">val</span> int</span> : <code class="type"><a href="Gccjit.html#TYPEcontext">Gccjit.context</a> -> ?signed:bool -> int -> <a href="Gccjit.html#TYPEtype_">Gccjit.type_</a></code></pre><div class="info ">
+Get the integer type of the given size and signedness.<br>
+</div>
+
+<pre><span id="VALpointer"><span class="keyword">val</span> pointer</span> : <code class="type"><a href="Gccjit.html#TYPEtype_">Gccjit.type_</a> -> <a href="Gccjit.html#TYPEtype_">Gccjit.type_</a></code></pre><div class="info ">
+Given type <code class="code"><span class="constructor">T</span></code>, get type <code class="code"><span class="constructor">T</span>*</code><br>
+</div>
+
+<pre><span id="VALconst"><span class="keyword">val</span> const</span> : <code class="type"><a href="Gccjit.html#TYPEtype_">Gccjit.type_</a> -> <a href="Gccjit.html#TYPEtype_">Gccjit.type_</a></code></pre><div class="info ">
+Given type <code class="code"><span class="constructor">T</span></code>, get type <code class="code">const <span class="constructor">T</span></code>.<br>
+</div>
+
+<pre><span id="VALvolatile"><span class="keyword">val</span> volatile</span> : <code class="type"><a href="Gccjit.html#TYPEtype_">Gccjit.type_</a> -> <a href="Gccjit.html#TYPEtype_">Gccjit.type_</a></code></pre><div class="info ">
+Given type <code class="code"><span class="constructor">T</span></code>, get type <code class="code">volatile <span class="constructor">T</span></code>.<br>
+</div>
+
+<pre><span id="VALarray"><span class="keyword">val</span> array</span> : <code class="type"><a href="Gccjit.html#TYPEcontext">Gccjit.context</a> -> ?loc:<a href="Gccjit.html#TYPElocation">Gccjit.location</a> -> <a href="Gccjit.html#TYPEtype_">Gccjit.type_</a> -> int -> <a href="Gccjit.html#TYPEtype_">Gccjit.type_</a></code></pre><div class="info ">
+Given type <code class="code"><span class="constructor">T</span></code>, get type <code class="code"><span class="constructor">T</span>[<span class="constructor">N</span>]</code> (for a constant <code class="code"><span class="constructor">N</span></code>).<br>
+</div>
+
+<pre><span id="VALfunction_ptr"><span class="keyword">val</span> function_ptr</span> : <code class="type"><a href="Gccjit.html#TYPEcontext">Gccjit.context</a> -><br>       ?loc:<a href="Gccjit.html#TYPElocation">Gccjit.location</a> -><br>       ?variadic:bool -> <a href="Gccjit.html#TYPEtype_">Gccjit.type_</a> list -> <a href="Gccjit.html#TYPEtype_">Gccjit.type_</a> -> <a href="Gccjit.html#TYPEtype_">Gccjit.type_</a></code></pre>
+<pre><span id="VALstruct_"><span class="keyword">val</span> struct_</span> : <code class="type"><a href="Gccjit.html#TYPEstruct_">Gccjit.struct_</a> -> <a href="Gccjit.html#TYPEtype_">Gccjit.type_</a></code></pre>
+<pre><span id="VALunion"><span class="keyword">val</span> union</span> : <code class="type"><a href="Gccjit.html#TYPEcontext">Gccjit.context</a> -><br>       ?loc:<a href="Gccjit.html#TYPElocation">Gccjit.location</a> -> string -> <a href="Gccjit.html#TYPEfield">Gccjit.field</a> list -> <a href="Gccjit.html#TYPEtype_">Gccjit.type_</a></code></pre><div class="info ">
+Unions work similarly to structs.<br>
+</div>
+
+<pre><span id="VALto_string"><span class="keyword">val</span> to_string</span> : <code class="type"><a href="Gccjit.html#TYPEtype_">Gccjit.type_</a> -> string</code></pre><div class="info ">
+Get a human-readable description of this object.<br>
+</div>
+</body></html>

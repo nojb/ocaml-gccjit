@@ -1,0 +1,350 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=iso-8859-1" http-equiv="Content-Type">
+<link rel="Start" href="index.html">
+<link rel="next" href="Gccjit.Field.html">
+<link rel="Up" href="Gccjit.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of exceptions" rel=Appendix href="index_exceptions.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Gccjit" rel="Chapter" href="Gccjit.html"><link title="Lifetime-management" rel="Section" href="#1_Lifetimemanagement">
+<link title="Thread-safety" rel="Section" href="#1_Threadsafety">
+<link title="Debugging" rel="Section" href="#1_Debugging">
+<link title="Context Options" rel="Section" href="#1_ContextOptions">
+<link title="Compilation" rel="Section" href="#1_Compilation">
+<title>Gccjit.Context</title>
+</head>
+<body>
+<div class="navbar">&nbsp;<a class="up" href="Gccjit.html" title="Gccjit">Up</a>
+&nbsp;<a class="post" href="Gccjit.Field.html" title="Gccjit.Field">Next</a>
+</div>
+<h1>Module <a href="type_Gccjit.Context.html">Gccjit.Context</a></h1>
+
+<pre><span class="keyword">module</span> Context: <code class="code"><span class="keyword">sig</span></code> <a href="Gccjit.Context.html">..</a> <code class="code"><span class="keyword">end</span></code></pre><hr width="100%">
+<br>
+<h1 id="1_Lifetimemanagement">Lifetime-management</h1><br>
+
+<pre><span id="VALcreate"><span class="keyword">val</span> create</span> : <code class="type">unit -> <a href="Gccjit.html#TYPEcontext">Gccjit.context</a></code></pre><div class="info ">
+Creates a new <a href="Gccjit.html#TYPEcontext"><code class="code"><span class="constructor">Gccjit</span>.context</code></a> instance, which is independent of any others that
+      may be present within this process.<br>
+</div>
+
+<pre><span id="VALrelease"><span class="keyword">val</span> release</span> : <code class="type"><a href="Gccjit.html#TYPEcontext">Gccjit.context</a> -> unit</code></pre><div class="info ">
+Releases all resources associated with the given context.  Both the
+      context itsel and all of its object instances are cleared up.  It should
+      be called exactly once on a given context.
+<p>
+
+      It is invalid to use the context or any of its <em>contextual</em> objects
+      after calling this.<br>
+</div>
+
+<pre><span id="VALcreate_child"><span class="keyword">val</span> create_child</span> : <code class="type"><a href="Gccjit.html#TYPEcontext">Gccjit.context</a> -> <a href="Gccjit.html#TYPEcontext">Gccjit.context</a></code></pre><div class="info ">
+Given an existing JIT context, create a child context.<ul>
+<li>The child inherits a copy of all option-settings from the parent.</li>
+<li>The child can reference objects created within the parent, but not
+        vice-versa.</li>
+<li>The lifetime of the child context must be bounded by that of the parent:
+        you should release a child context before releasing the parent context.</li>
+</ul>
+
+      If you use a function from a parent context within a child context, you
+      have to compile the parent context before you can compile the child
+      context, and the <a href="Gccjit.html#TYPEresult"><code class="code"><span class="constructor">Gccjit</span>.result</code></a> of the parent context must outlive the
+      <a href="Gccjit.html#TYPEresult"><code class="code"><span class="constructor">Gccjit</span>.result</code></a> of the child context.
+<p>
+
+      This allows caching of shared initializations. For example, you could
+      create types and declarations of global functions in a parent context once
+      within a process, and then create child contexts whenever a function or
+      loop becomes hot. Each such child context can be used for JIT-compiling
+      just one function or loop, but can reference types and helper functions
+      created within the parent context.
+<p>
+
+      Contexts can be arbitrarily nested, provided the above rules are followed,
+      but it's probably not worth going above 2 or 3 levels, and there will likely
+      be a performance hit for such nesting.<br>
+</div>
+<br>
+<h1 id="1_Threadsafety">Thread-safety</h1>
+<p>
+
+      Instances of <a href="Gccjit.html#TYPEcontext"><code class="code"><span class="constructor">Gccjit</span>.context</code></a> created via <a href="Gccjit.Context.html#VALcreate"><code class="code"><span class="constructor">Gccjit</span>.<span class="constructor">Context</span>.create</code></a> are independent from each
+      other: only one thread may use a given context at once, but multiple
+      threads could each have their own contexts without needing locks.
+<p>
+
+      Contexts created via <a href="Gccjit.Context.html#VALcreate_child"><code class="code"><span class="constructor">Gccjit</span>.<span class="constructor">Context</span>.create_child</code></a> are related to their parent
+      context. They can be partitioned by their ultimate ancestor into
+      independent "family trees". Only one thread within a process may use a
+      given "family tree" of such contexts at once, and if you're using multiple
+      threads you should provide your own locking around entire such context
+      partitions.<br>
+<br>
+<h1 id="1_Debugging">Debugging</h1><br>
+
+<pre><span id="VALdump_to_file"><span class="keyword">val</span> dump_to_file</span> : <code class="type"><a href="Gccjit.html#TYPEcontext">Gccjit.context</a> -> ?update_locs:bool -> string -> unit</code></pre><div class="info ">
+Dump a C-like representation to the given path, describing what's been set
+      up on the context.  If <code class="code">~update_locs</code> true, then also set up <a href="Gccjit.html#TYPElocation"><code class="code"><span class="constructor">Gccjit</span>.location</code></a>
+      information throughout the context, pointing at the dump file as if it
+      were a source file.  This may be of use in conjunction with
+      <a href="Gccjit.Context.html#TYPEcontext_option"><code class="code"><span class="constructor">Debuginfo</span></code></a> to allow stepping through the code
+      in a debugger.<br>
+</div>
+
+<pre><span id="VALset_logfile"><span class="keyword">val</span> set_logfile</span> : <code class="type"><a href="Gccjit.html#TYPEcontext">Gccjit.context</a> -> Unix.file_descr option -> unit</code></pre><div class="info ">
+<code class="code">set_logfile ctx logfile</code> enable ongoing logging of the context <code class="code">ctx</code>'s
+      activity to the given file descriptor <code class="code">logfile</code>. Examples of information
+      logged include:<ul>
+<li>API calls</li>
+<li>the various steps involved within compilation</li>
+<li>activity on any <a href="Gccjit.html#TYPEresult"><code class="code"><span class="constructor">Gccjit</span>.result</code></a> instances created by the context</li>
+<li>activity within any child contexts</li>
+<li>An example of a log can be seen here, though the precise format and kinds of
+        information logged is subject to change.</li>
+</ul>
+
+      The caller remains responsible for closing <code class="code">logfile</code>, and it must not be
+      closed until all users are released. In particular, note that child
+      <a href="Gccjit.html#TYPEcontext">contexts</a> and <a href="Gccjit.html#TYPEresult"><code class="code"><span class="constructor">Gccjit</span>.result</code></a> instances created by the <a href="Gccjit.html#TYPEcontext"><code class="code"><span class="constructor">Gccjit</span>.context</code></a>
+      will use <code class="code">logfile</code>.
+<p>
+
+      There may a performance cost for logging.
+<p>
+
+      You can turn off logging on <code class="code">ctx</code> by passing <code class="code"><span class="constructor">None</span></code> for <code class="code">logfile</code>. Doing
+      so only affects the context; it does not affect child <a href="Gccjit.html#TYPEcontext">contexts</a>
+      or <a href="Gccjit.html#TYPEresult"><code class="code"><span class="constructor">Gccjit</span>.result</code></a> instances already created by the <a href="Gccjit.html#TYPEcontext"><code class="code"><span class="constructor">Gccjit</span>.context</code></a>.<br>
+</div>
+
+<pre><span id="VALdump_reproducer_to_file"><span class="keyword">val</span> dump_reproducer_to_file</span> : <code class="type"><a href="Gccjit.html#TYPEcontext">Gccjit.context</a> -> string -> unit</code></pre><div class="info ">
+Write C source code into path that can be compiled into a self-contained
+      executable (i.e. with <code class="code">libgccjit</code> as the only dependency). The generated
+      code will attempt to replay the API calls that have been made into the
+      given context.
+<p>
+
+      This may be useful when debugging the library or client code, for reducing a
+      complicated recipe for reproducing a bug into a simpler form. For example,
+      consider client code that parses some source file into some internal
+      representation, and then walks this IR, calling into <code class="code">libgccjit</code>. If this
+      encounters a bug, a call to <a href="Gccjit.Context.html#VALdump_reproducer_to_file"><code class="code"><span class="constructor">Gccjit</span>.<span class="constructor">Context</span>.dump_reproducer_to_file</code></a> will write out C code
+      for a much simpler executable that performs the equivalent calls into
+      <code class="code">libgccjit</code>, without needing the client code and its data.
+<p>
+
+      Typically you need to supply <code class="code"><span class="string">"-Wno-unused-variable"</span></code> when compiling the
+      generated file (since the result of each API call is assigned to a unique
+      variable within the generated C source, and not all are necessarily then
+      used).<br>
+</div>
+<br>
+<h1 id="1_ContextOptions">Context Options</h1><br>
+
+<pre><code><span id="TYPEcontext_option"><span class="keyword">type</span> <code class="type">'_</code> context_option</span> = </code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTcontext_option.Progname"><span class="constructor">Progname</span></span> <span class="keyword">:</span> <code class="type">string <a href="Gccjit.Context.html#TYPEcontext_option">context_option</a></code></code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+The name of the program, for used as a prefix when printing error messages
+        to stderr.  If not set, <code class="code"><span class="string">"libgccjit.so"</span></code> is used.<br>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTcontext_option.Optimization_level"><span class="constructor">Optimization_level</span></span> <span class="keyword">:</span> <code class="type">int <a href="Gccjit.Context.html#TYPEcontext_option">context_option</a></code></code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+How much to optimize the code.  Valid values are <code class="code">0-3</code>, corresponding to
+        GCC's command-line options -O0 through -O3.
+<p>
+
+        The default value is 0 (unoptimized).<br>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTcontext_option.Debuginfo"><span class="constructor">Debuginfo</span></span> <span class="keyword">:</span> <code class="type">bool <a href="Gccjit.Context.html#TYPEcontext_option">context_option</a></code></code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+If <code class="code"><span class="keyword">true</span></code>, <a href="Gccjit.Context.html#VALcompile"><code class="code"><span class="constructor">Gccjit</span>.<span class="constructor">Context</span>.compile</code></a> will attempt to do the right thing so that
+        if you attach a debugger to the process, it will be able to inspect
+        variables and step through your code.  Note that you can't step through
+        code unless you set up source location information for the code (by
+        creating and passing in <a href="Gccjit.html#TYPElocation"><code class="code"><span class="constructor">Gccjit</span>.location</code></a> instances).<br>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTcontext_option.Dump_initial_tree"><span class="constructor">Dump_initial_tree</span></span> <span class="keyword">:</span> <code class="type">bool <a href="Gccjit.Context.html#TYPEcontext_option">context_option</a></code></code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+If <code class="code"><span class="keyword">true</span></code>, <a href="Gccjit.Context.html#VALcompile"><code class="code"><span class="constructor">Gccjit</span>.<span class="constructor">Context</span>.compile</code></a> will dump its initial "tree" representation
+        of your code to <code class="code">stderr</code> (before any optimizations).<br>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTcontext_option.Dump_initial_gimple"><span class="constructor">Dump_initial_gimple</span></span> <span class="keyword">:</span> <code class="type">bool <a href="Gccjit.Context.html#TYPEcontext_option">context_option</a></code></code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+If <code class="code"><span class="keyword">true</span></code>, <a href="Gccjit.Context.html#VALcompile"><code class="code"><span class="constructor">Gccjit</span>.<span class="constructor">Context</span>.compile</code></a> will dump the "gimple" representation of
+        your code to stderr, before any optimizations are performed.  The dump
+        resembles C code.<br>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTcontext_option.Dump_generated_code"><span class="constructor">Dump_generated_code</span></span> <span class="keyword">:</span> <code class="type">bool <a href="Gccjit.Context.html#TYPEcontext_option">context_option</a></code></code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+If <code class="code"><span class="keyword">true</span></code>, <a href="Gccjit.Context.html#VALcompile"><code class="code"><span class="constructor">Gccjit</span>.<span class="constructor">Context</span>.compile</code></a> will dump the final generated code to
+        stderr, in the form of assembly language.<br>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTcontext_option.Dump_summary"><span class="constructor">Dump_summary</span></span> <span class="keyword">:</span> <code class="type">bool <a href="Gccjit.Context.html#TYPEcontext_option">context_option</a></code></code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+If <code class="code"><span class="keyword">true</span></code>, <a href="Gccjit.Context.html#VALcompile"><code class="code"><span class="constructor">Gccjit</span>.<span class="constructor">Context</span>.compile</code></a> will print information to stderr on the
+        actions it is performing, followed by a profile showing the time taken and
+        memory usage of each phase.<br>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTcontext_option.Dump_everything"><span class="constructor">Dump_everything</span></span> <span class="keyword">:</span> <code class="type">bool <a href="Gccjit.Context.html#TYPEcontext_option">context_option</a></code></code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+If <code class="code"><span class="keyword">true</span></code>, <a href="Gccjit.Context.html#VALcompile"><code class="code"><span class="constructor">Gccjit</span>.<span class="constructor">Context</span>.compile</code></a> will dump copious amount of information on
+        what it's doing to various files within a temporary directory.  Use
+        <code class="code"><span class="constructor">Keep_intermediates</span></code> (see below) to see the results.  The files are
+        intended to be human-readable, but the exact files and their formats are
+        subject to change.<br>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTcontext_option.Selfcheck_gc"><span class="constructor">Selfcheck_gc</span></span> <span class="keyword">:</span> <code class="type">bool <a href="Gccjit.Context.html#TYPEcontext_option">context_option</a></code></code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+If <code class="code"><span class="keyword">true</span></code>, <code class="code">libgccjit</code> will aggressively run its garbage collector,
+        to shake out bugs (greatly slowing down the compile).  This is likely to
+        only be of interest to developers *of* the library.  It is used when
+        running the selftest suite.<br>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTcontext_option.Keep_intermediates"><span class="constructor">Keep_intermediates</span></span> <span class="keyword">:</span> <code class="type">bool <a href="Gccjit.Context.html#TYPEcontext_option">context_option</a></code></code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+If <code class="code"><span class="keyword">true</span></code>, <a href="Gccjit.Context.html#VALrelease"><code class="code"><span class="constructor">Gccjit</span>.<span class="constructor">Context</span>.release</code></a> will not clean up intermediate files written
+         to the filesystem, and will display their location on stderr.<br>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr></table>
+
+
+
+<pre><span id="VALset_option"><span class="keyword">val</span> set_option</span> : <code class="type"><a href="Gccjit.html#TYPEcontext">Gccjit.context</a> -> 'a <a href="Gccjit.Context.html#TYPEcontext_option">context_option</a> -> 'a -> unit</code></pre><div class="info ">
+<code class="code">set_option ctx opt v</code> sets the <a href="Gccjit.Context.html#TYPEcontext_option"><code class="code"><span class="constructor">Gccjit</span>.<span class="constructor">Context</span>.context_option</code></a> <code class="code">opt</code> of <code class="code">ctx</code>
+      to <code class="code">v</code>.<br>
+</div>
+<br>
+<h1 id="1_Compilation">Compilation</h1>
+<p>
+
+      Once populated, a <a href="Gccjit.html#TYPEcontext"><code class="code"><span class="constructor">Gccjit</span>.context</code></a> can be compiled to machine code, either
+      in-memory via <a href="Gccjit.Context.html#VALcompile"><code class="code"><span class="constructor">Gccjit</span>.<span class="constructor">Context</span>.compile</code></a> or to disk via <a href="Gccjit.Context.html#VALcompile_to_file"><code class="code"><span class="constructor">Gccjit</span>.<span class="constructor">Context</span>.compile_to_file</code></a>.
+<p>
+
+      You can compile a context multiple times (using either form of compilation),
+      although any errors that occur on the context will prevent any future
+      compilation of that context.<br>
+
+<pre><span id="VALcompile"><span class="keyword">val</span> compile</span> : <code class="type"><a href="Gccjit.html#TYPEcontext">Gccjit.context</a> -> <a href="Gccjit.html#TYPEresult">Gccjit.result</a></code></pre><div class="info ">
+This calls into GCC and builds the code, returning a <a href="Gccjit.html#TYPEresult"><code class="code"><span class="constructor">Gccjit</span>.result</code></a>.  See
+      <a href="Gccjit.html#inmemory">In-memory compilation</a>.<br>
+</div>
+
+<pre><code><span id="TYPEoutput_kind"><span class="keyword">type</span> <code class="type"></code>output_kind</span> = </code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELToutput_kind.Assembler"><span class="constructor">Assembler</span></span></code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+Compile the context to an assembly file.<br>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELToutput_kind.Object_file"><span class="constructor">Object_file</span></span></code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+Compile the context to an object file.<br>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELToutput_kind.Dynamic_library"><span class="constructor">Dynamic_library</span></span></code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+Compile the context to a dynamic library.<br>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELToutput_kind.Executable"><span class="constructor">Executable</span></span></code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+Compile the context to an executable.<br>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr></table>
+
+<div class="info ">
+Kinds of ahead-of-time compilation, for use with
+      <a href="Gccjit.Context.html#VALcompile_to_file"><code class="code"><span class="constructor">Gccjit</span>.<span class="constructor">Context</span>.compile_to_file</code></a>.<br>
+</div>
+
+
+<pre><span id="VALcompile_to_file"><span class="keyword">val</span> compile_to_file</span> : <code class="type"><a href="Gccjit.html#TYPEcontext">Gccjit.context</a> -> <a href="Gccjit.Context.html#TYPEoutput_kind">output_kind</a> -> string -> unit</code></pre><div class="info ">
+Compile the context to a file of the given kind.  This can be called more
+      that once on a given context, although any errors that occur will block
+      further compilation.<br>
+</div>
+</body></html>

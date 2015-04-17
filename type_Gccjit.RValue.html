@@ -1,0 +1,50 @@
+<html><head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=iso-8859-1" http-equiv="Content-Type">
+<link rel="Start" href="index.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of exceptions" rel=Appendix href="index_exceptions.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Gccjit" rel="Chapter" href="Gccjit.html"><title>Gccjit.RValue</title>
+</head>
+<body>
+<code class="code"><span class="keyword">sig</span><br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;type_of&nbsp;:&nbsp;<span class="constructor">Gccjit</span>.rvalue&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Gccjit</span>.type_<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;int&nbsp;:&nbsp;<span class="constructor">Gccjit</span>.context&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Gccjit</span>.type_&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Gccjit</span>.rvalue<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;zero&nbsp;:&nbsp;<span class="constructor">Gccjit</span>.context&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Gccjit</span>.type_&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Gccjit</span>.rvalue<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;one&nbsp;:&nbsp;<span class="constructor">Gccjit</span>.context&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Gccjit</span>.type_&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Gccjit</span>.rvalue<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;double&nbsp;:&nbsp;<span class="constructor">Gccjit</span>.context&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Gccjit</span>.type_&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;float&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Gccjit</span>.rvalue<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;ptr&nbsp;:&nbsp;<span class="constructor">Gccjit</span>.context&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Gccjit</span>.type_&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="keywordsign">'</span>a&nbsp;<span class="constructor">Ctypes</span>.ptr&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Gccjit</span>.rvalue<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;null&nbsp;:&nbsp;<span class="constructor">Gccjit</span>.context&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Gccjit</span>.type_&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Gccjit</span>.rvalue<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;string_literal&nbsp;:&nbsp;<span class="constructor">Gccjit</span>.context&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Gccjit</span>.rvalue<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;unary_op&nbsp;:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="constructor">Gccjit</span>.context&nbsp;<span class="keywordsign">-&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;?loc:<span class="constructor">Gccjit</span>.location&nbsp;<span class="keywordsign">-&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="constructor">Gccjit</span>.unary_op&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Gccjit</span>.type_&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Gccjit</span>.rvalue&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Gccjit</span>.rvalue<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;binary_op&nbsp;:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="constructor">Gccjit</span>.context&nbsp;<span class="keywordsign">-&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;?loc:<span class="constructor">Gccjit</span>.location&nbsp;<span class="keywordsign">-&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="constructor">Gccjit</span>.binary_op&nbsp;<span class="keywordsign">-&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="constructor">Gccjit</span>.type_&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Gccjit</span>.rvalue&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Gccjit</span>.rvalue&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Gccjit</span>.rvalue<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;comparison&nbsp;:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="constructor">Gccjit</span>.context&nbsp;<span class="keywordsign">-&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;?loc:<span class="constructor">Gccjit</span>.location&nbsp;<span class="keywordsign">-&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="constructor">Gccjit</span>.comparison&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Gccjit</span>.rvalue&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Gccjit</span>.rvalue&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Gccjit</span>.rvalue<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;call&nbsp;:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="constructor">Gccjit</span>.context&nbsp;<span class="keywordsign">-&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;?loc:<span class="constructor">Gccjit</span>.location&nbsp;<span class="keywordsign">-&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="constructor">Gccjit</span>.function_&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Gccjit</span>.rvalue&nbsp;list&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Gccjit</span>.rvalue<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;indirect_call&nbsp;:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="constructor">Gccjit</span>.context&nbsp;<span class="keywordsign">-&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;?loc:<span class="constructor">Gccjit</span>.location&nbsp;<span class="keywordsign">-&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="constructor">Gccjit</span>.rvalue&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Gccjit</span>.rvalue&nbsp;list&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Gccjit</span>.rvalue<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;cast&nbsp;:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="constructor">Gccjit</span>.context&nbsp;<span class="keywordsign">-&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;?loc:<span class="constructor">Gccjit</span>.location&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Gccjit</span>.rvalue&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Gccjit</span>.type_&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Gccjit</span>.rvalue<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;access_field&nbsp;:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;?loc:<span class="constructor">Gccjit</span>.location&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Gccjit</span>.rvalue&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Gccjit</span>.field&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Gccjit</span>.rvalue<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;lvalue&nbsp;:&nbsp;<span class="constructor">Gccjit</span>.lvalue&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Gccjit</span>.rvalue<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;param&nbsp;:&nbsp;<span class="constructor">Gccjit</span>.param&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Gccjit</span>.rvalue<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;to_string&nbsp;:&nbsp;<span class="constructor">Gccjit</span>.rvalue&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string<br>
+<span class="keyword">end</span></code></body></html>

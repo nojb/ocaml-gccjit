@@ -1,0 +1,103 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=iso-8859-1" http-equiv="Content-Type">
+<link rel="Start" href="index.html">
+<link rel="previous" href="Gccjit.Param.html">
+<link rel="next" href="Gccjit.Block.html">
+<link rel="Up" href="Gccjit.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of exceptions" rel=Appendix href="index_exceptions.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Gccjit" rel="Chapter" href="Gccjit.html"><title>Gccjit.Function</title>
+</head>
+<body>
+<div class="navbar"><a class="pre" href="Gccjit.Param.html" title="Gccjit.Param">Previous</a>
+&nbsp;<a class="up" href="Gccjit.html" title="Gccjit">Up</a>
+&nbsp;<a class="post" href="Gccjit.Block.html" title="Gccjit.Block">Next</a>
+</div>
+<h1>Module <a href="type_Gccjit.Function.html">Gccjit.Function</a></h1>
+
+<pre><span class="keyword">module</span> Function: <code class="code"><span class="keyword">sig</span></code> <a href="Gccjit.Function.html">..</a> <code class="code"><span class="keyword">end</span></code></pre><hr width="100%">
+
+<pre><code><span id="TYPEfunction_kind"><span class="keyword">type</span> <code class="type"></code>function_kind</span> = </code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTfunction_kind.Exported"><span class="constructor">Exported</span></span></code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+Function is defined by the client code and visible by name outside of the
+        JIT.<br>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTfunction_kind.Internal"><span class="constructor">Internal</span></span></code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+Function is defined by the client code, but is invisible outside of the
+        JIT.  Analogous to a <code class="code"><span class="string">"static"</span></code> function.<br>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTfunction_kind.Imported"><span class="constructor">Imported</span></span></code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+Function is not defined by the client code; we're merely referring to it.
+         Analogous to using an <code class="code"><span class="string">"extern"</span></code> function from a header file.<br>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTfunction_kind.Always_inline"><span class="constructor">Always_inline</span></span></code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><div class="info ">
+Function is only ever inlined into other functions, and is invisible
+        outside of the JIT.  Analogous to prefixing with <code class="code"><span class="string">"inline"</span></code> and adding
+        <code class="code">__attribute__((always_inline))</code>.  Inlining will only occur when the
+        optimization level is above 0; when optimization is off, this is
+        essentially the same as <code class="code"><span class="constructor">FUNCTION_Internal</span></code>.<br>
+</div>
+</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr></table>
+
+<div class="info ">
+Kinds of function.<br>
+</div>
+
+
+<pre><span id="VALcreate"><span class="keyword">val</span> create</span> : <code class="type"><a href="Gccjit.html#TYPEcontext">Gccjit.context</a> -><br>       ?loc:<a href="Gccjit.html#TYPElocation">Gccjit.location</a> -><br>       ?variadic:bool -><br>       <a href="Gccjit.Function.html#TYPEfunction_kind">function_kind</a> -><br>       <a href="Gccjit.html#TYPEtype_">Gccjit.type_</a> -> string -> <a href="Gccjit.html#TYPEparam">Gccjit.param</a> list -> <a href="Gccjit.html#TYPEfunction_">Gccjit.function_</a></code></pre><div class="info ">
+Create a function with the given name and parameters.<br>
+</div>
+
+<pre><span id="VALbuiltin"><span class="keyword">val</span> builtin</span> : <code class="type"><a href="Gccjit.html#TYPEcontext">Gccjit.context</a> -> string -> <a href="Gccjit.html#TYPEfunction_">Gccjit.function_</a></code></pre><div class="info ">
+Create a reference to a builtin function (sometimes called intrinsic
+      functions).<br>
+</div>
+
+<pre><span id="VALparam"><span class="keyword">val</span> param</span> : <code class="type"><a href="Gccjit.html#TYPEfunction_">Gccjit.function_</a> -> int -> <a href="Gccjit.html#TYPEparam">Gccjit.param</a></code></pre><div class="info ">
+Get a specific param of a function by index (0-based).<br>
+</div>
+
+<pre><span id="VALdump_dot"><span class="keyword">val</span> dump_dot</span> : <code class="type"><a href="Gccjit.html#TYPEfunction_">Gccjit.function_</a> -> string -> unit</code></pre><div class="info ">
+Emit the function in graphviz format to the given path.<br>
+</div>
+
+<pre><span id="VALlocal"><span class="keyword">val</span> local</span> : <code class="type">?loc:<a href="Gccjit.html#TYPElocation">Gccjit.location</a> -><br>       <a href="Gccjit.html#TYPEfunction_">Gccjit.function_</a> -> <a href="Gccjit.html#TYPEtype_">Gccjit.type_</a> -> string -> <a href="Gccjit.html#TYPElvalue">Gccjit.lvalue</a></code></pre><div class="info ">
+Add a new local variable within the function, of the given type and name.<br>
+</div>
+
+<pre><span id="VALto_string"><span class="keyword">val</span> to_string</span> : <code class="type"><a href="Gccjit.html#TYPEfunction_">Gccjit.function_</a> -> string</code></pre><div class="info ">
+Get a human-readable description of this object.<br>
+</div>
+</body></html>

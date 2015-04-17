@@ -1,0 +1,413 @@
+<html>
+<head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=iso-8859-1" http-equiv="Content-Type">
+<link rel="Start" href="index.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of exceptions" rel=Appendix href="index_exceptions.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Gccjit" rel="Chapter" href="Gccjit.html"><title>Index of values</title>
+</head>
+<body>
+<div class="navbar">&nbsp;<a class="up" href="index.html" title="Index">Up</a>
+&nbsp;</div>
+<h1>Index of values</h1>
+<table>
+<tr><td align="left"><br>A</td></tr>
+<tr><td><a href="Gccjit.LValue.html#VALaccess_array">access_array</a> [<a href="Gccjit.LValue.html">Gccjit.LValue</a>]</td>
+<td><div class="info">
+Given an rvalue of pointer type <code class="code"><span class="constructor">T</span> *</code>, get at the element <code class="code"><span class="constructor">T</span></code> at the given
+      index, using standard C array indexing rules i.e.
+</div>
+</td></tr>
+<tr><td><a href="Gccjit.LValue.html#VALaccess_field">access_field</a> [<a href="Gccjit.LValue.html">Gccjit.LValue</a>]</td>
+<td></td></tr>
+<tr><td><a href="Gccjit.RValue.html#VALaccess_field">access_field</a> [<a href="Gccjit.RValue.html">Gccjit.RValue</a>]</td>
+<td></td></tr>
+<tr><td><a href="Gccjit.LValue.html#VALaddress">address</a> [<a href="Gccjit.LValue.html">Gccjit.LValue</a>]</td>
+<td><div class="info">
+Taking the address of an <a href="Gccjit.html#TYPElvalue"><code class="code"><span class="constructor">Gccjit</span>.lvalue</code></a>; analogous to <code class="code"><span class="keywordsign">&amp;</span>(<span class="constructor">EXPR</span>)</code> in C.
+</div>
+</td></tr>
+<tr><td><a href="Gccjit.Type.html#VALarray">array</a> [<a href="Gccjit.Type.html">Gccjit.Type</a>]</td>
+<td><div class="info">
+Given type <code class="code"><span class="constructor">T</span></code>, get type <code class="code"><span class="constructor">T</span>[<span class="constructor">N</span>]</code> (for a constant <code class="code"><span class="constructor">N</span></code>).
+</div>
+</td></tr>
+<tr><td><a href="Gccjit.Block.html#VALassign">assign</a> [<a href="Gccjit.Block.html">Gccjit.Block</a>]</td>
+<td><div class="info">
+Add evaluation of an <a href="Gccjit.html#TYPErvalue"><code class="code"><span class="constructor">Gccjit</span>.rvalue</code></a>, assigning the result to the given
+      <a href="Gccjit.html#TYPElvalue"><code class="code"><span class="constructor">Gccjit</span>.lvalue</code></a>.
+</div>
+</td></tr>
+<tr><td><a href="Gccjit.Block.html#VALassign_op">assign_op</a> [<a href="Gccjit.Block.html">Gccjit.Block</a>]</td>
+<td><div class="info">
+Add evaluation of an <a href="Gccjit.html#TYPErvalue"><code class="code"><span class="constructor">Gccjit</span>.rvalue</code></a>, using the result to modify an <a href="Gccjit.html#TYPElvalue"><code class="code"><span class="constructor">Gccjit</span>.lvalue</code></a>.
+</div>
+</td></tr>
+<tr><td align="left"><br>B</td></tr>
+<tr><td><a href="Gccjit.RValue.html#VALbinary_op">binary_op</a> [<a href="Gccjit.RValue.html">Gccjit.RValue</a>]</td>
+<td><div class="info">
+Build a binary operation out of two constituent <a href="Gccjit.html#TYPErvalue">rvalues</a>.
+</div>
+</td></tr>
+<tr><td><a href="Gccjit.Function.html#VALbuiltin">builtin</a> [<a href="Gccjit.Function.html">Gccjit.Function</a>]</td>
+<td><div class="info">
+Create a reference to a builtin function (sometimes called intrinsic
+      functions).
+</div>
+</td></tr>
+<tr><td align="left"><br>C</td></tr>
+<tr><td><a href="Gccjit.RValue.html#VALcall">call</a> [<a href="Gccjit.RValue.html">Gccjit.RValue</a>]</td>
+<td><div class="info">
+Given a function and the given table of argument rvalues, construct a call
+      to the function, with the result as an <a href="Gccjit.html#TYPErvalue"><code class="code"><span class="constructor">Gccjit</span>.rvalue</code></a>.
+</div>
+</td></tr>
+<tr><td><a href="Gccjit.RValue.html#VALcast">cast</a> [<a href="Gccjit.RValue.html">Gccjit.RValue</a>]</td>
+<td><div class="info">
+Given an <a href="Gccjit.html#TYPErvalue"><code class="code"><span class="constructor">Gccjit</span>.rvalue</code></a> of <code class="code"><span class="constructor">T</span></code>, construct another <a href="Gccjit.html#TYPErvalue"><code class="code"><span class="constructor">Gccjit</span>.rvalue</code></a> of another type.
+</div>
+</td></tr>
+<tr><td><a href="Gccjit.Result.html#VALcode">code</a> [<a href="Gccjit.Result.html">Gccjit.Result</a>]</td>
+<td><div class="info">
+Locate a given function within the built machine code.
+</div>
+</td></tr>
+<tr><td><a href="Gccjit.Block.html#VALcomment">comment</a> [<a href="Gccjit.Block.html">Gccjit.Block</a>]</td>
+<td><div class="info">
+Add a no-op textual comment to the internal representation of the code.
+</div>
+</td></tr>
+<tr><td><a href="Gccjit.RValue.html#VALcomparison">comparison</a> [<a href="Gccjit.RValue.html">Gccjit.RValue</a>]</td>
+<td><div class="info">
+Build a boolean <a href="Gccjit.html#TYPErvalue"><code class="code"><span class="constructor">Gccjit</span>.rvalue</code></a> out of the comparison of two other
+      <a href="Gccjit.html#TYPErvalue">rvalues</a>.
+</div>
+</td></tr>
+<tr><td><a href="Gccjit.Context.html#VALcompile">compile</a> [<a href="Gccjit.Context.html">Gccjit.Context</a>]</td>
+<td><div class="info">
+This calls into GCC and builds the code, returning a <a href="Gccjit.html#TYPEresult"><code class="code"><span class="constructor">Gccjit</span>.result</code></a>.
+</div>
+</td></tr>
+<tr><td><a href="Gccjit.Context.html#VALcompile_to_file">compile_to_file</a> [<a href="Gccjit.Context.html">Gccjit.Context</a>]</td>
+<td><div class="info">
+Compile the context to a file of the given kind.
+</div>
+</td></tr>
+<tr><td><a href="Gccjit.Block.html#VALcond_jump">cond_jump</a> [<a href="Gccjit.Block.html">Gccjit.Block</a>]</td>
+<td><div class="info">
+Terminate a block by adding evaluation of an rvalue, branching on the
+      result to the appropriate successor block.
+</div>
+</td></tr>
+<tr><td><a href="Gccjit.Type.html#VALconst">const</a> [<a href="Gccjit.Type.html">Gccjit.Type</a>]</td>
+<td><div class="info">
+Given type <code class="code"><span class="constructor">T</span></code>, get type <code class="code">const <span class="constructor">T</span></code>.
+</div>
+</td></tr>
+<tr><td><a href="Gccjit.Location.html#VALcreate">create</a> [<a href="Gccjit.Location.html">Gccjit.Location</a>]</td>
+<td><div class="info">
+Create a <a href="Gccjit.html#TYPElocation"><code class="code"><span class="constructor">Gccjit</span>.location</code></a> instance representing the given source location.
+</div>
+</td></tr>
+<tr><td><a href="Gccjit.Block.html#VALcreate">create</a> [<a href="Gccjit.Block.html">Gccjit.Block</a>]</td>
+<td><div class="info">
+Create a block.
+</div>
+</td></tr>
+<tr><td><a href="Gccjit.Function.html#VALcreate">create</a> [<a href="Gccjit.Function.html">Gccjit.Function</a>]</td>
+<td><div class="info">
+Create a function with the given name and parameters.
+</div>
+</td></tr>
+<tr><td><a href="Gccjit.Param.html#VALcreate">create</a> [<a href="Gccjit.Param.html">Gccjit.Param</a>]</td>
+<td><div class="info">
+In preparation for creating a function, create a new parameter of the given
+      type and name.
+</div>
+</td></tr>
+<tr><td><a href="Gccjit.Struct.html#VALcreate">create</a> [<a href="Gccjit.Struct.html">Gccjit.Struct</a>]</td>
+<td><div class="info">
+Create a struct type, with the given name and fields.
+</div>
+</td></tr>
+<tr><td><a href="Gccjit.Field.html#VALcreate">create</a> [<a href="Gccjit.Field.html">Gccjit.Field</a>]</td>
+<td><div class="info">
+Create a field, with the given type and name.
+</div>
+</td></tr>
+<tr><td><a href="Gccjit.Context.html#VALcreate">create</a> [<a href="Gccjit.Context.html">Gccjit.Context</a>]</td>
+<td><div class="info">
+Creates a new <a href="Gccjit.html#TYPEcontext"><code class="code"><span class="constructor">Gccjit</span>.context</code></a> instance, which is independent of any others that
+      may be present within this process.
+</div>
+</td></tr>
+<tr><td><a href="Gccjit.Context.html#VALcreate_child">create_child</a> [<a href="Gccjit.Context.html">Gccjit.Context</a>]</td>
+<td><div class="info">
+Given an existing JIT context, create a child context.
+</div>
+</td></tr>
+<tr><td align="left"><br>D</td></tr>
+<tr><td><a href="Gccjit.LValue.html#VALderef">deref</a> [<a href="Gccjit.LValue.html">Gccjit.LValue</a>]</td>
+<td><div class="info">
+Dereferencing a pointer; analogous to <code class="code">*(<span class="constructor">EXPR</span>)</code> in C.
+</div>
+</td></tr>
+<tr><td><a href="Gccjit.LValue.html#VALderef_field">deref_field</a> [<a href="Gccjit.LValue.html">Gccjit.LValue</a>]</td>
+<td><div class="info">
+Accessing a field of an <code class="code">rvalue</code> of pointer type, analogous <code class="code">(<span class="constructor">EXPR</span>)<span class="keywordsign">-&gt;</span>field</code>
+      in C, itself equivalent to <code class="code">(\*EXPR).FIELD</code>
+</div>
+</td></tr>
+<tr><td><a href="Gccjit.RValue.html#VALdouble">double</a> [<a href="Gccjit.RValue.html">Gccjit.RValue</a>]</td>
+<td><div class="info">
+Given a numeric type (integer or floating point), build an <a href="Gccjit.html#TYPErvalue"><code class="code"><span class="constructor">Gccjit</span>.rvalue</code></a> for the
+      given constant double value.
+</div>
+</td></tr>
+<tr><td><a href="Gccjit.Function.html#VALdump_dot">dump_dot</a> [<a href="Gccjit.Function.html">Gccjit.Function</a>]</td>
+<td><div class="info">
+Emit the function in graphviz format to the given path.
+</div>
+</td></tr>
+<tr><td><a href="Gccjit.Context.html#VALdump_reproducer_to_file">dump_reproducer_to_file</a> [<a href="Gccjit.Context.html">Gccjit.Context</a>]</td>
+<td><div class="info">
+Write C source code into path that can be compiled into a self-contained
+      executable (i.e.
+</div>
+</td></tr>
+<tr><td><a href="Gccjit.Context.html#VALdump_to_file">dump_to_file</a> [<a href="Gccjit.Context.html">Gccjit.Context</a>]</td>
+<td><div class="info">
+Dump a C-like representation to the given path, describing what's been set
+      up on the context.
+</div>
+</td></tr>
+<tr><td align="left"><br>E</td></tr>
+<tr><td><a href="Gccjit.Block.html#VALeval">eval</a> [<a href="Gccjit.Block.html">Gccjit.Block</a>]</td>
+<td><div class="info">
+Add evaluation of an <a href="Gccjit.html#TYPErvalue"><code class="code"><span class="constructor">Gccjit</span>.rvalue</code></a>, discarding the result (e.g.
+</div>
+</td></tr>
+<tr><td align="left"><br>F</td></tr>
+<tr><td><a href="Gccjit.Type.html#VALfunction_ptr">function_ptr</a> [<a href="Gccjit.Type.html">Gccjit.Type</a>]</td>
+<td></td></tr>
+<tr><td align="left"><br>G</td></tr>
+<tr><td><a href="Gccjit.Type.html#VALget">get</a> [<a href="Gccjit.Type.html">Gccjit.Type</a>]</td>
+<td><div class="info">
+Access a standard type.
+</div>
+</td></tr>
+<tr><td><a href="Gccjit.Result.html#VALglobal">global</a> [<a href="Gccjit.Result.html">Gccjit.Result</a>]</td>
+<td><div class="info">
+Locate a given global within the built machine code.
+</div>
+</td></tr>
+<tr><td><a href="Gccjit.LValue.html#VALglobal">global</a> [<a href="Gccjit.LValue.html">Gccjit.LValue</a>]</td>
+<td><div class="info">
+Add a new global variable of the given type and name to the context.
+</div>
+</td></tr>
+<tr><td align="left"><br>I</td></tr>
+<tr><td><a href="Gccjit.RValue.html#VALindirect_call">indirect_call</a> [<a href="Gccjit.RValue.html">Gccjit.RValue</a>]</td>
+<td><div class="info">
+Call through a function pointer.
+</div>
+</td></tr>
+<tr><td><a href="Gccjit.RValue.html#VALint">int</a> [<a href="Gccjit.RValue.html">Gccjit.RValue</a>]</td>
+<td><div class="info">
+Given a numeric type (integer or floating point), build an <a href="Gccjit.html#TYPErvalue"><code class="code"><span class="constructor">Gccjit</span>.rvalue</code></a> for the
+      given constant int value.
+</div>
+</td></tr>
+<tr><td><a href="Gccjit.Type.html#VALint">int</a> [<a href="Gccjit.Type.html">Gccjit.Type</a>]</td>
+<td><div class="info">
+Get the integer type of the given size and signedness.
+</div>
+</td></tr>
+<tr><td align="left"><br>J</td></tr>
+<tr><td><a href="Gccjit.Block.html#VALjump">jump</a> [<a href="Gccjit.Block.html">Gccjit.Block</a>]</td>
+<td><div class="info">
+Terminate a block by adding a jump to the given target block.
+</div>
+</td></tr>
+<tr><td align="left"><br>L</td></tr>
+<tr><td><a href="Gccjit.Function.html#VALlocal">local</a> [<a href="Gccjit.Function.html">Gccjit.Function</a>]</td>
+<td><div class="info">
+Add a new local variable within the function, of the given type and name.
+</div>
+</td></tr>
+<tr><td><a href="Gccjit.RValue.html#VALlvalue">lvalue</a> [<a href="Gccjit.RValue.html">Gccjit.RValue</a>]</td>
+<td></td></tr>
+<tr><td align="left"><br>N</td></tr>
+<tr><td><a href="Gccjit.RValue.html#VALnull">null</a> [<a href="Gccjit.RValue.html">Gccjit.RValue</a>]</td>
+<td><div class="info">
+Given a pointer type, build an <a href="Gccjit.html#TYPErvalue"><code class="code"><span class="constructor">Gccjit</span>.rvalue</code></a> for <code class="code"><span class="constructor">NULL</span></code>.
+</div>
+</td></tr>
+<tr><td align="left"><br>O</td></tr>
+<tr><td><a href="Gccjit.RValue.html#VALone">one</a> [<a href="Gccjit.RValue.html">Gccjit.RValue</a>]</td>
+<td><div class="info">
+Given a numeric type (integer or floating point), get the <a href="Gccjit.html#TYPErvalue"><code class="code"><span class="constructor">Gccjit</span>.rvalue</code></a> for
+      one.
+</div>
+</td></tr>
+<tr><td><a href="Gccjit.Struct.html#VALopaque">opaque</a> [<a href="Gccjit.Struct.html">Gccjit.Struct</a>]</td>
+<td><div class="info">
+Construct a new struct type, with the given name, but without specifying the
+      fields.
+</div>
+</td></tr>
+<tr><td align="left"><br>P</td></tr>
+<tr><td><a href="Gccjit.Function.html#VALparam">param</a> [<a href="Gccjit.Function.html">Gccjit.Function</a>]</td>
+<td><div class="info">
+Get a specific param of a function by index (0-based).
+</div>
+</td></tr>
+<tr><td><a href="Gccjit.LValue.html#VALparam">param</a> [<a href="Gccjit.LValue.html">Gccjit.LValue</a>]</td>
+<td></td></tr>
+<tr><td><a href="Gccjit.RValue.html#VALparam">param</a> [<a href="Gccjit.RValue.html">Gccjit.RValue</a>]</td>
+<td></td></tr>
+<tr><td><a href="Gccjit.Block.html#VALparent">parent</a> [<a href="Gccjit.Block.html">Gccjit.Block</a>]</td>
+<td><div class="info">
+Which function is this block within?
+</div>
+</td></tr>
+<tr><td><a href="Gccjit.Type.html#VALpointer">pointer</a> [<a href="Gccjit.Type.html">Gccjit.Type</a>]</td>
+<td><div class="info">
+Given type <code class="code"><span class="constructor">T</span></code>, get type <code class="code"><span class="constructor">T</span>*</code>
+</div>
+</td></tr>
+<tr><td><a href="Gccjit.RValue.html#VALptr">ptr</a> [<a href="Gccjit.RValue.html">Gccjit.RValue</a>]</td>
+<td><div class="info">
+Given a pointer type, build an <a href="Gccjit.html#TYPErvalue"><code class="code"><span class="constructor">Gccjit</span>.rvalue</code></a> for the given address.
+</div>
+</td></tr>
+<tr><td align="left"><br>R</td></tr>
+<tr><td><a href="Gccjit.Result.html#VALrelease">release</a> [<a href="Gccjit.Result.html">Gccjit.Result</a>]</td>
+<td><div class="info">
+Once we're done with the code, this unloads the built <code class="code">.so</code> file.
+</div>
+</td></tr>
+<tr><td><a href="Gccjit.Context.html#VALrelease">release</a> [<a href="Gccjit.Context.html">Gccjit.Context</a>]</td>
+<td><div class="info">
+Releases all resources associated with the given context.
+</div>
+</td></tr>
+<tr><td><a href="Gccjit.Block.html#VALreturn">return</a> [<a href="Gccjit.Block.html">Gccjit.Block</a>]</td>
+<td><div class="info">
+Terminate a block by adding evaluation of an <a href="Gccjit.html#TYPErvalue"><code class="code"><span class="constructor">Gccjit</span>.rvalue</code></a>, returning the
+      value.
+</div>
+</td></tr>
+<tr><td><a href="Gccjit.Block.html#VALreturn_void">return_void</a> [<a href="Gccjit.Block.html">Gccjit.Block</a>]</td>
+<td><div class="info">
+Terminate a block by adding a valueless return, for use within a function
+      with <code class="code">void</code> return type.
+</div>
+</td></tr>
+<tr><td align="left"><br>S</td></tr>
+<tr><td><a href="Gccjit.Struct.html#VALset_fields">set_fields</a> [<a href="Gccjit.Struct.html">Gccjit.Struct</a>]</td>
+<td><div class="info">
+Populate the fields of a formerly-opaque struct type.
+</div>
+</td></tr>
+<tr><td><a href="Gccjit.Context.html#VALset_logfile">set_logfile</a> [<a href="Gccjit.Context.html">Gccjit.Context</a>]</td>
+<td><div class="info">
+<code class="code">set_logfile ctx logfile</code> enable ongoing logging of the context <code class="code">ctx</code>'s
+      activity to the given file descriptor <code class="code">logfile</code>.
+</div>
+</td></tr>
+<tr><td><a href="Gccjit.Context.html#VALset_option">set_option</a> [<a href="Gccjit.Context.html">Gccjit.Context</a>]</td>
+<td><div class="info">
+<code class="code">set_option ctx opt v</code> sets the <a href="Gccjit.Context.html#TYPEcontext_option"><code class="code"><span class="constructor">Gccjit</span>.<span class="constructor">Context</span>.context_option</code></a> <code class="code">opt</code> of <code class="code">ctx</code>
+      to <code class="code">v</code>.
+</div>
+</td></tr>
+<tr><td><a href="Gccjit.RValue.html#VALstring_literal">string_literal</a> [<a href="Gccjit.RValue.html">Gccjit.RValue</a>]</td>
+<td><div class="info">
+Generate an <a href="Gccjit.html#TYPErvalue"><code class="code"><span class="constructor">Gccjit</span>.rvalue</code></a> for the given <code class="code"><span class="constructor">NIL</span></code>-terminated string, of type
+      <code class="code"><span class="constructor">Const_char_ptr</span></code>.
+</div>
+</td></tr>
+<tr><td><a href="Gccjit.Type.html#VALstruct_">struct_</a> [<a href="Gccjit.Type.html">Gccjit.Type</a>]</td>
+<td></td></tr>
+<tr><td align="left"><br>T</td></tr>
+<tr><td><a href="Gccjit.Location.html#VALto_string">to_string</a> [<a href="Gccjit.Location.html">Gccjit.Location</a>]</td>
+<td><div class="info">
+Get a human-readable description of this object.
+</div>
+</td></tr>
+<tr><td><a href="Gccjit.Block.html#VALto_string">to_string</a> [<a href="Gccjit.Block.html">Gccjit.Block</a>]</td>
+<td><div class="info">
+Get a human-readable description of this object.
+</div>
+</td></tr>
+<tr><td><a href="Gccjit.Function.html#VALto_string">to_string</a> [<a href="Gccjit.Function.html">Gccjit.Function</a>]</td>
+<td><div class="info">
+Get a human-readable description of this object.
+</div>
+</td></tr>
+<tr><td><a href="Gccjit.Param.html#VALto_string">to_string</a> [<a href="Gccjit.Param.html">Gccjit.Param</a>]</td>
+<td><div class="info">
+Get a human-readable description of this object.
+</div>
+</td></tr>
+<tr><td><a href="Gccjit.LValue.html#VALto_string">to_string</a> [<a href="Gccjit.LValue.html">Gccjit.LValue</a>]</td>
+<td><div class="info">
+Get a human-readable description of this object.
+</div>
+</td></tr>
+<tr><td><a href="Gccjit.RValue.html#VALto_string">to_string</a> [<a href="Gccjit.RValue.html">Gccjit.RValue</a>]</td>
+<td><div class="info">
+Get a human-readable description of this object.
+</div>
+</td></tr>
+<tr><td><a href="Gccjit.Type.html#VALto_string">to_string</a> [<a href="Gccjit.Type.html">Gccjit.Type</a>]</td>
+<td><div class="info">
+Get a human-readable description of this object.
+</div>
+</td></tr>
+<tr><td><a href="Gccjit.Struct.html#VALto_string">to_string</a> [<a href="Gccjit.Struct.html">Gccjit.Struct</a>]</td>
+<td><div class="info">
+Get a human-readable description of this object.
+</div>
+</td></tr>
+<tr><td><a href="Gccjit.Field.html#VALto_string">to_string</a> [<a href="Gccjit.Field.html">Gccjit.Field</a>]</td>
+<td><div class="info">
+Get a human-readable description of this object.
+</div>
+</td></tr>
+<tr><td><a href="Gccjit.RValue.html#VALtype_of">type_of</a> [<a href="Gccjit.RValue.html">Gccjit.RValue</a>]</td>
+<td><div class="info">
+Get the type of this <a href="Gccjit.html#TYPErvalue"><code class="code"><span class="constructor">Gccjit</span>.rvalue</code></a>.
+</div>
+</td></tr>
+<tr><td align="left"><br>U</td></tr>
+<tr><td><a href="Gccjit.RValue.html#VALunary_op">unary_op</a> [<a href="Gccjit.RValue.html">Gccjit.RValue</a>]</td>
+<td><div class="info">
+Build a unary operation out of an input <a href="Gccjit.html#TYPErvalue"><code class="code"><span class="constructor">Gccjit</span>.rvalue</code></a>.
+</div>
+</td></tr>
+<tr><td><a href="Gccjit.Type.html#VALunion">union</a> [<a href="Gccjit.Type.html">Gccjit.Type</a>]</td>
+<td><div class="info">
+Unions work similarly to structs.
+</div>
+</td></tr>
+<tr><td align="left"><br>V</td></tr>
+<tr><td><a href="Gccjit.Type.html#VALvolatile">volatile</a> [<a href="Gccjit.Type.html">Gccjit.Type</a>]</td>
+<td><div class="info">
+Given type <code class="code"><span class="constructor">T</span></code>, get type <code class="code">volatile <span class="constructor">T</span></code>.
+</div>
+</td></tr>
+<tr><td align="left"><br>Z</td></tr>
+<tr><td><a href="Gccjit.RValue.html#VALzero">zero</a> [<a href="Gccjit.RValue.html">Gccjit.RValue</a>]</td>
+<td><div class="info">
+Given a numeric type (integer or floating point), get the <a href="Gccjit.html#TYPErvalue"><code class="code"><span class="constructor">Gccjit</span>.rvalue</code></a> for
+      zero.
+</div>
+</td></tr>
+</table>
+</body>
+</html>

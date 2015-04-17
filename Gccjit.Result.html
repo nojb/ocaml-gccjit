@@ -1,0 +1,62 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=iso-8859-1" http-equiv="Content-Type">
+<link rel="Start" href="index.html">
+<link rel="previous" href="Gccjit.Location.html">
+<link rel="Up" href="Gccjit.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of exceptions" rel=Appendix href="index_exceptions.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Gccjit" rel="Chapter" href="Gccjit.html"><title>Gccjit.Result</title>
+</head>
+<body>
+<div class="navbar"><a class="pre" href="Gccjit.Location.html" title="Gccjit.Location">Previous</a>
+&nbsp;<a class="up" href="Gccjit.html" title="Gccjit">Up</a>
+&nbsp;</div>
+<h1>Module <a href="type_Gccjit.Result.html">Gccjit.Result</a></h1>
+
+<pre><span class="keyword">module</span> Result: <code class="code"><span class="keyword">sig</span></code> <a href="Gccjit.Result.html">..</a> <code class="code"><span class="keyword">end</span></code></pre><hr width="100%">
+
+<pre><span id="VALcode"><span class="keyword">val</span> code</span> : <code class="type"><a href="Gccjit.html#TYPEresult">Gccjit.result</a> -> string -> ('a -> 'b) Ctypes.fn -> 'a -> 'b</code></pre><div class="info ">
+Locate a given function within the built machine code.<ul>
+<li>Functions are looked up by name. For this to succeed, a function with a
+        name matching funcname must have been created on result's context (or a
+        parent context) via a call to <a href="Gccjit.Function.html#VALcreate"><code class="code"><span class="constructor">Gccjit</span>.<span class="constructor">Function</span>.create</code></a> with kind
+        <a href="Gccjit.Function.html#TYPEfunction_kind"><code class="code"><span class="constructor">Exported</span></code></a>.</li>
+<li>If such a function is not found, an error will be raised.</li>
+<li>If the function is found, the result is cast to the given Ctypes
+        signature.  Care must be taken to pass a signature compatible with that
+        of function being extracted.</li>
+<li>The resulting machine code becomes invalid after <a href="Gccjit.Result.html#VALrelease"><code class="code"><span class="constructor">Gccjit</span>.<span class="constructor">Result</span>.release</code></a> is called on
+        the <a href="Gccjit.html#TYPEresult"><code class="code"><span class="constructor">Gccjit</span>.result</code></a>; attempting to call it after that may lead to a
+        segmentation fault.</li>
+</ul>
+<br>
+</div>
+
+<pre><span id="VALglobal"><span class="keyword">val</span> global</span> : <code class="type"><a href="Gccjit.html#TYPEresult">Gccjit.result</a> -> string -> 'a Ctypes.typ -> 'a Ctypes.ptr</code></pre><div class="info ">
+Locate a given global within the built machine code.<ul>
+<li>Globals are looked up by name. For this to succeed, a global with a name
+        matching name must have been created on result's context (or a parent
+        context) via a call to <a href="Gccjit.LValue.html#VALglobal"><code class="code"><span class="constructor">Gccjit</span>.<span class="constructor">LValue</span>.global</code></a> with kind
+        <a href="Gccjit.LValue.html#TYPEglobal_kind"><code class="code"><span class="constructor">Exported</span></code></a>.</li>
+<li>If the global is found, the result is cast to the Given <code class="code"><span class="constructor">Ctypes</span></code> type.</li>
+<li>This is a pointer to the global, so e.g. for an <code class="code">int</code> this is an <code class="code">int *</code>.</li>
+<li>If such a global is not found, an error will be raised.</li>
+<li>The resulting address becomes invalid after <a href="Gccjit.Result.html#VALrelease"><code class="code"><span class="constructor">Gccjit</span>.<span class="constructor">Result</span>.release</code></a> is called on the
+        <a href="Gccjit.html#TYPEresult"><code class="code"><span class="constructor">Gccjit</span>.result</code></a>; attempting to use it after that may lead to a segmentation
+        fault.</li>
+</ul>
+<br>
+</div>
+
+<pre><span id="VALrelease"><span class="keyword">val</span> release</span> : <code class="type"><a href="Gccjit.html#TYPEresult">Gccjit.result</a> -> unit</code></pre><div class="info ">
+Once we're done with the code, this unloads the built <code class="code">.so</code> file. This
+      cleans up the result; after calling this, it's no longer valid to use the
+      result, or any code or globals that were obtained by calling <a href="Gccjit.Result.html#VALcode"><code class="code"><span class="constructor">Gccjit</span>.<span class="constructor">Result</span>.code</code></a> or
+      <a href="Gccjit.Result.html#VALglobal"><code class="code"><span class="constructor">Gccjit</span>.<span class="constructor">Result</span>.global</code></a> on it.<br>
+</div>
+</body></html>

@@ -1,0 +1,423 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=iso-8859-1" http-equiv="Content-Type">
+<link rel="Start" href="index.html">
+<link rel="Up" href="index.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of exceptions" rel=Appendix href="index_exceptions.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Gccjit" rel="Chapter" href="Gccjit.html"><link title="Compilation Contexts" rel="Section" href="#contexts">
+<link title="Fields" rel="Section" href="#fields">
+<link title="Structure Types" rel="Section" href="#structs">
+<link title="Types" rel="Section" href="#types">
+<link title="Rvalues" rel="Section" href="#rvalues">
+<link title="Lvalues" rel="Section" href="#lvalues">
+<link title="Parameters" rel="Section" href="#params">
+<link title="Functions" rel="Section" href="#functions">
+<link title="Basic Blocks" rel="Section" href="#blocks">
+<link title="Source Locations" rel="Section" href="#locations">
+<link title="In-memory compilation" rel="Section" href="#inmemory">
+<link title="Faking it" rel="Subsection" href="#2_Fakingit">
+<title>Gccjit</title>
+</head>
+<body>
+<div class="navbar">&nbsp;<a class="up" href="index.html" title="Index">Up</a>
+&nbsp;</div>
+<h1>Module <a href="type_Gccjit.html">Gccjit</a></h1>
+
+<pre><span class="keyword">module</span> Gccjit: <code class="code"><span class="keyword">sig</span></code> <a href="Gccjit.html">..</a> <code class="code"><span class="keyword">end</span></code></pre><div class="info module top">
+OCaml bindings for <code class="code">libgccjit</code>.
+<p>
+
+    See <a href="https://gcc.gnu.org/wiki/JIT">GCC wiki page</a> for more information.<br>
+</div>
+<hr width="100%">
+
+<pre><span id="EXCEPTIONError"><span class="keyword">exception</span> Error</span> <span class="keyword">of</span> <code class="type">string</code></pre>
+<div class="info ">
+This exception (containing an explanatory string) is raised if an error
+    occurs.<br>
+</div>
+
+<pre><span id="TYPEcontext"><span class="keyword">type</span> <code class="type"></code>context</span> </pre>
+<div class="info ">
+The type of compilation contexts.  See <a href="Gccjit.html#contexts">Compilation
+    Contexts</a>.<br>
+</div>
+
+
+<pre><span id="TYPEresult"><span class="keyword">type</span> <code class="type"></code>result</span> </pre>
+<div class="info ">
+A <a href="Gccjit.html#TYPEresult"><code class="code"><span class="constructor">Gccjit</span>.result</code></a> encapsulates the result of an in-memory compilation.<br>
+</div>
+
+
+<pre><span id="TYPElocation"><span class="keyword">type</span> <code class="type"></code>location</span> </pre>
+<div class="info ">
+A <a href="Gccjit.html#TYPElocation"><code class="code"><span class="constructor">Gccjit</span>.location</code></a> encapsulates a source code location, so that you can
+    (optionally) associate locations in your languages with statements in the
+    JIT-compiled code, alowing the debugger to single-step through your
+    language. See <a href="Gccjit.html#locations">Source locations</a>.<br>
+</div>
+
+
+<pre><span id="TYPEparam"><span class="keyword">type</span> <code class="type"></code>param</span> </pre>
+<div class="info ">
+A <a href="Gccjit.html#TYPEparam"><code class="code"><span class="constructor">Gccjit</span>.param</code></a> is a function parameter.  See <a href="Gccjit.html#params">Parameters</a>.<br>
+</div>
+
+
+<pre><span id="TYPElvalue"><span class="keyword">type</span> <code class="type"></code>lvalue</span> </pre>
+<div class="info ">
+An <a href="Gccjit.html#TYPElvalue"><code class="code"><span class="constructor">Gccjit</span>.lvalue</code></a> is something that can of the left-hand side of an assignment.
+    See <a href="Gccjit.html#lvalues">Lvalues</a>.<br>
+</div>
+
+
+<pre><span id="TYPErvalue"><span class="keyword">type</span> <code class="type"></code>rvalue</span> </pre>
+<div class="info ">
+A <code class="code">rvalue</code> is an expression within your code, with some type. See
+    <a href="Gccjit.html#rvalues">RValues</a>.<br>
+</div>
+
+
+<pre><span id="TYPEfield"><span class="keyword">type</span> <code class="type"></code>field</span> </pre>
+<div class="info ">
+The type of fields of structs and unions.  See <a href="Gccjit.html#fields">Fields</a>.<br>
+</div>
+
+
+<pre><span id="TYPEstruct_"><span class="keyword">type</span> <code class="type"></code>struct_</span> </pre>
+<div class="info ">
+The type of structure types. See <a href="Gccjit.html#structs">Structure Types</a>.<br>
+</div>
+
+
+<pre><span id="TYPEtype_"><span class="keyword">type</span> <code class="type"></code>type_</span> </pre>
+<div class="info ">
+The type of C types, e.g. <code class="code">int</code> or a <code class="code"><span class="keyword">struct</span> foo*</code>. See <a href="Gccjit.html#types">Types</a>.<br>
+</div>
+
+
+<pre><span id="TYPEfunction_"><span class="keyword">type</span> <code class="type"></code>function_</span> </pre>
+<div class="info ">
+The type of functios.  See <a href="Gccjit.html#functions">Functions</a>.<br>
+</div>
+
+
+<pre><span id="TYPEblock"><span class="keyword">type</span> <code class="type"></code>block</span> </pre>
+<div class="info ">
+The type of basic blocks.  See <a href="Gccjit.html#blocks">Basic Blocks</a>.<br>
+</div>
+
+
+<pre><code><span id="TYPEunary_op"><span class="keyword">type</span> <code class="type"></code>unary_op</span> = </code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTunary_op.Negate"><span class="constructor">Negate</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTunary_op.Bitwise_negate"><span class="constructor">Bitwise_negate</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTunary_op.Logical_negate"><span class="constructor">Logical_negate</span></span></code></td>
+
+</tr></table>
+
+
+
+<pre><code><span id="TYPEbinary_op"><span class="keyword">type</span> <code class="type"></code>binary_op</span> = </code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTbinary_op.Plus"><span class="constructor">Plus</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTbinary_op.Minus"><span class="constructor">Minus</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTbinary_op.Mult"><span class="constructor">Mult</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTbinary_op.Divide"><span class="constructor">Divide</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTbinary_op.Modulo"><span class="constructor">Modulo</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTbinary_op.Bitwise_and"><span class="constructor">Bitwise_and</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTbinary_op.Bitwise_xor"><span class="constructor">Bitwise_xor</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTbinary_op.Bitwise_or"><span class="constructor">Bitwise_or</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTbinary_op.Logical_and"><span class="constructor">Logical_and</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTbinary_op.Logical_or"><span class="constructor">Logical_or</span></span></code></td>
+
+</tr></table>
+
+
+
+<pre><code><span id="TYPEcomparison"><span class="keyword">type</span> <code class="type"></code>comparison</span> = </code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTcomparison.Eq"><span class="constructor">Eq</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTcomparison.Ne"><span class="constructor">Ne</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTcomparison.Lt"><span class="constructor">Lt</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTcomparison.Le"><span class="constructor">Le</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTcomparison.Gt"><span class="constructor">Gt</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTcomparison.Ge"><span class="constructor">Ge</span></span></code></td>
+
+</tr></table>
+
+
+<br>
+<h1 id="contexts">Compilation Contexts</h1>
+<p>
+
+    A <a href="Gccjit.html#TYPEcontext"><code class="code"><span class="constructor">Gccjit</span>.context</code></a> encapsulates the state of a compilation.  You can
+    <a href="Gccjit.Context.html#VALset_option">set up options</a> on it, add <a href="Gccjit.html#types">types</a>,
+    <a href="Gccjit.html#functions">functions</a> and <a href="Gccjit.html#blocks">code</a>, using the API below.
+<p>
+
+    Invoking <a href="Gccjit.Context.html#VALcompile"><code class="code"><span class="constructor">Gccjit</span>.<span class="constructor">Context</span>.compile</code></a> on it gives you a <a href="Gccjit.html#TYPEresult"><code class="code"><span class="constructor">Gccjit</span>.result</code></a>, representing
+    in-memory machine-code.
+<p>
+
+    You can call <a href="Gccjit.Context.html#VALcompile"><code class="code"><span class="constructor">Gccjit</span>.<span class="constructor">Context</span>.compile</code></a> repeatedly on one context, giving multiple
+    independent results.
+<p>
+
+    Similarly, you can call <a href="Gccjit.Context.html#VALcompile_to_file"><code class="code"><span class="constructor">Gccjit</span>.<span class="constructor">Context</span>.compile_to_file</code></a> on a context to compile
+    to disk.
+<p>
+
+    Eventually you can call <a href="Gccjit.Context.html#VALrelease"><code class="code"><span class="constructor">Gccjit</span>.<span class="constructor">Context</span>.release</code></a> to clean up the context; any
+    in-memory results created from it are still usable.<br>
+
+<pre><span class="keyword">module</span> <a href="Gccjit.Context.html">Context</a>: <code class="code"><span class="keyword">sig</span></code> <a href="Gccjit.Context.html">..</a> <code class="code"><span class="keyword">end</span></code></pre><br>
+<h1 id="fields">Fields</h1>
+<p>
+
+    A <code class="code">field</code> encapsulates a field within a struct; it is used when creating a
+    struct type (using <a href="Gccjit.Struct.html#VALcreate"><code class="code"><span class="constructor">Gccjit</span>.<span class="constructor">Struct</span>.create</code></a>).  Fields cannot be shared between
+    structs.<br>
+
+<pre><span class="keyword">module</span> <a href="Gccjit.Field.html">Field</a>: <code class="code"><span class="keyword">sig</span></code> <a href="Gccjit.Field.html">..</a> <code class="code"><span class="keyword">end</span></code></pre><br>
+<h1 id="structs">Structure Types</h1>
+<p>
+
+    A <code class="code">struct_</code> encapsulates a struct type, either one that we have the layout for,
+    or an opaque type.
+<p>
+
+    You can model C struct types by creating <code class="code">struct_</code> and <code class="code">field</code> instances, in
+    either order:
+<p>
+<ul>
+<li>by creating the fields, then the structure. For example, to model:
+<pre class="codepre"><code class="code"><span class="keyword">struct</span>&nbsp;coord&nbsp;{double&nbsp;x;&nbsp;double&nbsp;y;&nbsp;};<br>
+</code></pre>
+      you could call:
+<pre class="codepre"><code class="code"><span class="keyword">let</span>&nbsp;field_x&nbsp;=&nbsp;<span class="constructor">Field</span>.create&nbsp;ctx&nbsp;double_type&nbsp;<span class="string">"x"</span>&nbsp;<span class="keyword">in</span><br>
+<span class="keyword">let</span>&nbsp;field_y&nbsp;=&nbsp;<span class="constructor">Field</span>.create&nbsp;ctx&nbsp;double_type&nbsp;<span class="string">"y"</span>&nbsp;<span class="keyword">in</span><br>
+<span class="keyword">let</span>&nbsp;coord&nbsp;=&nbsp;<span class="constructor">Struct</span>.create&nbsp;ctx&nbsp;<span class="string">"coord"</span>&nbsp;[&nbsp;field_x&nbsp;;&nbsp;field_y&nbsp;]<br>
+</code></pre></li>
+<li>by creating the structure, then populating it with fields, typically to
+      allow modelling self-referential structs such as:
+<pre class="codepre"><code class="code"><span class="keyword">struct</span>&nbsp;node&nbsp;{&nbsp;int&nbsp;m_hash;&nbsp;<span class="keyword">struct</span>&nbsp;node&nbsp;*m_next;&nbsp;};<br>
+</code></pre>
+      like this:
+<pre class="codepre"><code class="code"><span class="keyword">let</span>&nbsp;node&nbsp;=&nbsp;<span class="constructor">Struct</span>.create_opaque&nbsp;ctx&nbsp;<span class="string">"node"</span>&nbsp;<span class="keyword">in</span><br>
+<span class="keyword">let</span>&nbsp;node_ptr&nbsp;=&nbsp;<span class="constructor">Type</span>.pointer&nbsp;node&nbsp;<span class="keyword">in</span><br>
+<span class="keyword">let</span>&nbsp;field_hash&nbsp;=&nbsp;<span class="constructor">Field</span>.create&nbsp;ctx&nbsp;int_type&nbsp;<span class="string">"m_hash"</span>&nbsp;<span class="keyword">in</span><br>
+<span class="keyword">let</span>&nbsp;field_next&nbsp;=&nbsp;<span class="constructor">Field</span>.create&nbsp;ctx&nbsp;node_ptr&nbsp;<span class="string">"m_next"</span>&nbsp;<span class="keyword">in</span><br>
+<span class="constructor">Struct</span>.set_fields&nbsp;node&nbsp;[&nbsp;field_hash;&nbsp;field_next&nbsp;]<br>
+</code></pre></li>
+</ul>
+<br>
+
+<pre><span class="keyword">module</span> <a href="Gccjit.Struct.html">Struct</a>: <code class="code"><span class="keyword">sig</span></code> <a href="Gccjit.Struct.html">..</a> <code class="code"><span class="keyword">end</span></code></pre><br>
+<h1 id="types">Types</h1><br>
+
+<pre><span class="keyword">module</span> <a href="Gccjit.Type.html">Type</a>: <code class="code"><span class="keyword">sig</span></code> <a href="Gccjit.Type.html">..</a> <code class="code"><span class="keyword">end</span></code></pre><br>
+<h1 id="rvalues">Rvalues</h1>
+<p>
+
+    A <a href="Gccjit.html#TYPErvalue"><code class="code"><span class="constructor">Gccjit</span>.rvalue</code></a> is an expression that can be computed.
+<p>
+
+    It can be simple, e.g.:<ul>
+<li>an integer value e.g. <code class="code">0</code> or <code class="code">42</code></li>
+<li>a string literal e.g. <code class="code"><span class="string">"Hello world"</span></code></li>
+<li>a variable e.g. <code class="code">i</code>. These are also <a href="Gccjit.html#lvalues">lvalues</a> (see below).</li>
+</ul>
+
+    or compound e.g.:<ul>
+<li>a unary expression e.g. <code class="code">!cond</code></li>
+<li>a binary expression e.g. <code class="code">(a + b)</code></li>
+<li>a function call e.g. <code class="code">get_distance (<span class="keywordsign">&amp;</span>player_ship, <span class="keywordsign">&amp;</span>target)</code></li>
+<li>etc.</li>
+</ul>
+
+    Every <a href="Gccjit.html#TYPErvalue"><code class="code"><span class="constructor">Gccjit</span>.rvalue</code></a> has an associated <a href="Gccjit.html#TYPEtype_">type</a>, and the API will check to
+    ensure that types match up correctly (otherwise the context will emit an
+    error).<br>
+
+<pre><span class="keyword">module</span> <a href="Gccjit.RValue.html">RValue</a>: <code class="code"><span class="keyword">sig</span></code> <a href="Gccjit.RValue.html">..</a> <code class="code"><span class="keyword">end</span></code></pre><br>
+<h1 id="lvalues">Lvalues</h1>
+<p>
+
+    An <a href="Gccjit.html#TYPElvalue"><code class="code"><span class="constructor">Gccjit</span>.lvalue</code></a> is something that can of the left-hand side of an assignment: a
+    storage area (such as a variable). It is also usable as an <a href="Gccjit.html#TYPErvalue"><code class="code"><span class="constructor">Gccjit</span>.rvalue</code></a>, where
+    the <a href="Gccjit.html#TYPErvalue"><code class="code"><span class="constructor">Gccjit</span>.rvalue</code></a> is computed by reading from the storage area.<br>
+
+<pre><span class="keyword">module</span> <a href="Gccjit.LValue.html">LValue</a>: <code class="code"><span class="keyword">sig</span></code> <a href="Gccjit.LValue.html">..</a> <code class="code"><span class="keyword">end</span></code></pre><br>
+<h1 id="params">Parameters</h1>
+<p>
+
+    A value of type <a href="Gccjit.html#TYPEparam"><code class="code"><span class="constructor">Gccjit</span>.param</code></a> represents a parameter to a
+    <a href="Gccjit.html#functions">function</a>.<br>
+
+<pre><span class="keyword">module</span> <a href="Gccjit.Param.html">Param</a>: <code class="code"><span class="keyword">sig</span></code> <a href="Gccjit.Param.html">..</a> <code class="code"><span class="keyword">end</span></code></pre><br>
+<h1 id="functions">Functions</h1>
+<p>
+
+    A values of type <code class="code">function_</code> encapsulates a function: either one that you're
+    creating yourself, or a reference to one that you're dynamically linking to
+    within the rest of the process.<br>
+
+<pre><span class="keyword">module</span> <a href="Gccjit.Function.html">Function</a>: <code class="code"><span class="keyword">sig</span></code> <a href="Gccjit.Function.html">..</a> <code class="code"><span class="keyword">end</span></code></pre><br>
+<h1 id="blocks">Basic Blocks</h1>
+<p>
+
+    A <code class="code">block</code> encapsulates a <em>basic block</em> of statements within a function
+    (i.e. with one entry point and one exit point).<ul>
+<li>Every block within a function must be terminated with a conditional, a
+      branch, or a return.</li>
+<li>The blocks within a function form a directed graph.</li>
+<li>The entrypoint to the function is the first block created within it.</li>
+<li>All of the blocks in a function must be reachable via some path from the
+      first block.</li>
+<li>It's OK to have more than one <em>return</em> from a function (i.e., multiple
+      blocks that terminate by returning.</li>
+</ul>
+<br>
+
+<pre><span class="keyword">module</span> <a href="Gccjit.Block.html">Block</a>: <code class="code"><span class="keyword">sig</span></code> <a href="Gccjit.Block.html">..</a> <code class="code"><span class="keyword">end</span></code></pre><br>
+<h1 id="locations">Source Locations</h1>
+<p>
+
+    A <a href="Gccjit.html#TYPElocation"><code class="code"><span class="constructor">Gccjit</span>.location</code></a> encapsulates a source code location, so that you can (optionally)
+    associate locations in your language with statements in the JIT-compiled code,
+    allowing the debugger to single-step through your language.<ul>
+<li><a href="Gccjit.html#TYPElocation"><code class="code"><span class="constructor">Gccjit</span>.location</code></a> instances are optional: you can always omit them to any API
+      entrypoint accepting one.</li>
+<li>You can construct them using <a href="Gccjit.Location.html#VALcreate"><code class="code"><span class="constructor">Gccjit</span>.<span class="constructor">Location</span>.create</code></a>.</li>
+<li>You need to <a href="Gccjit.Context.html#VALset_option">enable</a>
+      <a href="Gccjit.Context.html#TYPEcontext_option"><code class="code"><span class="constructor">Debuginfo</span></code></a> on the <a href="Gccjit.html#TYPEcontext"><code class="code"><span class="constructor">Gccjit</span>.context</code></a> for these
+      locations to actually be usable by the debugger.</li>
+</ul>
+
+    <h2 id="2_Fakingit">Faking it</h2>
+<p>
+
+    If you don't have source code for your internal representation, but need to
+    debug, you can generate a C-like representation of the functions in your
+    context using <a href="Gccjit.Context.html#VALdump_to_file"><code class="code"><span class="constructor">Gccjit</span>.<span class="constructor">Context</span>.dump_to_file</code></a>.  This will dump C-like code to the
+    given path. If the update_locations argument is true, this will also set up
+    <a href="Gccjit.html#TYPElocation"><code class="code"><span class="constructor">Gccjit</span>.location</code></a> information throughout the context, pointing at the dump file as
+    if it were a source file, giving you something you can step through in the
+    debugger.<br>
+
+<pre><span class="keyword">module</span> <a href="Gccjit.Location.html">Location</a>: <code class="code"><span class="keyword">sig</span></code> <a href="Gccjit.Location.html">..</a> <code class="code"><span class="keyword">end</span></code></pre><br>
+<h1 id="inmemory">In-memory compilation</h1><br>
+
+<pre><span class="keyword">module</span> <a href="Gccjit.Result.html">Result</a>: <code class="code"><span class="keyword">sig</span></code> <a href="Gccjit.Result.html">..</a> <code class="code"><span class="keyword">end</span></code></pre></body></html>
