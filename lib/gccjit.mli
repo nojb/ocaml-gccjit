@@ -163,7 +163,7 @@ module Context : sig
       up on the context.  If [~update_locs] true, then also set up {!location}
       information throughout the context, pointing at the dump file as if it
       were a source file.  This may be of use in conjunction with
-      {{!context_option}[OPTION_Debuginfo]} to allow stepping through the code
+      {{!Context.context_option}[Debuginfo]} to allow stepping through the code
       in a debugger. *)
 
   val set_logfile : context -> Unix.file_descr option -> unit
@@ -248,7 +248,7 @@ module Context : sig
     | Dump_everything : bool context_option
     (** If [true], {!Context.compile} will dump copious amount of information on
         what it's doing to various files within a temporary directory.  Use
-        [OPTION_Keep_intermediates] (see below) to see the results.  The files are
+        [Keep_intermediates] (see below) to see the results.  The files are
         intended to be human-readable, but the exact files and their formats are
         subject to change. *)
 
@@ -263,8 +263,8 @@ module Context : sig
          to the filesystem, and will display their location on stderr.  *)
 
   val set_option : context -> 'a context_option -> 'a -> unit
-  (** [set_option ctx opt v] sets the {!context_option} [opt] of [ctx] to
-      [v]. *)
+  (** [set_option ctx opt v] sets the {!Context.context_option} [opt] of [ctx]
+      to [v]. *)
 
   (** {1 Compilation}
 
@@ -695,8 +695,8 @@ add_assignment_op loop_body i Plus (one ctx int_type)
   val comment : ?loc:location -> block -> string -> unit
   (** Add a no-op textual comment to the internal representation of the code.
       It will be optimized away, but will be visible in the dumps seen via
-      {{!context_option}[OPTION_Dump_initial_tree]} and
-      {{!context_option}[OPTION_Dump_initial_gimple]} and thus may be of use
+      {{!Context.context_option}[Dump_initial_tree]} and
+      {{!Context.context_option}[Dump_initial_gimple]} and thus may be of use
       when debugging how your project's internal representation gets converted
       to the [libgccjit] IR.  *)
 
@@ -745,7 +745,7 @@ end
       entrypoint accepting one.
     - You can construct them using {!Location.create}.
     - You need to {{!Context.set_option}enable}
-      {{!context_option}[OPTION_Debuginfo]} on the {!context} for these
+      {{!Context.context_option}[Debuginfo]} on the {!context} for these
       locations to actually be usable by the debugger.
 
     {2 Faking it}
@@ -775,7 +775,7 @@ module Result : sig
       - Functions are looked up by name. For this to succeed, a function with a
         name matching funcname must have been created on result's context (or a
         parent context) via a call to {!Function.create} with kind
-        {{!function_kind}[FUNCTION_Exported]}.
+        {{!Function.function_kind}[Exported]}.
       - If such a function is not found, an error will be raised.
       - If the function is found, the result is cast to the given Ctypes
         signature.  Care must be taken to pass a signature compatible with that
@@ -789,7 +789,7 @@ module Result : sig
       - Globals are looked up by name. For this to succeed, a global with a name
         matching name must have been created on result's context (or a parent
         context) via a call to {!LValue.global} with kind
-        {{!global_kind}[GLOBAL_exported]}.
+        {{!LValue.global_kind}[Exported]}.
       - If the global is found, the result is cast to the Given [Ctypes] type.
       - This is a pointer to the global, so e.g. for an [int] this is an [int *].
       - If such a global is not found, an error will be raised.
