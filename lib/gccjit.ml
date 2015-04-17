@@ -255,7 +255,7 @@ module Context = struct
 
   let compile ctx =
     let res = wrap1 ctx gcc_jit_context_compile ctx in
-    Gc.finalise gcc_jit_result_release res;
+    (* Gc.finalise gcc_jit_result_release res; *)
     res
 
   type output_kind =
