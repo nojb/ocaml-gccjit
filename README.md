@@ -15,25 +15,26 @@ int square (int i)
 We can construct this function at runtime using `libgccjit`, as follows:
 
 ```ocaml
-module G = Gccjit.Make ()
-open G
+open Gccjit
 
 let square =
+  let ctx = Context.create () in
+
   (* Create parameter "i" *)
-  let param_i = Param.create Type.int "i" in
+  let param_i = Param.create ctx Type.(get ctx Int) "i" in
 
   (* Create the function *)
-  let fn = Function.create Function.Exported Type.int "square" [ param_i ] in
+  let fn = Function.create ctx Function.Exported Type.(get ctx Int) "square" [ param_i ] in
 
   (* Create a basic block within the function *)
   let block = Block.create ~name:"entry" fn in
 
   (* This basic block is relatively simple *)
-  let expr = RValue.binary_op Mult Type.int (RValue.param param_i) (RValue.param param_i) in
+  let expr = RValue.binary_op ctx Mult Type.(get ctx Int) (RValue.param param_i) (RValue.param param_i) in
   Block.return block expr;
 
   (* Having populated the context, compile it *)
-  let jit_result = Context.compile () in
+  let jit_result = Context.compile ctx in
 
   (* Look up a specific machine code routine within the gccjit.Result, in this
      case, the function we created above: *)
