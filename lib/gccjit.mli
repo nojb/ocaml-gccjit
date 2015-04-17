@@ -742,30 +742,22 @@ end
     A {!location} encapsulates a source code location, so that you can (optionally)
     associate locations in your language with statements in the JIT-compiled code,
     allowing the debugger to single-step through your language.
-
-    {!location} instances are optional: you can always omit them to any API
-    entrypoint accepting one.
-
-    You can construct them using {!Location.create}.
-
-    You need to enable {{!context_option}[OPTION_Debuginfo]} on the {!context}
-    for these locations to actually be usable by the debugger:
-{[
-Context.set_option ctx OPTION_Debuginfo true
-]}
+    - {!location} instances are optional: you can always omit them to any API
+      entrypoint accepting one.
+    - You can construct them using {!Location.create}.
+    - You need to {{!Context.set_option}enable}
+      {{!context_option}[OPTION_Debuginfo]} on the {!context} for these
+      locations to actually be usable by the debugger.
 
     {2 Faking it}
 
     If you don't have source code for your internal representation, but need to
     debug, you can generate a C-like representation of the functions in your
-    context using {!Context.dump_to_file}:
-    {[
-      dump_to_file ctx ~update_locs:true "/tmp/something.c"
-    ]}
-    This will dump C-like code to the given path. If the update_locations
-    argument is true, this will also set up {!location} information throughout
-    the context, pointing at the dump file as if it were a source file, giving
-    you something you can step through in the debugger. *)
+    context using {!Context.dump_to_file}.  This will dump C-like code to the
+    given path. If the update_locations argument is true, this will also set up
+    {!location} information throughout the context, pointing at the dump file as
+    if it were a source file, giving you something you can step through in the
+    debugger. *)
 
 module Location : sig
   val create : context -> string -> int -> int -> location
@@ -781,50 +773,30 @@ module Result : sig
 
   val code : result -> string -> ('a -> 'b) Ctypes.fn -> 'a -> 'b
   (** Locate a given function within the built machine code.
-
-      Functions are looked up by name. For this to succeed, a function with a
-      name matching funcname must have been created on result's context (or a
-      parent context) via a call to {!Function.create} with kind
-      {{!function_kind}[FUNCTION_Exported]}:
-
-{[
-Function.create ctx FUNCTION_Exported any_return_type funcname (* etc. *)
-]}
-      If such a function is not found, an error will be raised.
-
-      If the function is found, the result is cast to the given Ctypes signature.
-      Care must be taken to pass a signature compatible with that of function
-      being extracted.
-
-      Note that the resulting machine code becomes invalid after {!release} is
-      called on the {!result}; attempting to call it after that may lead to a
-      segmentation fault. *)
+      - Functions are looked up by name. For this to succeed, a function with a
+        name matching funcname must have been created on result's context (or a
+        parent context) via a call to {!Function.create} with kind
+        {{!function_kind}[FUNCTION_Exported]}.
+      - If such a function is not found, an error will be raised.
+      - If the function is found, the result is cast to the given Ctypes
+        signature.  Care must be taken to pass a signature compatible with that
+        of function being extracted.
+      - The resulting machine code becomes invalid after {!release} is called on
+        the {!result}; attempting to call it after that may lead to a
+        segmentation fault. *)
 
   val global : result -> string -> 'a Ctypes.typ -> 'a Ctypes.ptr
   (** Locate a given global within the built machine code.
-
-      Globals are looked up by name. For this to succeed, a global with a name
-      matching name must have been created on result's context (or a parent
-      context) via a call to {!LValue.global} with kind
-      {{!global_kind}[GLOBAL_exported]}.
-
-      If the global is found, the result is cast to the Given [Ctypes] type.
-
-      This is a pointer to the global, so e.g. for an [int] this is an [int *].
-
-      For example, given an [int foo;] created this way:
-{[
-let exported_global = LValue.global ctx GLOBAL_Exported int_type "foo"
-]}
-      we can access it like this:
-{[
-let ptr_to_foo = Result.global result "foo" Ctypes.int
-]}
-      If such a global is not found, an error will be raised.
-
-      Note that the resulting address becomes invalid after {!release}
-      is called on the {!result}; attempting to use it after that may lead to a
-      segmentation fault.  *)
+      - Globals are looked up by name. For this to succeed, a global with a name
+        matching name must have been created on result's context (or a parent
+        context) via a call to {!LValue.global} with kind
+        {{!global_kind}[GLOBAL_exported]}.
+      - If the global is found, the result is cast to the Given [Ctypes] type.
+      - This is a pointer to the global, so e.g. for an [int] this is an [int *].
+      - If such a global is not found, an error will be raised.
+      - The resulting address becomes invalid after {!release} is called on the
+        {!result}; attempting to use it after that may lead to a segmentation
+        fault.  *)
 
   val release : result -> unit
   (** Once we're done with the code, this unloads the built [.so] file. This
@@ -832,6 +804,12 @@ let ptr_to_foo = Result.global result "foo" Ctypes.int
       result, or any code or globals that were obtained by calling {!code} or
       {!global} on it. *)
 end
+
+(** {1 Functorial interface}
+
+    Each instantiation of {!Make} represents an allocation of a fresh
+    {!context}.  The context argument is passed implicitly to all functions of the
+    resulting module. *)
 
 module type S = sig
   module Context : sig
