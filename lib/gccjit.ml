@@ -227,13 +227,13 @@ let get_first_error ctx =
   gcc_jit_context_get_first_error ctx
 
 module Context = struct
-  let acquire () =
+  let create () =
     gcc_jit_context_acquire ()
 
   let release ctx =
     gcc_jit_context_release ctx
 
-  let child_context ctx =
+  let create_child ctx =
     wrap1 ctx gcc_jit_context_new_child_context ctx
 
   let dump_to_file ctx ?(update_locs = false) path =
@@ -666,7 +666,7 @@ module type S = sig
 end
 
 module Make () = struct
-  let ctx = Context.acquire ()
+  let ctx = Context.create ()
 
   module Context = struct
     open Context
