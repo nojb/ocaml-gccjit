@@ -65,56 +65,6 @@ type global_kind =
   | GLOBAL_Internal
   | GLOBAL_Imported
 
-type type_kind =
-    TYPE_Void
-  | TYPE_Void_ptr
-  | TYPE_Bool
-  | TYPE_Char
-  | TYPE_Signed_char
-  | TYPE_Unsigned_char
-  | TYPE_Short
-  | TYPE_Unsigned_short
-  | TYPE_Int
-  | TYPE_Unsigned_int
-  | TYPE_Long
-  | TYPE_Unsigned_long
-  | TYPE_Long_long
-  | TYPE_Unsigned_long_long
-  | TYPE_Float
-  | TYPE_Double
-  | TYPE_Long_double
-  | TYPE_Const_char_ptr
-  | TYPE_Size_t
-  | TYPE_File_ptr
-  | TYPE_Complex_float
-  | TYPE_Complex_double
-  | TYPE_Complex_long_double
-
-let type_kind = function
-    TYPE_Void -> GCC_JIT_TYPE_VOID
-  | TYPE_Void_ptr -> GCC_JIT_TYPE_VOID_PTR
-  | TYPE_Bool -> GCC_JIT_TYPE_BOOL
-  | TYPE_Char -> GCC_JIT_TYPE_CHAR
-  | TYPE_Signed_char -> GCC_JIT_TYPE_SIGNED_CHAR
-  | TYPE_Unsigned_char -> GCC_JIT_TYPE_UNSIGNED_CHAR
-  | TYPE_Short -> GCC_JIT_TYPE_SHORT
-  | TYPE_Unsigned_short -> GCC_JIT_TYPE_UNSIGNED_SHORT
-  | TYPE_Int -> GCC_JIT_TYPE_INT
-  | TYPE_Unsigned_int -> GCC_JIT_TYPE_UNSIGNED_INT
-  | TYPE_Long -> GCC_JIT_TYPE_LONG
-  | TYPE_Unsigned_long -> GCC_JIT_TYPE_UNSIGNED_LONG
-  | TYPE_Long_long -> GCC_JIT_TYPE_LONG_LONG
-  | TYPE_Unsigned_long_long -> GCC_JIT_TYPE_UNSIGNED_LONG_LONG
-  | TYPE_Float -> GCC_JIT_TYPE_FLOAT
-  | TYPE_Double -> GCC_JIT_TYPE_DOUBLE
-  | TYPE_Long_double -> GCC_JIT_TYPE_LONG_DOUBLE
-  | TYPE_Const_char_ptr -> GCC_JIT_TYPE_CONST_CHAR_PTR
-  | TYPE_Size_t -> GCC_JIT_TYPE_SIZE_T
-  | TYPE_File_ptr -> GCC_JIT_TYPE_FILE_PTR
-  | TYPE_Complex_float -> GCC_JIT_TYPE_COMPLEX_FLOAT
-  | TYPE_Complex_double -> GCC_JIT_TYPE_COMPLEX_DOUBLE
-  | TYPE_Complex_long_double -> GCC_JIT_TYPE_COMPLEX_LONG_DOUBLE
-
 let binary_op = function
   | Plus -> GCC_JIT_BINARY_OP_PLUS
   | Minus -> GCC_JIT_BINARY_OP_MINUS
@@ -303,6 +253,56 @@ module Struct = struct
 end
 
 module Type = struct
+  type type_kind =
+      Void
+    | Void_ptr
+    | Bool
+    | Char
+    | Signed_char
+    | Unsigned_char
+    | Short
+    | Unsigned_short
+    | Int
+    | Unsigned_int
+    | Long
+    | Unsigned_long
+    | Long_long
+    | Unsigned_long_long
+    | Float
+    | Double
+    | Long_double
+    | Const_char_ptr
+    | Size_t
+    | File_ptr
+    | Complex_float
+    | Complex_double
+    | Complex_long_double
+
+  let type_kind = function
+      Void -> GCC_JIT_TYPE_VOID
+    | Void_ptr -> GCC_JIT_TYPE_VOID_PTR
+    | Bool -> GCC_JIT_TYPE_BOOL
+    | Char -> GCC_JIT_TYPE_CHAR
+    | Signed_char -> GCC_JIT_TYPE_SIGNED_CHAR
+    | Unsigned_char -> GCC_JIT_TYPE_UNSIGNED_CHAR
+    | Short -> GCC_JIT_TYPE_SHORT
+    | Unsigned_short -> GCC_JIT_TYPE_UNSIGNED_SHORT
+    | Int -> GCC_JIT_TYPE_INT
+    | Unsigned_int -> GCC_JIT_TYPE_UNSIGNED_INT
+    | Long -> GCC_JIT_TYPE_LONG
+    | Unsigned_long -> GCC_JIT_TYPE_UNSIGNED_LONG
+    | Long_long -> GCC_JIT_TYPE_LONG_LONG
+    | Unsigned_long_long -> GCC_JIT_TYPE_UNSIGNED_LONG_LONG
+    | Float -> GCC_JIT_TYPE_FLOAT
+    | Double -> GCC_JIT_TYPE_DOUBLE
+    | Long_double -> GCC_JIT_TYPE_LONG_DOUBLE
+    | Const_char_ptr -> GCC_JIT_TYPE_CONST_CHAR_PTR
+    | Size_t -> GCC_JIT_TYPE_SIZE_T
+    | File_ptr -> GCC_JIT_TYPE_FILE_PTR
+    | Complex_float -> GCC_JIT_TYPE_COMPLEX_FLOAT
+    | Complex_double -> GCC_JIT_TYPE_COMPLEX_DOUBLE
+    | Complex_long_double -> GCC_JIT_TYPE_COMPLEX_LONG_DOUBLE
+
   let standard ctx kind =
     wrap2 ctx gcc_jit_context_get_type ctx (type_kind kind)
 
@@ -310,7 +310,7 @@ module Type = struct
     wrap3 ctx gcc_jit_context_get_int_type ctx (if signed then 1 else 0) n
 
   let int ctx =
-    standard ctx TYPE_Int
+    standard ctx Int
 
   let pointer typ =
     let ctx = gcc_jit_object_get_context (gcc_jit_type_as_object typ) in
@@ -597,6 +597,30 @@ module type S = sig
   end
 
   module Type : sig
+    type type_kind =
+        Void
+      | Void_ptr
+      | Bool
+      | Char
+      | Signed_char
+      | Unsigned_char
+      | Short
+      | Unsigned_short
+      | Int
+      | Unsigned_int
+      | Long
+      | Unsigned_long
+      | Long_long
+      | Unsigned_long_long
+      | Float
+      | Double
+      | Long_double
+      | Const_char_ptr
+      | Size_t
+      | File_ptr
+      | Complex_float
+      | Complex_double
+      | Complex_long_double
     val standard : type_kind -> type_
     val int_gen : ?signed:bool -> int -> type_
     val int : type_
@@ -732,6 +756,30 @@ module Make () = struct
   end
 
   module Type = struct
+    type type_kind = Type.type_kind =
+        Void
+      | Void_ptr
+      | Bool
+      | Char
+      | Signed_char
+      | Unsigned_char
+      | Short
+      | Unsigned_short
+      | Int
+      | Unsigned_int
+      | Long
+      | Unsigned_long
+      | Long_long
+      | Unsigned_long_long
+      | Float
+      | Double
+      | Long_double
+      | Const_char_ptr
+      | Size_t
+      | File_ptr
+      | Complex_float
+      | Complex_double
+      | Complex_long_double
     open Type
     let standard = standard ctx
     let int_gen = int_gen ctx

@@ -92,31 +92,6 @@ type global_kind =
   | GLOBAL_Internal
   | GLOBAL_Imported
 
-type type_kind =
-    TYPE_Void
-  | TYPE_Void_ptr
-  | TYPE_Bool
-  | TYPE_Char
-  | TYPE_Signed_char
-  | TYPE_Unsigned_char
-  | TYPE_Short
-  | TYPE_Unsigned_short
-  | TYPE_Int
-  | TYPE_Unsigned_int
-  | TYPE_Long
-  | TYPE_Unsigned_long
-  | TYPE_Long_long
-  | TYPE_Unsigned_long_long
-  | TYPE_Float
-  | TYPE_Double
-  | TYPE_Long_double
-  | TYPE_Const_char_ptr
-  | TYPE_Size_t
-  | TYPE_File_ptr
-  | TYPE_Complex_float
-  | TYPE_Complex_double
-  | TYPE_Complex_long_double
-
 (** {1:contexts Compilation Contexts}
 
     A {!context} encapsulates the state of a compilation.  You can
@@ -398,6 +373,31 @@ end
 (** {1:types Types} *)
 
 module Type : sig
+
+  type type_kind =
+      Void
+    | Void_ptr
+    | Bool
+    | Char
+    | Signed_char
+    | Unsigned_char
+    | Short
+    | Unsigned_short
+    | Int
+    | Unsigned_int
+    | Long
+    | Unsigned_long
+    | Long_long
+    | Unsigned_long_long
+    | Float
+    | Double
+    | Long_double
+    | Const_char_ptr
+    | Size_t
+    | File_ptr
+    | Complex_float
+    | Complex_double
+    | Complex_long_double
 
   val standard : context -> type_kind -> type_
   (** Access a standard type.  See {!type_kind}. *)
@@ -851,6 +851,30 @@ module type S = sig
   end
 
   module Type : sig
+    type type_kind =
+        Void
+      | Void_ptr
+      | Bool
+      | Char
+      | Signed_char
+      | Unsigned_char
+      | Short
+      | Unsigned_short
+      | Int
+      | Unsigned_int
+      | Long
+      | Unsigned_long
+      | Long_long
+      | Unsigned_long_long
+      | Float
+      | Double
+      | Long_double
+      | Const_char_ptr
+      | Size_t
+      | File_ptr
+      | Complex_float
+      | Complex_double
+      | Complex_long_double
     val standard : type_kind -> type_
     val int_gen : ?signed:bool -> int -> type_
     val int : type_
