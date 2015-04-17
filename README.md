@@ -49,8 +49,9 @@ Printf.printf "square(5) = %d\n%!" (square 5)
 
 ### Installation
 
-```
-opam install gccjit
+```bash
+# Soon: opam install gccjit
+opam pin add gccjit git://github.com/nojb/ocaml-gccjit
 ```
 
 In order for compilation to be successful the library `libgccjit` needs to be
@@ -58,8 +59,8 @@ found by the C compiler using the `-lgccjit` flag.  If the `libgccjit` library
 in your system is a non-standard location, please set the `LIBGCCJIT_DIR`
 environment variable before installing this package, like this:
 
-```
-LIBGCCJIT_DIR=<directory where libgccjit lives> opam install gccjit
+```bash
+LIBGCCJIT_DIR=<libgccjit dir> opam pin add gccjit git://github.com/nojb/ocaml-gccjit
 ```
 
 ### Links
