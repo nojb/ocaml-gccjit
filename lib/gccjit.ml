@@ -65,12 +65,6 @@ type global_kind =
   | GLOBAL_Internal
   | GLOBAL_Imported
 
-type output_kind =
-    OUTPUT_Assembler
-  | OUTPUT_Object_file
-  | OUTPUT_Dynamic_library
-  | OUTPUT_Executable
-
 type type_kind =
     TYPE_Void
   | TYPE_Void_ptr
@@ -150,12 +144,6 @@ let global_kind = function
   | GLOBAL_Exported -> GCC_JIT_GLOBAL_EXPORTED
   | GLOBAL_Imported -> GCC_JIT_GLOBAL_IMPORTED
   | GLOBAL_Internal -> GCC_JIT_GLOBAL_INTERNAL
-
-let output_kind = function
-  | OUTPUT_Assembler -> GCC_JIT_OUTPUT_KIND_ASSEMBLER
-  | OUTPUT_Object_file -> GCC_JIT_OUTPUT_KIND_OBJECT_FILE
-  | OUTPUT_Dynamic_library -> GCC_JIT_OUTPUT_KIND_DYNAMIC_LIBRARY
-  | OUTPUT_Executable -> GCC_JIT_OUTPUT_KIND_EXECUTABLE
 
 let wrap1 ctx f x1 =
   let y = f x1 in
@@ -269,6 +257,18 @@ module Context = struct
     let res = wrap1 ctx gcc_jit_context_compile ctx in
     Gc.finalise gcc_jit_result_release res;
     res
+
+  type output_kind =
+      Assembler
+    | Object_file
+    | Dynamic_library
+    | Executable
+
+  let output_kind = function
+    | Assembler -> GCC_JIT_OUTPUT_KIND_ASSEMBLER
+    | Object_file -> GCC_JIT_OUTPUT_KIND_OBJECT_FILE
+    | Dynamic_library -> GCC_JIT_OUTPUT_KIND_DYNAMIC_LIBRARY
+    | Executable -> GCC_JIT_OUTPUT_KIND_EXECUTABLE
 
   let compile_to_file ctx kind path =
     wrap3 ctx gcc_jit_context_compile_to_file ctx (output_kind kind) path
@@ -576,6 +576,11 @@ module type S = sig
       | Keep_intermediates : bool context_option
     val set_option : 'a context_option -> 'a -> unit
     val compile : unit -> result
+    type output_kind =
+        Assembler
+      | Object_file
+      | Dynamic_library
+      | Executable
     val compile_to_file : output_kind -> string -> unit
   end
 
@@ -704,6 +709,11 @@ module Make () = struct
       | Keep_intermediates : bool context_option
     let set_option o v = set_option ctx o v
     let compile () = compile ctx
+    type output_kind = Context.output_kind =
+        Assembler
+      | Object_file
+      | Dynamic_library
+      | Executable
     let compile_to_file = compile_to_file ctx
   end
 

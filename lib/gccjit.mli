@@ -92,21 +92,6 @@ type global_kind =
   | GLOBAL_Internal
   | GLOBAL_Imported
 
-(** Kinds of ahead-of-time compilation, for use with
-    {!Context.compile_to_file}.  *)
-type output_kind =
-    OUTPUT_Assembler
-  (** Compile the context to an assembly file. *)
-
-  | OUTPUT_Object_file
-  (** Compile the context to an object file. *)
-
-  | OUTPUT_Dynamic_library
-  (** Compile the context to a dynamic library. *)
-
-  | OUTPUT_Executable
-  (** Compile the context to an executable. *)
-
 type type_kind =
     TYPE_Void
   | TYPE_Void_ptr
@@ -324,6 +309,21 @@ module Context : sig
   val compile : context -> result
   (** This calls into GCC and builds the code, returning a {!result}.  See
       {{!inmemory}In-memory compilation}. *)
+
+  (** Kinds of ahead-of-time compilation, for use with
+      {!compile_to_file}.  *)
+  type output_kind =
+      Assembler
+    (** Compile the context to an assembly file. *)
+
+    | Object_file
+    (** Compile the context to an object file. *)
+
+    | Dynamic_library
+    (** Compile the context to a dynamic library. *)
+
+    | Executable
+    (** Compile the context to an executable. *)
 
   val compile_to_file : context -> output_kind -> string -> unit
   (** Compile the context to a file of the given kind.  This can be called more
@@ -830,6 +830,11 @@ module type S = sig
       | Keep_intermediates : bool context_option
     val set_option : 'a context_option -> 'a -> unit
     val compile : unit -> result
+    type output_kind =
+        Assembler
+      | Object_file
+      | Dynamic_library
+      | Executable
     val compile_to_file : output_kind -> string -> unit
   end
 
