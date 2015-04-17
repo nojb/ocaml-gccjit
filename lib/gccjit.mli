@@ -393,14 +393,11 @@ module Type : sig
     | Complex_double
     | Complex_long_double
 
-  val standard : context -> type_kind -> type_
+  val get : context -> type_kind -> type_
   (** Access a standard type.  See {!type_kind}. *)
 
-  val int_gen : context -> ?signed:bool -> int -> type_
+  val int : context -> ?signed:bool -> int -> type_
   (** Get the integer type of the given size and signedness. *)
-
-  val int : context -> type_
-  (** Standard [int] type. *)
 
   val pointer : type_ -> type_
   (** Given type [T], get type [T*] *)

@@ -293,14 +293,11 @@ module Type = struct
     | Complex_double -> GCC_JIT_TYPE_COMPLEX_DOUBLE
     | Complex_long_double -> GCC_JIT_TYPE_COMPLEX_LONG_DOUBLE
 
-  let standard ctx kind =
+  let get ctx kind =
     wrap2 ctx gcc_jit_context_get_type ctx (type_kind kind)
 
-  let int_gen ctx ?(signed = false) n =
+  let int ctx ?(signed = false) n =
     wrap3 ctx gcc_jit_context_get_int_type ctx (if signed then 1 else 0) n
-
-  let int ctx =
-    standard ctx Int
 
   let pointer typ =
     let ctx = gcc_jit_object_get_context (gcc_jit_type_as_object typ) in
