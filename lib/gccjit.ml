@@ -65,18 +65,6 @@ type global_kind =
   | GLOBAL_Internal
   | GLOBAL_Imported
 
-type _ context_option =
-    OPTION_Progname : string context_option
-  | OPTION_Optimization_level : int context_option
-  | OPTION_Debuginfo : bool context_option
-  | OPTION_Dump_initial_tree : bool context_option
-  | OPTION_Dump_initial_gimple : bool context_option
-  | OPTION_Dump_generated_code : bool context_option
-  | OPTION_Dump_summary : bool context_option
-  | OPTION_Dump_everything : bool context_option
-  | OPTION_Selfcheck_gc : bool context_option
-  | OPTION_Keep_intermediates : bool context_option
-
 type output_kind =
     OUTPUT_Assembler
   | OUTPUT_Object_file
@@ -242,27 +230,39 @@ module Context = struct
   let dump_reproducer_to_file ctx path =
     wrap2 ctx gcc_jit_context_dump_reproducer_to_file ctx path
 
+  type _ context_option =
+      Progname : string context_option
+    | Optimization_level : int context_option
+    | Debuginfo : bool context_option
+    | Dump_initial_tree : bool context_option
+    | Dump_initial_gimple : bool context_option
+    | Dump_generated_code : bool context_option
+    | Dump_summary : bool context_option
+    | Dump_everything : bool context_option
+    | Selfcheck_gc : bool context_option
+    | Keep_intermediates : bool context_option
+
   let set_option : type a. context -> a context_option -> a -> unit = fun ctx opt v ->
     match opt with
-    | OPTION_Progname ->
+    | Progname ->
         wrap3 ctx gcc_jit_context_set_str_option ctx GCC_JIT_STR_OPTION_PROGNAME v
-    | OPTION_Optimization_level ->
+    | Optimization_level ->
         wrap3 ctx gcc_jit_context_set_int_option ctx GCC_JIT_INT_OPTION_OPTIMIZATION_LEVEL v
-    | OPTION_Debuginfo ->
+    | Debuginfo ->
         wrap3 ctx gcc_jit_context_set_bool_option ctx GCC_JIT_BOOL_OPTION_DEBUGINFO v
-    | OPTION_Dump_initial_tree ->
+    | Dump_initial_tree ->
         wrap3 ctx gcc_jit_context_set_bool_option ctx GCC_JIT_BOOL_OPTION_DUMP_INITIAL_TREE v
-    | OPTION_Dump_initial_gimple ->
+    | Dump_initial_gimple ->
         wrap3 ctx gcc_jit_context_set_bool_option ctx GCC_JIT_BOOL_OPTION_DUMP_INITIAL_GIMPLE v
-    | OPTION_Dump_generated_code ->
+    | Dump_generated_code ->
         wrap3 ctx gcc_jit_context_set_bool_option ctx GCC_JIT_BOOL_OPTION_DUMP_GENERATED_CODE v
-    | OPTION_Dump_summary ->
+    | Dump_summary ->
         wrap3 ctx gcc_jit_context_set_bool_option ctx GCC_JIT_BOOL_OPTION_DUMP_SUMMARY v
-    | OPTION_Dump_everything ->
+    | Dump_everything ->
         wrap3 ctx gcc_jit_context_set_bool_option ctx GCC_JIT_BOOL_OPTION_DUMP_EVERYTHING v
-    | OPTION_Selfcheck_gc ->
+    | Selfcheck_gc ->
         wrap3 ctx gcc_jit_context_set_bool_option ctx GCC_JIT_BOOL_OPTION_SELFCHECK_GC v
-    | OPTION_Keep_intermediates ->
+    | Keep_intermediates ->
         wrap3 ctx gcc_jit_context_set_bool_option ctx GCC_JIT_BOOL_OPTION_KEEP_INTERMEDIATES v
 
   let compile ctx =
@@ -563,6 +563,17 @@ module type S = sig
     val dump_to_file : ?update_locs:bool -> string -> unit
     val set_logfile : Unix.file_descr option -> unit
     val dump_reproducer_to_file : string -> unit
+    type _ context_option =
+        Progname : string context_option
+      | Optimization_level : int context_option
+      | Debuginfo : bool context_option
+      | Dump_initial_tree : bool context_option
+      | Dump_initial_gimple : bool context_option
+      | Dump_generated_code : bool context_option
+      | Dump_summary : bool context_option
+      | Dump_everything : bool context_option
+      | Selfcheck_gc : bool context_option
+      | Keep_intermediates : bool context_option
     val set_option : 'a context_option -> 'a -> unit
     val compile : unit -> result
     val compile_to_file : output_kind -> string -> unit
@@ -680,6 +691,17 @@ module Make () = struct
     let dump_to_file = dump_to_file ctx
     let set_logfile = set_logfile ctx
     let dump_reproducer_to_file = dump_reproducer_to_file ctx
+    type 'a context_option = 'a Context.context_option =
+        Progname : string context_option
+      | Optimization_level : int context_option
+      | Debuginfo : bool context_option
+      | Dump_initial_tree : bool context_option
+      | Dump_initial_gimple : bool context_option
+      | Dump_generated_code : bool context_option
+      | Dump_summary : bool context_option
+      | Dump_everything : bool context_option
+      | Selfcheck_gc : bool context_option
+      | Keep_intermediates : bool context_option
     let set_option o v = set_option ctx o v
     let compile () = compile ctx
     let compile_to_file = compile_to_file ctx

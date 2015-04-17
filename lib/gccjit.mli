@@ -92,60 +92,6 @@ type global_kind =
   | GLOBAL_Internal
   | GLOBAL_Imported
 
-(** Context options.  Set with {!Context.set_option}. *)
-type _ context_option =
-    OPTION_Progname : string context_option
-  (** The name of the program, for used as a prefix when printing error messages
-      to stderr.  If not set, ["libgccjit.so"] is used. *)
-
-  | OPTION_Optimization_level : int context_option
-  (** How much to optimize the code.  Valid values are [0-3], corresponding to
-      GCC's command-line options -O0 through -O3.
-
-      The default value is 0 (unoptimized). *)
-
-  | OPTION_Debuginfo : bool context_option
-  (** If [true], {!Context.compile} will attempt to do the right thing so that
-      if you attach a debugger to the process, it will be able to inspect
-      variables and step through your code.  Note that you can't step through
-      code unless you set up source location information for the code (by
-      creating and passing in {!location} instances).  *)
-
-  | OPTION_Dump_initial_tree : bool context_option
-  (** If [true], {!Context.compile} will dump its initial "tree" representation
-      of your code to [stderr] (before any optimizations).  *)
-
-  | OPTION_Dump_initial_gimple : bool context_option
-  (** If [true], {!Context.compile} will dump the "gimple" representation of
-      your code to stderr, before any optimizations are performed.  The dump
-      resembles C code.  *)
-
-  | OPTION_Dump_generated_code : bool context_option
-  (** If [true], {!Context.compile} will dump the final generated code to
-      stderr, in the form of assembly language.  *)
-
-  | OPTION_Dump_summary : bool context_option
-  (** If [true], {!Context.compile} will print information to stderr on the
-      actions it is performing, followed by a profile showing the time taken and
-      memory usage of each phase. *)
-
-  | OPTION_Dump_everything : bool context_option
-  (** If [true], {!Context.compile} will dump copious amount of information on
-      what it's doing to various files within a temporary directory.  Use
-      [OPTION_Keep_intermediates] (see below) to see the results.  The files are
-      intended to be human-readable, but the exact files and their formats are
-      subject to change. *)
-
-  | OPTION_Selfcheck_gc : bool context_option
-  (** If [true], [libgccjit] will aggressively run its garbage collector,
-      to shake out bugs (greatly slowing down the compile).  This is likely to
-      only be of interest to developers *of* the library.  It is used when
-      running the selftest suite.  *)
-
-  | OPTION_Keep_intermediates : bool context_option
-  (** If [true], {!Context.release} will not clean up intermediate files written
-       to the filesystem, and will display their location on stderr.  *)
-
 (** Kinds of ahead-of-time compilation, for use with
     {!Context.compile_to_file}.  *)
 type output_kind =
@@ -307,7 +253,60 @@ module Context : sig
       variable within the generated C source, and not all are necessarily then
       used). *)
 
-  (** {1 Options} *)
+  (** {1 Context Options} *)
+
+  type _ context_option =
+      Progname : string context_option
+    (** The name of the program, for used as a prefix when printing error messages
+        to stderr.  If not set, ["libgccjit.so"] is used. *)
+
+    | Optimization_level : int context_option
+    (** How much to optimize the code.  Valid values are [0-3], corresponding to
+        GCC's command-line options -O0 through -O3.
+
+        The default value is 0 (unoptimized). *)
+
+    | Debuginfo : bool context_option
+    (** If [true], {!Context.compile} will attempt to do the right thing so that
+        if you attach a debugger to the process, it will be able to inspect
+        variables and step through your code.  Note that you can't step through
+        code unless you set up source location information for the code (by
+        creating and passing in {!location} instances).  *)
+
+    | Dump_initial_tree : bool context_option
+    (** If [true], {!Context.compile} will dump its initial "tree" representation
+        of your code to [stderr] (before any optimizations).  *)
+
+    | Dump_initial_gimple : bool context_option
+    (** If [true], {!Context.compile} will dump the "gimple" representation of
+        your code to stderr, before any optimizations are performed.  The dump
+        resembles C code.  *)
+
+    | Dump_generated_code : bool context_option
+    (** If [true], {!Context.compile} will dump the final generated code to
+        stderr, in the form of assembly language.  *)
+
+    | Dump_summary : bool context_option
+    (** If [true], {!Context.compile} will print information to stderr on the
+        actions it is performing, followed by a profile showing the time taken and
+        memory usage of each phase. *)
+
+    | Dump_everything : bool context_option
+    (** If [true], {!Context.compile} will dump copious amount of information on
+        what it's doing to various files within a temporary directory.  Use
+        [OPTION_Keep_intermediates] (see below) to see the results.  The files are
+        intended to be human-readable, but the exact files and their formats are
+        subject to change. *)
+
+    | Selfcheck_gc : bool context_option
+    (** If [true], [libgccjit] will aggressively run its garbage collector,
+        to shake out bugs (greatly slowing down the compile).  This is likely to
+        only be of interest to developers *of* the library.  It is used when
+        running the selftest suite.  *)
+
+    | Keep_intermediates : bool context_option
+    (** If [true], {!Context.release} will not clean up intermediate files written
+         to the filesystem, and will display their location on stderr.  *)
 
   val set_option : context -> 'a context_option -> 'a -> unit
   (** [set_option ctx opt v] sets the {!context_option} [opt] of [ctx] to
@@ -818,6 +817,17 @@ module type S = sig
     val dump_to_file : ?update_locs:bool -> string -> unit
     val set_logfile : Unix.file_descr option -> unit
     val dump_reproducer_to_file : string -> unit
+    type _ context_option =
+        Progname : string context_option
+      | Optimization_level : int context_option
+      | Debuginfo : bool context_option
+      | Dump_initial_tree : bool context_option
+      | Dump_initial_gimple : bool context_option
+      | Dump_generated_code : bool context_option
+      | Dump_summary : bool context_option
+      | Dump_everything : bool context_option
+      | Selfcheck_gc : bool context_option
+      | Keep_intermediates : bool context_option
     val set_option : 'a context_option -> 'a -> unit
     val compile : unit -> result
     val compile_to_file : output_kind -> string -> unit
